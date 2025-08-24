@@ -2,6 +2,13 @@ import { useState } from 'react';
 import { FaEye, FaChartLine, FaFileAlt, FaSignOutAlt, FaSearch } from 'react-icons/fa';
 
 function AdminClerkDashboard({ user, onLogout }) {
+
+  const [groups] = useState([
+    { id: 1, name: "Group A", location: "Location A", members: 12, leader: "Leader 1", collector: "Collector 1" },
+    { id: 2, name: "Group B", location: "Location B", members: 8, leader: "Leader 2", collector: "Collector 2" },
+    { id: 3, name: "Group C", location: "Location C", members: 15, leader: "Leader 3", collector: "Collector 3" },
+  ]);
+
   const [recentActivities] = useState([
     { id: 1, action: "New collection recorded", group: "Group A", amount: "₹1,250", time: "2 hours ago" },
     { id: 2, action: "Loan application submitted", member: "Member 5", amount: "₹5,000", time: "5 hours ago" },
@@ -151,8 +158,69 @@ function AdminClerkDashboard({ user, onLogout }) {
             </div>
           </div>
 
-          {/* Monitoring Tools Section */}
-          <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+          {/* Groups Management Section */}
+        <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+          <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
+            <h3 className="text-lg leading-6 font-medium text-gray-900">Group Management</h3>
+            <p className="mt-1 max-w-2xl text-sm text-gray-500">All groups in the system</p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Group Name
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Location
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Members
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Team Leader
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Bill Collector
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {groups.map((group) => (
+                  <tr key={group.id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {group.name}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {group.location}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {group.members}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {group.leader}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {group.collector}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <button className="text-blue-600 hover:text-blue-900">Edit</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+          
+        </div>
+
+        {/* Monitoring Tools Section */}
+          <div className="bg-white shadow overflow-hidden sm:rounded-lg mt-8">
             <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
               <h3 className="text-lg leading-6 font-medium text-gray-900">Monitoring Tools</h3>
               <p className="mt-1 max-w-2xl text-sm text-gray-500">Oversight and reporting functions</p>
@@ -200,7 +268,7 @@ function AdminClerkDashboard({ user, onLogout }) {
               </button>
             </div>
           </div>
-        </div>
+        
       </main>
     </div>
   );
