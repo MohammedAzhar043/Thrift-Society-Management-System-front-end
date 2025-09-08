@@ -18,6 +18,7 @@ import {
   FaExclamationTriangle
 } from 'react-icons/fa';
 import apiService from '../services/api';
+import { formatIndianCurrency } from '../utils/formatters';
 import { formatCurrency, formatDate } from '../utils/formatters';
 
 function TeamLeaderDashboard({ user, onLogout }) {

@@ -9,6 +9,7 @@ import {
 } from "react-icons/fa";
 import apiService from "../services/api";
 import { useDashboardData } from "../hooks/useDashboardData";
+import { formatIndianCurrency } from "../utils/formatters";
 import {
   DashboardHeader,
   StatsCards,
@@ -740,7 +741,7 @@ function AdminDashboard({ user, onLogout }) {
                         {loan.group_name || 'N/A'}
                       </Table.Cell>
                       <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap">
-                        {loan.amount}
+                        {formatIndianCurrency(loan.amount)}
                       </Table.Cell>
                       <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap">
                         {loan.location}

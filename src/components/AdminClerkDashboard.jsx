@@ -136,7 +136,7 @@ function AdminClerkDashboard({ user, onLogout }) {
             id: `approval_${index}`,
             action: `Pending ${approval.type} approval`,
             group: approval.name || 'N/A',
-            amount: approval.amount || 'N/A',
+            amount: approval.amount ? formatCurrency(approval.amount) : 'N/A',
             time: approval.date || 'Today',
             type: approval.type // Add type information for styling
           });
@@ -951,7 +951,7 @@ function AdminClerkDashboard({ user, onLogout }) {
                                     <div key={index}>
                                       <span className="inline-flex items-center px-1 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 truncate max-w-[120px] sm:max-w-none">
                                         <span className="truncate">
-                                          {item.member?.user?.full_name || item.member?.user?.username || `Member ${item.member_id}`}
+                                        {item.member?.user?.full_name || item.member?.user?.username || `Member ${item.member_id}`}
                                         </span>
                                       </span>
                                     </div>
@@ -979,8 +979,8 @@ function AdminClerkDashboard({ user, onLogout }) {
                             </td>
                             <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm font-medium">
                               <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
-                                <button
-                                  onClick={() => verifyCollectionRecord(collection.id)}
+                              <button
+                                onClick={() => verifyCollectionRecord(collection.id)}
                                   className="text-green-600 hover:text-green-900 text-xs px-2 py-1 rounded hover:bg-green-50"
                                 >
                                   <span className="hidden sm:inline">
@@ -989,12 +989,12 @@ function AdminClerkDashboard({ user, onLogout }) {
                                   <span className="sm:hidden">
                                     <FaCheckCircle className="inline" />
                                   </span>
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    setSelectedCollection(collection);
-                                    setShowCollectionDetailsModal(true);
-                                  }}
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setSelectedCollection(collection);
+                                  setShowCollectionDetailsModal(true);
+                                }}
                                   className="text-blue-600 hover:text-blue-900 text-xs px-2 py-1 rounded hover:bg-blue-50"
                                 >
                                   <span className="hidden sm:inline">
@@ -1003,7 +1003,7 @@ function AdminClerkDashboard({ user, onLogout }) {
                                   <span className="sm:hidden">
                                     <FaEye className="inline" />
                                   </span>
-                                </button>
+                              </button>
                               </div>
                             </td>
                           </tr>

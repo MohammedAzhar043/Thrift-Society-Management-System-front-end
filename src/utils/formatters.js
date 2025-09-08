@@ -28,6 +28,31 @@ export const formatCurrency = (amount, currency = 'INR') => {
 };
 
 /**
+ * Format number in Indian number system (lakhs, crores)
+ * @param {number|string} amount - Amount to format
+ * @param {boolean} showCurrency - Whether to show ₹ symbol (default: true)
+ * @returns {string} Formatted number string in Indian format
+ */
+export const formatIndianCurrency = (amount, showCurrency = true) => {
+  if (amount === null || amount === undefined || amount === '') {
+    return 'N/A';
+  }
+  
+  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+  
+  if (isNaN(numAmount)) {
+    return 'N/A';
+  }
+  
+  const formatted = new Intl.NumberFormat('en-IN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(numAmount);
+  
+  return showCurrency ? `₹${formatted}` : formatted;
+};
+
+/**
  * Format date string to readable format
  * @param {string|Date} dateString - Date to format
  * @param {string} format - Format style ('short', 'long', 'relative')

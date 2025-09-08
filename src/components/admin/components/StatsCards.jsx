@@ -1,6 +1,7 @@
 import React from 'react';
 import { FaUsers, FaUserPlus, FaHandHoldingUsd, FaChartBar } from 'react-icons/fa';
 import StatsCard from './StatsCard';
+import { formatIndianCurrency } from '../../../utils/formatters';
 
 const StatsCards = ({ dashboardStats, memberApprovals, loanApprovals }) => {
   const stats = [
@@ -25,13 +26,13 @@ const StatsCards = ({ dashboardStats, memberApprovals, loanApprovals }) => {
     {
       icon: FaHandHoldingUsd,
       title: "Daily Collections",
-      value: `₹${dashboardStats.total_collections_today.toLocaleString()}`,
+      value: formatIndianCurrency(dashboardStats.total_collections_today),
       iconBgColor: "bg-indigo-500"
     },
     {
       icon: FaChartBar,
       title: "Total Collection",
-      value: `₹${dashboardStats.total_collections_month.toLocaleString()}`,
+      value: formatIndianCurrency(dashboardStats.total_collections_month),
       iconBgColor: "bg-purple-500"
     }
   ];

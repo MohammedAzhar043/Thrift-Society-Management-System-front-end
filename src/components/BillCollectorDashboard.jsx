@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { FaUsers, FaMoneyBillWave, FaHistory, FaHandHoldingUsd, FaSignOutAlt, FaPlus, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import apiService from '../services/api';
+import { formatIndianCurrency } from '../utils/formatters';
 
 function BillCollectorDashboard({ user, onLogout }) {
   const [loading, setLoading] = useState(true);
@@ -227,7 +228,7 @@ function BillCollectorDashboard({ user, onLogout }) {
 
       const totalCalculated = collectionForm.collection_items.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0);
       if (Math.abs(totalCalculated - parseFloat(collectionForm.total_collected || 0)) > 0.01) {
-        setError(`Total collected amount (${collectionForm.total_collected}) does not match sum of collection items (${totalCalculated.toFixed(2)})`);
+        setError(`Total collected amount (${collectionForm.total_collected}) does not match sum of collection items (${formatIndianCurrency(totalCalculated, false)})`);
         return;
       }
 
@@ -409,7 +410,7 @@ function BillCollectorDashboard({ user, onLogout }) {
                   <dl>
                     <dt className="text-xs sm:text-sm font-medium text-gray-500 truncate">Today's Collection</dt>
                     <dd className="flex items-baseline">
-                      <div className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900 truncate">₹{stats.today_total.toFixed(2)}</div>
+                      <div className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900 truncate">{formatIndianCurrency(stats.today_total)}</div>
                     </dd>
                   </dl>
                 </div>
@@ -427,7 +428,7 @@ function BillCollectorDashboard({ user, onLogout }) {
                   <dl>
                     <dt className="text-xs sm:text-sm font-medium text-gray-500 truncate">Month Total</dt>
                     <dd className="flex items-baseline">
-                      <div className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900 truncate">₹{stats.month_total.toFixed(2)}</div>
+                      <div className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900 truncate">{formatIndianCurrency(stats.month_total)}</div>
                     </dd>
                   </dl>
                 </div>
@@ -589,7 +590,7 @@ function BillCollectorDashboard({ user, onLogout }) {
                         </div>
                         <div className="text-right">
                           <p className="text-sm font-medium text-green-600">
-                            ₹{parseFloat(collection.total_collected).toFixed(2)}
+                            {formatIndianCurrency(collection.total_collected)}
                           </p>
                           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
                             collection.is_verified 
@@ -722,9 +723,9 @@ function BillCollectorDashboard({ user, onLogout }) {
                         {selectedMember && (
                           <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded">
                             <div className="flex justify-between">
-                              <span>Due Amount: ₹{dueAmount.toFixed(2)}</span>
+                              <span>Due Amount: {formatIndianCurrency(dueAmount)}</span>
                               <span className={remaining > 0 ? 'text-red-600' : 'text-green-600'}>
-                                {remaining > 0 ? `Remaining: ₹${remaining.toFixed(2)}` : 'Fully Paid'}
+                                {remaining > 0 ? `Remaining: ${formatIndianCurrency(remaining)}` : 'Fully Paid'}
                               </span>
                             </div>
                             {remaining > 0 && (
@@ -859,7 +860,7 @@ function BillCollectorDashboard({ user, onLogout }) {
                             </div>
                             <div className="text-right">
                               <p className="text-lg font-semibold text-green-600">
-                                ₹{parseFloat(collection.total_collected).toFixed(2)}
+                                {formatIndianCurrency(collection.total_collected)}
                               </p>
                               <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
                                 collection.is_verified 
@@ -880,7 +881,7 @@ function BillCollectorDashboard({ user, onLogout }) {
                                     <span className="text-gray-600">
                                       {getMemberNameById(item.member_id)}
                                     </span>
-                                    <span className="font-medium">₹{parseFloat(item.amount).toFixed(2)}</span>
+                                    <span className="font-medium">{formatIndianCurrency(item.amount)}</span>
                                   </div>
                                 ))}
                               </div>
