@@ -865,26 +865,26 @@ function AdminClerkDashboard({ user, onLogout }) {
                     <table className="min-w-full divide-y divide-gray-200">
                       <thead className="bg-gray-50">
                         <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                          <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Type</th>
+                          <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Name</th>
+                          <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Amount</th>
+                          <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Location</th>
+                          <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Date</th>
+                          <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Status</th>
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
                         {pendingApprovals.map((approval) => (
                           <tr key={approval.id}>
-                            <td className="px-6 py-4 whitespace-nowrap">
+                            <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap">
                               <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                                 approval.type === 'member' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
                               }`}>
                                 {approval.type}
                               </span>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{approval.name}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900">{approval.name}</td>
+                            <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
                               {approval.type === 'member' ? (
                                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                                   Not Applicable
@@ -895,9 +895,9 @@ function AdminClerkDashboard({ user, onLogout }) {
                                 </span>
                               )}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{approval.location || 'N/A'}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{approval.date}</td>
-                            <td className="px-6 py-4 whitespace-nowrap">
+                            <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">{approval.location || 'N/A'}</td>
+                            <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">{approval.date}</td>
+                            <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap">
                               <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
                                 {approval.status}
                               </span>
@@ -926,37 +926,39 @@ function AdminClerkDashboard({ user, onLogout }) {
                     <table className="min-w-full divide-y divide-gray-200">
                       <thead className="bg-gray-50">
                         <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Group</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Members</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Collector</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                          <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Date</th>
+                          <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Group</th>
+                          <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Members</th>
+                          <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Amount</th>
+                          <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Collector</th>
+                          <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Status</th>
+                          <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Actions</th>
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
                         {pendingCollections.map((collection) => (
                           <tr key={collection.id}>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900">
                               {new Date(collection.collection_date).toLocaleDateString()}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
                               {collection.group?.name || 'N/A'}
                             </td>
-                            <td className="px-6 py-4 text-sm text-gray-500">
+                            <td className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500">
                               {collection.collection_items && collection.collection_items.length > 0 ? (
                                 <div className="space-y-1">
-                                  {collection.collection_items.slice(0, 3).map((item, index) => (
+                                  {collection.collection_items.slice(0, 1).map((item, index) => (
                                     <div key={index}>
-                                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                        {item.member?.user?.full_name || item.member?.user?.username || `Member ${item.member_id}`}
+                                      <span className="inline-flex items-center px-1 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 truncate max-w-[120px] sm:max-w-none">
+                                        <span className="truncate">
+                                          {item.member?.user?.full_name || item.member?.user?.username || `Member ${item.member_id}`}
+                                        </span>
                                       </span>
                                     </div>
                                   ))}
-                                  {collection.collection_items.length > 3 && (
+                                  {collection.collection_items.length > 1 && (
                                     <div className="text-xs text-gray-400">
-                                      +{collection.collection_items.length - 3} more members
+                                      +{collection.collection_items.length - 1} more
                                     </div>
                                   )}
                                 </div>
@@ -964,33 +966,45 @@ function AdminClerkDashboard({ user, onLogout }) {
                                 <span className="text-gray-400">No members</span>
                               )}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900">
                               {formatCurrency(collection.total_collected)}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
                               {collection.collector?.username || 'N/A'}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
+                            <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap">
                               <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
                                 Pending Verification
                               </span>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              <button
-                                onClick={() => verifyCollectionRecord(collection.id)}
-                                className="text-green-600 hover:text-green-900 mr-3"
-                              >
-                                <FaCheckCircle className="inline" /> Verify
-                              </button>
-                              <button
-                                onClick={() => {
-                                  setSelectedCollection(collection);
-                                  setShowCollectionDetailsModal(true);
-                                }}
-                                className="text-blue-600 hover:text-blue-900"
-                              >
-                                <FaEye className="inline" /> View
-                              </button>
+                            <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm font-medium">
+                              <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
+                                <button
+                                  onClick={() => verifyCollectionRecord(collection.id)}
+                                  className="text-green-600 hover:text-green-900 text-xs px-2 py-1 rounded hover:bg-green-50"
+                                >
+                                  <span className="hidden sm:inline">
+                                    <FaCheckCircle className="inline mr-1" /> Verify
+                                  </span>
+                                  <span className="sm:hidden">
+                                    <FaCheckCircle className="inline" />
+                                  </span>
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setSelectedCollection(collection);
+                                    setShowCollectionDetailsModal(true);
+                                  }}
+                                  className="text-blue-600 hover:text-blue-900 text-xs px-2 py-1 rounded hover:bg-blue-50"
+                                >
+                                  <span className="hidden sm:inline">
+                                    <FaEye className="inline mr-1" /> View
+                                  </span>
+                                  <span className="sm:hidden">
+                                    <FaEye className="inline" />
+                                  </span>
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         ))}

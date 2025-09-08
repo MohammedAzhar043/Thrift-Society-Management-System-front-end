@@ -667,39 +667,45 @@ function AdminDashboard({ user, onLogout }) {
                 ) : (
                   memberApprovals.map((item) => (
                     <Table.Row key={item.id}>
-                      <Table.Cell>{item.name}</Table.Cell>
-                      <Table.Cell className="px-6 py-4 text-sm text-gray-500">
+                      <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm font-medium text-gray-900 whitespace-nowrap">
+                        {item.name}
+                      </Table.Cell>
+                      <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap">
                         {item.group_name || 'N/A'}
                       </Table.Cell>
-                      <Table.Cell className="px-6 py-4 text-sm text-gray-500">
+                      <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap">
                         {item.location || 'N/A'}
                       </Table.Cell>
-                      <Table.Cell className="px-6 py-4 text-sm text-gray-500">
+                      <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap">
                         {item.team_leader || 'Not assigned'}
                       </Table.Cell>
-                      <Table.Cell className="px-6 py-4 text-sm text-gray-500">
+                      <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap">
                         {item.bill_collector || 'Not assigned'}
                       </Table.Cell>
-                      <Table.Cell className="px-6 py-4 text-sm text-gray-500">{item.date}</Table.Cell>
-                      <Table.Cell className="px-6 py-4 text-sm font-medium">
-                        <div className="flex flex-col sm:flex-row gap-2">
+                      <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap">
+                        {item.date}
+                      </Table.Cell>
+                      <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm font-medium">
+                        <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
                           <Button
                             onClick={() => handleApproval("member", item.id, "approve")}
                             variant="primary"
                             size="sm"
                             icon={FaCheck}
-                            className="w-full sm:w-auto"
+                            className="w-full sm:w-auto text-xs px-2 py-1"
                           >
-                            Approve
+                            <span className="hidden sm:inline">Approve</span>
+                            <span className="sm:hidden">✓</span>
                           </Button>
                           <Button
                             onClick={() => handleApproval("member", item.id, "reject")}
                             variant="danger"
                             size="sm"
                             icon={FaTimes}
-                            className="w-full sm:w-auto"
+                            className="w-full sm:w-auto text-xs px-2 py-1"
                           >
-                            Reject
+                            <span className="hidden sm:inline">Reject</span>
+                            <span className="sm:hidden">✗</span>
                           </Button>
                         </div>
                       </Table.Cell>
@@ -727,38 +733,48 @@ function AdminDashboard({ user, onLogout }) {
                 ) : (
                   loanApprovals.map((loan) => (
                     <Table.Row key={loan.id}>
-                      <Table.Cell>{loan.name}</Table.Cell>
-                      <Table.Cell className="px-6 py-4 text-sm text-gray-500">
+                      <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm font-medium text-gray-900 whitespace-nowrap">
+                        {loan.name}
+                      </Table.Cell>
+                      <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap">
                         {loan.group_name || 'N/A'}
                       </Table.Cell>
-                      <Table.Cell className="px-6 py-4 text-sm text-gray-500">{loan.amount}</Table.Cell>
-                      <Table.Cell className="px-6 py-4 text-sm text-gray-500">{loan.location}</Table.Cell>
-                      <Table.Cell className="px-6 py-4 text-sm text-gray-500">
+                      <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap">
+                        {loan.amount}
+                      </Table.Cell>
+                      <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap">
+                        {loan.location}
+                      </Table.Cell>
+                      <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap">
                         {loan.team_leader || 'Not assigned'}
                       </Table.Cell>
-                      <Table.Cell className="px-6 py-4 text-sm text-gray-500">
+                      <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap">
                         {loan.bill_collector || 'Not assigned'}
                       </Table.Cell>
-                      <Table.Cell className="px-6 py-4 text-sm text-gray-500">{loan.date}</Table.Cell>
-                      <Table.Cell className="px-6 py-4 text-sm font-medium">
-                        <div className="flex flex-col sm:flex-row gap-2">
+                      <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap">
+                        {loan.date}
+                      </Table.Cell>
+                      <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm font-medium">
+                        <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
                           <Button
                             onClick={() => handleApproval("loan", loan.id, "approve")}
                             variant="primary"
                             size="sm"
                             icon={FaCheck}
-                            className="w-full sm:w-auto"
+                            className="w-full sm:w-auto text-xs px-2 py-1"
                           >
-                            Approve
+                            <span className="hidden sm:inline">Approve</span>
+                            <span className="sm:hidden">✓</span>
                           </Button>
                           <Button
                             onClick={() => handleApproval("loan", loan.id, "reject")}
                             variant="danger"
                             size="sm"
                             icon={FaTimes}
-                            className="w-full sm:w-auto"
+                            className="w-full sm:w-auto text-xs px-2 py-1"
                           >
-                            Reject
+                            <span className="hidden sm:inline">Reject</span>
+                            <span className="sm:hidden">✗</span>
                           </Button>
                         </div>
                       </Table.Cell>
@@ -798,36 +814,44 @@ function AdminDashboard({ user, onLogout }) {
               ) : (
                 groups.map((group) => (
                   <Table.Row key={group.id}>
-                    <Table.Cell>{group.name}</Table.Cell>
-                    <Table.Cell className="px-6 py-4 text-sm text-gray-500">{group.location}</Table.Cell>
-                    <Table.Cell className="px-6 py-4 text-sm text-gray-500">{group.member_count || 0}</Table.Cell>
-                    <Table.Cell className="px-6 py-4 text-sm text-gray-500">
+                    <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm font-medium text-gray-900 whitespace-nowrap">
+                      {group.name}
+                    </Table.Cell>
+                    <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap">
+                      {group.location}
+                    </Table.Cell>
+                    <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap">
+                      {group.member_count || 0}
+                    </Table.Cell>
+                    <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap">
                       {group.team_leader
                         ? `${group.team_leader.full_name || group.team_leader.username} (Team Leader)`
                         : 'Not assigned'}
                     </Table.Cell>
-                    <Table.Cell className="px-6 py-4 text-sm text-gray-500">
+                    <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap">
                       {group.bill_collector?.full_name || group.bill_collector?.username || 'Not assigned'}
                     </Table.Cell>
-                    <Table.Cell className="px-6 py-4 text-sm font-medium">
-                      <div className="flex flex-col sm:flex-row gap-2">
+                    <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm font-medium">
+                      <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
                         <Button
                           onClick={() => handleEditGroup(group)}
                           variant="primary"
                           size="sm"
                           icon={FaEdit}
-                          className="w-full sm:w-auto"
+                          className="w-full sm:w-auto text-xs px-2 py-1"
                         >
-                          Edit
+                          <span className="hidden sm:inline">Edit</span>
+                          <span className="sm:hidden">✏</span>
                         </Button>
                         <Button
                           onClick={() => handleDeleteGroup(group.id)}
                           variant="danger"
                           size="sm"
                           icon={FaTrash}
-                          className="w-full sm:w-auto"
+                          className="w-full sm:w-auto text-xs px-2 py-1"
                         >
-                          Delete
+                          <span className="hidden sm:inline">Delete</span>
+                          <span className="sm:hidden">🗑</span>
                         </Button>
                       </div>
                     </Table.Cell>

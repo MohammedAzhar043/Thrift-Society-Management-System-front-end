@@ -15,7 +15,7 @@ const Table = ({
             {headers.map((header, index) => (
               <th 
                 key={index}
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
               >
                 {header}
               </th>
@@ -38,7 +38,7 @@ const TableRow = ({ children, className = "" }) => (
 
 const TableCell = ({ 
   children, 
-  className = "px-6 py-4 text-sm text-gray-900",
+  className = "px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-900",
   colSpan 
 }) => (
   <td className={className} colSpan={colSpan}>
@@ -48,7 +48,7 @@ const TableCell = ({
 
 const EmptyTableRow = ({ message, colSpan }) => (
   <tr>
-    <TableCell colSpan={colSpan} className="px-6 py-4 text-center text-gray-500">
+    <TableCell colSpan={colSpan} className="px-2 sm:px-4 lg:px-6 py-4 text-center text-xs sm:text-sm text-gray-500">
       {message}
     </TableCell>
   </tr>
