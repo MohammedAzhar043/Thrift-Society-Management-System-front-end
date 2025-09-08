@@ -25,7 +25,8 @@ const Button = ({
     secondary: "bg-gray-200 hover:bg-gray-300 focus:ring-gray-500 text-gray-700",
     success: "bg-green-600 hover:bg-green-700 focus:ring-green-500 text-white",
     danger: "bg-red-600 hover:bg-red-700 focus:ring-red-500 text-white",
-    warning: "bg-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500 text-white"
+    warning: "bg-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500 text-white",
+    info: "bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500 text-white"
   };
   
   const disabledClasses = disabled ? "opacity-50 cursor-not-allowed" : "";
