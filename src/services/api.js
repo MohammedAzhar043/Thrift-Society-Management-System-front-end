@@ -72,10 +72,10 @@ class ApiService {
   }
 
   // Authentication
-  async login(username, password) {
+  async login(credentials) {
     const response = await this.request('/login', {
       method: 'POST',
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify(credentials),
     });
     
     if (response.access_token) {

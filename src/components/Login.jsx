@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaUser, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
 import apiService from '../services/api';
-import Captcha from './Captcha';
+import ReCaptcha from './ReCaptcha';
 
 function Login({ onLogin }) {
   const navigate = useNavigate();
@@ -13,9 +13,11 @@ function Login({ onLogin }) {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isCaptchaValid, setIsCaptchaValid] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState(null);
 
-  const handleCaptchaChange = (isValid) => {
+  const handleCaptchaChange = (isValid, token) => {
     setIsCaptchaValid(isValid);
+    setCaptchaToken(token);
   };
 
   const handleSubmit = async (e) => {
@@ -37,7 +39,11 @@ function Login({ onLogin }) {
     
     try {
       // Call the backend API
-      const response = await apiService.login(username, password);
+      const response = await apiService.login({
+        username,
+        password,
+        captcha_token: captchaToken
+      });
       
       // Get user info to determine role
       const userInfo = await apiService.getCurrentUser();
@@ -149,8 +155,8 @@ function Login({ onLogin }) {
               </div>
             </div>
 
-            {/* Captcha Component */}
-            <Captcha 
+            {/* reCAPTCHA Component */}
+            <ReCaptcha 
               onCaptchaChange={handleCaptchaChange}
               isDisabled={isLoading}
             />
