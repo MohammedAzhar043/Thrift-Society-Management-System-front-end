@@ -380,18 +380,18 @@ function BillCollectorDashboard({ user, onLogout }) {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
           <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
+            <div className="px-3 py-4 sm:px-4 sm:py-5 lg:p-6">
               <div className="flex items-center">
-                <div className="flex-shrink-0 bg-blue-500 rounded-md p-3">
-                  <FaUsers className="text-white h-6 w-6" />
+                <div className="flex-shrink-0 bg-blue-500 rounded-md p-2 sm:p-3">
+                  <FaUsers className="text-white h-5 w-5 sm:h-6 sm:w-6" />
                 </div>
-                <div className="ml-5 w-0 flex-1">
+                <div className="ml-3 sm:ml-5 w-0 flex-1 min-w-0">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Total Groups</dt>
+                    <dt className="text-xs sm:text-sm font-medium text-gray-500 truncate">Total Groups</dt>
                     <dd className="flex items-baseline">
-                      <div className="text-2xl font-semibold text-gray-900">{stats.assigned_groups}</div>
+                      <div className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900">{stats.assigned_groups}</div>
                     </dd>
                   </dl>
                 </div>
@@ -400,16 +400,16 @@ function BillCollectorDashboard({ user, onLogout }) {
           </div>
 
           <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
+            <div className="px-3 py-4 sm:px-4 sm:py-5 lg:p-6">
               <div className="flex items-center">
-                <div className="flex-shrink-0 bg-green-500 rounded-md p-3">
-                  <FaMoneyBillWave className="text-white h-6 w-6" />
+                <div className="flex-shrink-0 bg-green-500 rounded-md p-2 sm:p-3">
+                  <FaMoneyBillWave className="text-white h-5 w-5 sm:h-6 sm:w-6" />
                 </div>
-                <div className="ml-5 w-0 flex-1">
+                <div className="ml-3 sm:ml-5 w-0 flex-1 min-w-0">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Today's Collection</dt>
+                    <dt className="text-xs sm:text-sm font-medium text-gray-500 truncate">Today's Collection</dt>
                     <dd className="flex items-baseline">
-                      <div className="text-2xl font-semibold text-gray-900">₹{stats.today_total.toFixed(2)}</div>
+                      <div className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900 truncate">₹{stats.today_total.toFixed(2)}</div>
                     </dd>
                   </dl>
                 </div>
@@ -418,16 +418,16 @@ function BillCollectorDashboard({ user, onLogout }) {
           </div>
 
           <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
+            <div className="px-3 py-4 sm:px-4 sm:py-5 lg:p-6">
               <div className="flex items-center">
-                <div className="flex-shrink-0 bg-yellow-500 rounded-md p-3">
-                  <FaHandHoldingUsd className="text-white h-6 w-6" />
+                <div className="flex-shrink-0 bg-yellow-500 rounded-md p-2 sm:p-3">
+                  <FaHandHoldingUsd className="text-white h-5 w-5 sm:h-6 sm:w-6" />
                 </div>
-                <div className="ml-5 w-0 flex-1">
+                <div className="ml-3 sm:ml-5 w-0 flex-1 min-w-0">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Month Total</dt>
+                    <dt className="text-xs sm:text-sm font-medium text-gray-500 truncate">Month Total</dt>
                     <dd className="flex items-baseline">
-                      <div className="text-2xl font-semibold text-gray-900">₹{stats.month_total.toFixed(2)}</div>
+                      <div className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900 truncate">₹{stats.month_total.toFixed(2)}</div>
                     </dd>
                   </dl>
                 </div>
@@ -436,16 +436,16 @@ function BillCollectorDashboard({ user, onLogout }) {
           </div>
 
           <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
+            <div className="px-3 py-4 sm:px-4 sm:py-5 lg:p-6">
               <div className="flex items-center">
-                <div className="flex-shrink-0 bg-purple-500 rounded-md p-3">
-                  <FaCheckCircle className="text-white h-6 w-6" />
+                <div className="flex-shrink-0 bg-purple-500 rounded-md p-2 sm:p-3">
+                  <FaCheckCircle className="text-white h-5 w-5 sm:h-6 sm:w-6" />
                 </div>
-                <div className="ml-5 w-0 flex-1">
+                <div className="ml-3 sm:ml-5 w-0 flex-1 min-w-0">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Pending Verifications</dt>
+                    <dt className="text-xs sm:text-sm font-medium text-gray-500 truncate">Pending Verifications</dt>
                     <dd className="flex items-baseline">
-                      <div className="text-2xl font-semibold text-gray-900">{stats.pending_verifications}</div>
+                      <div className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900">{stats.pending_verifications}</div>
                     </dd>
                   </dl>
                 </div>
