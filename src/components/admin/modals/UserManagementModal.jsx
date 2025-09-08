@@ -497,6 +497,11 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
               {editingUser ? "Edit User" : "Create New User"}
             </h3>
             <form onSubmit={handleCreateUser}>
+              {/* User Information Section */}
+              <div className="mb-6">
+                <h4 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                  User Information
+                </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -602,6 +607,15 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
                     </div>
                   )}
                 </div>
+                </div>
+              </div>
+
+              {/* Role & Assignment Section */}
+              <div className="mb-6">
+                <h4 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                  Role & Assignment
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Role
@@ -650,8 +664,15 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
                     )}
                   </div>
                 )}
+                </div>
+              </div>
 
-                {/* New fields for additional user details */}
+              {/* Documentation Section */}
+              <div className="mb-6">
+                <h4 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                  Documentation
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Aadhar ID
@@ -719,6 +740,15 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
                     </div>
                   )}
                 </div>
+                </div>
+              </div>
+
+              {/* Banking Information Section */}
+              <div className="mb-6">
+                <h4 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                  Banking Information
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Bank Account Number
@@ -766,14 +796,17 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
                     placeholder="11-character IFSC code"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
+                  </div>
+                </div>
                 </div>
 
-                {/* Member-specific fields - only show when member role is selected */}
+              {/* Member Information Section - only show when member role is selected */}
                 {userForm.role_id && roles.find(role => role.id === parseInt(userForm.role_id))?.name === 'member' && (
-                  <>
-                    <div className="mt-4 pt-4 border-t border-gray-200">
-                      <h4 className="text-lg font-medium text-gray-900 mb-3">Member Information</h4>
-                    </div>
+                <div className="mb-6">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                    Member Information
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Monthly Income (₹)
@@ -822,10 +855,9 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
                         <div className="mt-1 text-xs text-red-600">{fieldErrors.emergency_phone}</div>
                       )}
                     </div>
-                  </>
-                )}
-
               </div>
+                </div>
+              )}
               <div className="mt-4 flex gap-2">
                 <button
                   type="submit"
