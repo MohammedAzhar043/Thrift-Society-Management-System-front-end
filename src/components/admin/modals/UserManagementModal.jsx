@@ -484,7 +484,114 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
       await loadUsers();
     } catch (error) {
       console.error("Error deleting user:", error);
-      toast.error(error.message || "Failed to delete user");
+      
+      // Handle specific error messages from backend with dismiss functionality
+      if (error.message && error.message.includes("active loans")) {
+        toast((t) => (
+          <div className="flex items-center space-x-4 bg-red-600 text-white p-4 rounded-lg shadow-lg">
+            <span className="flex-1">Cannot delete user with active loans. Please close all loans first.</span>
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              className="text-white hover:text-red-200 text-xl font-bold ml-2 transition-colors duration-200"
+            >
+              ×
+            </button>
+          </div>
+        ), {
+          duration: 8000,
+          position: "top-center",
+        });
+      } else if (error.message && error.message.includes("foreign key constraint")) {
+        toast((t) => (
+          <div className="flex items-center space-x-4 bg-red-600 text-white p-4 rounded-lg shadow-lg">
+            <span className="flex-1">Cannot delete user due to existing loan records. Please contact system administrator.</span>
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              className="text-white hover:text-red-200 text-xl font-bold ml-2 transition-colors duration-200"
+            >
+              ×
+            </button>
+          </div>
+        ), {
+          duration: 8000,
+          position: "top-center",
+        });
+      } else if (error.message && error.message.includes("constraint")) {
+        toast((t) => (
+          <div className="flex items-center space-x-4 bg-red-600 text-white p-4 rounded-lg shadow-lg">
+            <span className="flex-1">Cannot delete user due to existing records. Please check for active loans or other dependencies.</span>
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              className="text-white hover:text-red-200 text-xl font-bold ml-2 transition-colors duration-200"
+            >
+              ×
+            </button>
+          </div>
+        ), {
+          duration: 8000,
+          position: "top-center",
+        });
+      } else if (error.response?.status === 400) {
+        toast((t) => (
+          <div className="flex items-center space-x-4 bg-red-600 text-white p-4 rounded-lg shadow-lg">
+            <span className="flex-1">Cannot delete user. This user may have active loans or other dependencies.</span>
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              className="text-white hover:text-red-200 text-xl font-bold ml-2 transition-colors duration-200"
+            >
+              ×
+            </button>
+          </div>
+        ), {
+          duration: 8000,
+          position: "top-center",
+        });
+      } else if (error.response?.status === 404) {
+        toast((t) => (
+          <div className="flex items-center space-x-4 bg-red-600 text-white p-4 rounded-lg shadow-lg">
+            <span className="flex-1">User not found. It may have been deleted by another user.</span>
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              className="text-white hover:text-red-200 text-xl font-bold ml-2 transition-colors duration-200"
+            >
+              ×
+            </button>
+          </div>
+        ), {
+          duration: 8000,
+          position: "top-center",
+        });
+      } else if (error.response?.status === 403) {
+        toast((t) => (
+          <div className="flex items-center space-x-4 bg-red-600 text-white p-4 rounded-lg shadow-lg">
+            <span className="flex-1">You don't have permission to delete this user.</span>
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              className="text-white hover:text-red-200 text-xl font-bold ml-2 transition-colors duration-200"
+            >
+              ×
+            </button>
+          </div>
+        ), {
+          duration: 8000,
+          position: "top-center",
+        });
+      } else {
+        toast((t) => (
+          <div className="flex items-center space-x-4 bg-red-600 text-white p-4 rounded-lg shadow-lg">
+            <span className="flex-1">{error.message || "Failed to delete user. Please try again."}</span>
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              className="text-white hover:text-red-200 text-xl font-bold ml-2 transition-colors duration-200"
+            >
+              ×
+            </button>
+          </div>
+        ), {
+          duration: 8000,
+          position: "top-center",
+        });
+      }
     }
   };
 
@@ -562,9 +669,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
         nominee_phone: "",
         relation: "",
         bank_passbook_path: "",
-        bank_passbook_file: null,
-        password: "",
-        confirm_password: ""
+        bank_passbook_file: null
               });
               setShowUserForm(true);
             }}
