@@ -1256,7 +1256,7 @@ function AdminDashboard({ user, onLogout }) {
                             </span>
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-500">
-                            {member.loans?.filter(loan => loan.status === 'active').length || 0}
+                            {loans.filter(loan => loan.member_id === member.id && (loan.status === 'ACTIVE' || loan.status === 'DISBURSED' || loan.status === 'APPROVED')).length}
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-500">
                             {member.joined_date ? new Date(member.joined_date).toLocaleDateString() : "N/A"}
