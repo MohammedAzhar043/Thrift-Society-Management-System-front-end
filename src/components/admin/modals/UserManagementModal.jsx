@@ -29,8 +29,11 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
     ifsc_code: "",
     // Member-specific fields
     monthly_income: "",
-    emergency_contact: "",
-    emergency_phone: ""
+    nominee_name: "",
+    nominee_phone: "",
+    relation: "",
+    bank_passbook_path: "",
+    bank_passbook_file: null
   });
 
   // Add state for field-specific errors and password visibility
@@ -69,6 +72,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
       setIsLoading(true);
       const data = await apiService.getUsers();
       console.log("Loaded users data:", data);
+      console.log("User 55 data:", data.find(user => user.id === 55));
       setUsers(data);
     } catch (error) {
       console.error("Error loading users:", error);
@@ -221,8 +225,10 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
         ifsc_code: userForm.ifsc_code?.trim() || null,
         // Member-specific fields
         monthly_income: userForm.monthly_income ? parseFloat(userForm.monthly_income) : null,
-        emergency_contact: userForm.emergency_contact?.trim() || null,
-        emergency_phone: userForm.emergency_phone?.trim() || null,
+        nominee_name: userForm.nominee_name?.trim() || null,
+        nominee_phone: userForm.nominee_phone?.trim() || null,
+        nominee_relation: userForm.relation?.trim() || null,
+        bank_passbook_path: userForm.bank_passbook_path?.trim() || null,
         // Group assignment for members
         group_id: userForm.group_id ? parseInt(userForm.group_id) : null
       };
@@ -247,18 +253,33 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
       } else {
         const newUser = await apiService.createUser(userData);
         
-        // Upload document if provided
+        // Upload documents if provided
+        let documentsUploaded = 0;
+        let totalDocuments = 0;
+        
         if (userForm.aadhar_document_file) {
+          totalDocuments++;
           try {
             await apiService.uploadUserDocument(newUser.id, userForm.aadhar_document_file);
-            toast.success("User created and document uploaded successfully!");
+            documentsUploaded++;
           } catch (error) {
-            console.error("Failed to upload document:", error);
-            toast.error("User created but document upload failed. Please upload the document manually.");
+            console.error("Failed to upload Aadhar document:", error);
+            toast.error("Aadhar document upload failed. Please upload manually.");
           }
         } else {
           toast.error("Aadhar document is required for all users");
           return;
+        }
+        
+        if (userForm.bank_passbook_file) {
+          totalDocuments++;
+          try {
+            await apiService.uploadBankPassbook(newUser.id, userForm.bank_passbook_file);
+            documentsUploaded++;
+          } catch (error) {
+            console.error("Failed to upload bank passbook:", error);
+            toast.error("Bank passbook upload failed. Please upload manually.");
+          }
         }
         
         // Assign role to the newly created user
@@ -282,20 +303,22 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
               joined_date: new Date().toISOString().split('T')[0],
               // Include member-specific fields
               monthly_income: userForm.monthly_income ? parseFloat(userForm.monthly_income) : null,
-              emergency_contact: userForm.emergency_contact?.trim() || null,
-              emergency_phone: userForm.emergency_phone?.trim() || null
+              nominee_name: userForm.nominee_name?.trim() || null,
+              nominee_phone: userForm.nominee_phone?.trim() || null,
+              nominee_relation: userForm.relation?.trim() || null
             };
             await apiService.createMember(memberData);
             if (onDataChanged) {
               onDataChanged();
             }
-            toast.success("User, role, and member created successfully!");
-          } else {
-            toast.success("User and role created successfully!");
           }
-        } else {
-          toast.success("User and role created successfully!");
         }
+        
+        // Show final success message
+        const successMessage = documentsUploaded > 0 
+          ? `User created successfully with ${documentsUploaded} document(s) uploaded!`
+          : "User created successfully!";
+        toast.success(successMessage);
       }
       
       setShowUserForm(false);
@@ -317,8 +340,11 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
         ifsc_code: "",
         // Member-specific fields
         monthly_income: "",
-        emergency_contact: "",
-        emergency_phone: ""
+        nominee_name: "",
+        nominee_phone: "",
+        relation: "",
+        bank_passbook_path: "",
+        bank_passbook_file: null
       });
       // Reload users to show the updated data
       await loadUsers();
@@ -416,13 +442,19 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
 
   const handleToggleUserStatus = async (user) => {
     try {
+      console.log("Toggling user status for user:", user.id, "Current status:", user.is_active);
+      
       if (user.is_active) {
+        console.log("Deactivating user:", user.id);
         await apiService.deactivateUser(user.id);
         toast.success("User deactivated successfully!");
       } else {
+        console.log("Activating user:", user.id);
         await apiService.activateUser(user.id);
         toast.success("User activated successfully!");
       }
+      
+      console.log("Reloading users...");
       await loadUsers();
     } catch (error) {
       console.error("Error toggling user status:", error);
@@ -785,20 +817,70 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    IFSC Code
-                  </label>
-                  <input
-                    type="text"
-                    value={userForm.ifsc_code}
-                    onChange={(e) => setUserForm({...userForm, ifsc_code: e.target.value})}
-                    placeholder="11-character IFSC code"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      IFSC Code
+                    </label>
+                    <input
+                      type="text"
+                      value={userForm.ifsc_code}
+                      onChange={(e) => setUserForm({...userForm, ifsc_code: e.target.value})}
+                      placeholder="11-character IFSC code"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Bank Passbook *
+                    </label>
+                    <input
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          setUserForm({
+                            ...userForm, 
+                            bank_passbook_path: file.name,
+                            bank_passbook_file: file
+                          });
+                          // Clear error when file is selected
+                          if (fieldErrors.bank_passbook) {
+                            setFieldErrors({...fieldErrors, bank_passbook: null});
+                          }
+                        }
+                      }}
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 ${
+                        fieldErrors.bank_passbook ? 'border-red-500' : 'border-gray-300'
+                      }`}
+                      required={true}
+                    />
+                    {fieldErrors.bank_passbook && (
+                      <div className="mt-1 text-xs text-red-600">{fieldErrors.bank_passbook}</div>
+                    )}
+                    {userForm.bank_passbook_path && (
+                      <div className="mt-2 flex items-center gap-2">
+                        <div className="text-xs text-green-600">
+                          ✓ File selected: {userForm.bank_passbook_path}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setUserForm({
+                              ...userForm,
+                              bank_passbook_path: "",
+                              bank_passbook_file: null
+                            });
+                          }}
+                          className="text-xs text-red-600 hover:text-red-800 underline"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
-                </div>
+              </div>
 
               {/* Member Information Section - only show when member role is selected */}
                 {userForm.role_id && roles.find(role => role.id === parseInt(userForm.role_id))?.name === 'member' && (
@@ -828,32 +910,53 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Emergency Contact Name
+                        Nominee Name
                       </label>
                       <input
                         type="text"
-                        value={userForm.emergency_contact}
-                        onChange={(e) => setUserForm({...userForm, emergency_contact: e.target.value})}
-                        placeholder="Emergency contact person's name"
+                        value={userForm.nominee_name}
+                        onChange={(e) => setUserForm({...userForm, nominee_name: e.target.value})}
+                        placeholder="Nominee's full name"
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Emergency Contact Phone
+                        Nominee Phone Number
                       </label>
                       <input
                         type="tel"
-                        value={userForm.emergency_phone}
-                        onChange={(e) => setUserForm({...userForm, emergency_phone: e.target.value})}
-                        placeholder="Emergency contact phone number"
+                        value={userForm.nominee_phone}
+                        onChange={(e) => setUserForm({...userForm, nominee_phone: e.target.value})}
+                        placeholder="Nominee's phone number"
                         className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                          fieldErrors.emergency_phone ? 'border-red-500' : 'border-gray-300'
+                          fieldErrors.nominee_phone ? 'border-red-500' : 'border-gray-300'
                         }`}
                       />
-                      {fieldErrors.emergency_phone && (
-                        <div className="mt-1 text-xs text-red-600">{fieldErrors.emergency_phone}</div>
+                      {fieldErrors.nominee_phone && (
+                        <div className="mt-1 text-xs text-red-600">{fieldErrors.nominee_phone}</div>
                       )}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Relation with Nominee
+                      </label>
+                      <select
+                        value={userForm.relation}
+                        onChange={(e) => setUserForm({...userForm, relation: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="">Select Relation</option>
+                        <option value="son">Son</option>
+                        <option value="daughter">Daughter</option>
+                        <option value="husband">Husband</option>
+                        <option value="wife">Wife</option>
+                        <option value="father">Father</option>
+                        <option value="mother">Mother</option>
+                        <option value="brother">Brother</option>
+                        <option value="sister">Sister</option>
+                        <option value="other">Other</option>
+                      </select>
                     </div>
               </div>
                 </div>

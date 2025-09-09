@@ -396,7 +396,9 @@ class ApiService {
 
   // User Management APIs
   async getUsers(skip = 0, limit = 100) {
-    return await this.request(`/users?skip=${skip}&limit=${limit}`);
+    const data = await this.request(`/users?skip=${skip}&limit=${limit}`);
+    console.log("API getUsers response:", data);
+    return data;
   }
 
   async getUser(userId) {
@@ -424,12 +426,14 @@ class ApiService {
   }
 
   async activateUser(userId) {
+    console.log("API: Activating user", userId);
     return await this.request(`/users/${userId}/activate`, {
       method: 'POST'
     });
   }
 
   async deactivateUser(userId) {
+    console.log("API: Deactivating user", userId);
     return await this.request(`/users/${userId}/deactivate`, {
       method: 'POST'
     });
@@ -485,6 +489,42 @@ class ApiService {
     formData.append('file', file);
     
     const response = await fetch(`${this.baseURL}/users/${userId}/upload-document`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${this.token}`
+      },
+      body: formData
+    });
+    
+    if (response.status === 401) {
+      this.clearToken();
+      window.location.href = '/login';
+      return;
+    }
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      
+      // Handle validation errors (422) with detailed field errors
+      if (response.status === 422 && errorData.errors) {
+        const validationErrors = errorData.errors.map(error => {
+          const field = error.loc ? error.loc.slice(1).join('.') : 'field';
+          return `${field}: ${error.msg}`;
+        }).join(', ');
+        throw new Error(validationErrors);
+      }
+      
+      throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  }
+
+  async uploadBankPassbook(userId, file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const response = await fetch(`${this.baseURL}/users/${userId}/upload-bank-passbook`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${this.token}`

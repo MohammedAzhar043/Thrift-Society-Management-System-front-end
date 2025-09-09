@@ -87,7 +87,7 @@ function Login({ onLogin }) {
       </div>
 
       <div className="mt-6 sm:mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-6 sm:py-8 px-4 sm:px-6 shadow sm:rounded-lg sm:px-8 sm:px-10">
+        <div className="bg-white py-6 sm:py-8 px-4 sm:px-6 shadow sm:rounded-lg ">
           <form className="space-y-4 sm:space-y-6" onSubmit={handleSubmit}>
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-600 px-3 sm:px-4 py-2 sm:py-3 rounded-md text-sm">
