@@ -419,6 +419,13 @@ class ApiService {
     });
   }
 
+  async updateMember(memberId, memberData) {
+    return await this.request(`/admin/members/${memberId}`, {
+      method: 'PUT',
+      body: JSON.stringify(memberData)
+    });
+  }
+
   async deleteUser(userId) {
     return await this.request(`/users/${userId}`, {
       method: 'DELETE'

@@ -137,18 +137,22 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
       errors.full_name = "Full name is required";
     }
     
-    if (!editingUser && !userForm.password?.trim()) {
-      errors.password = "Password is required for new users";
-    } else if (userForm.password?.trim() && userForm.password.length < 8) {
+    // Password validation - required for both new users and editing
+    if (!userForm.password?.trim()) {
+      errors.password = editingUser ? "Password is required for updating user" : "Password is required for new users";
+    } else if (userForm.password.length < 8) {
       errors.password = "Password must be at least 8 characters long";
-    } else if (userForm.password?.trim()) {
+    } else {
       const passwordError = validatePassword(userForm.password);
       if (passwordError) {
         errors.password = passwordError;
       }
     }
     
-    if (!editingUser && userForm.password !== userForm.confirm_password) {
+    // Confirm password validation - required for both new users and editing
+    if (!userForm.confirm_password?.trim()) {
+      errors.confirm_password = editingUser ? "Confirm password is required for updating user" : "Confirm password is required for new users";
+    } else if (userForm.password !== userForm.confirm_password) {
       errors.confirm_password = "Passwords do not match";
     }
     
@@ -167,8 +171,11 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
     }
     
     // Aadhar document is required for ALL users
-    // Note: We validate file selection, not upload completion
-    if (!userForm.aadhar_document_file) {
+    // For new users: require file upload
+    // For editing users: require either new file OR existing file path
+    if (!editingUser && !userForm.aadhar_document_file) {
+      errors.aadhar_document = "Aadhar document is required for all users";
+    } else if (editingUser && !userForm.aadhar_document_file && !userForm.aadhar_document_path) {
       errors.aadhar_document = "Aadhar document is required for all users";
     }
     
@@ -178,8 +185,8 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
         errors.monthly_income = "Monthly income must be a valid positive number";
       }
       
-      if (userForm.emergency_phone?.trim() && !/^[6-9]\d{9}$/.test(userForm.emergency_phone.replace(/\s/g, ''))) {
-        errors.emergency_phone = "Emergency phone must be a valid 10-digit Indian mobile number";
+      if (userForm.nominee_phone?.trim() && !/^[6-9]\d{9}$/.test(userForm.nominee_phone.replace(/\s/g, ''))) {
+        errors.nominee_phone = "Nominee phone must be a valid 10-digit Indian mobile number";
       }
     }
     
@@ -218,7 +225,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
         ...(userForm.role_id && { role_id: parseInt(userForm.role_id) }),
         // Additional user details - always include these fields
         aadhar_id: userForm.aadhar_id?.trim() || null,
-        aadhar_document_path: "pending_upload", // Placeholder until file is uploaded
+        aadhar_document_path: editingUser ? userForm.aadhar_document_path : "pending_upload", // Keep existing path for edit, placeholder for create
         bank_account_number: userForm.bank_account_number?.trim() || null,
         bank_name: userForm.bank_name?.trim() || null,
         bank_branch: userForm.bank_branch?.trim() || null,
@@ -228,7 +235,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
         nominee_name: userForm.nominee_name?.trim() || null,
         nominee_phone: userForm.nominee_phone?.trim() || null,
         nominee_relation: userForm.relation?.trim() || null,
-        bank_passbook_path: userForm.bank_passbook_path?.trim() || null,
+        bank_passbook_path: editingUser ? userForm.bank_passbook_path : (userForm.bank_passbook_path?.trim() || null), // Keep existing path for edit
         // Group assignment for members
         group_id: userForm.group_id ? parseInt(userForm.group_id) : null
       };
@@ -238,18 +245,56 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
       if (editingUser) {
         await apiService.updateUser(editingUser.id, userData);
         
-        // Upload document if provided during edit
+        // Upload documents if provided during edit
+        let documentsUploaded = 0;
+        let totalDocuments = 0;
+        
         if (userForm.aadhar_document_file) {
+          totalDocuments++;
           try {
             await apiService.uploadUserDocument(editingUser.id, userForm.aadhar_document_file);
-            toast.success("User and document updated successfully!");
+            documentsUploaded++;
           } catch (error) {
-            console.error("Failed to upload document:", error);
-            toast.error("User updated but document upload failed");
+            console.error("Failed to upload Aadhar document:", error);
+            toast.error("Aadhar document upload failed. Please upload manually.");
           }
-        } else {
-          toast.success("User updated successfully!");
         }
+        
+        if (userForm.bank_passbook_file) {
+          totalDocuments++;
+          try {
+            await apiService.uploadBankPassbook(editingUser.id, userForm.bank_passbook_file);
+            documentsUploaded++;
+          } catch (error) {
+            console.error("Failed to upload bank passbook:", error);
+            toast.error("Bank passbook upload failed. Please upload manually.");
+          }
+        }
+        
+        // Update member record if user is a member
+        if (editingUser.member && userForm.role_id) {
+          const selectedRole = roles.find(role => role.id === parseInt(userForm.role_id));
+          if (selectedRole && selectedRole.name === 'member') {
+            try {
+              const memberData = {
+                monthly_income: userForm.monthly_income ? parseFloat(userForm.monthly_income) : null,
+                nominee_name: userForm.nominee_name?.trim() || null,
+                nominee_phone: userForm.nominee_phone?.trim() || null,
+                nominee_relation: userForm.relation?.trim() || null
+              };
+              await apiService.updateMember(editingUser.member.id, memberData);
+            } catch (error) {
+              console.error("Failed to update member record:", error);
+              toast.error("User updated but member record update failed");
+            }
+          }
+        }
+        
+        // Show success message
+        const successMessage = documentsUploaded > 0 
+          ? `User updated successfully with ${documentsUploaded} document(s) uploaded!`
+          : "User updated successfully!";
+        toast.success(successMessage);
       } else {
         const newUser = await apiService.createUser(userData);
         
@@ -382,8 +427,8 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
       username: user.username || "",
       email: user.email || "",
       full_name: user.full_name || "",
-      password: "",
-      confirm_password: "",
+      password: "", // Leave empty so user must enter new password
+      confirm_password: "", // Leave empty so user must enter new password
       role_id: user.roles?.[0]?.id?.toString() || "",
       group_id: user.member?.group_id?.toString() || "",
       aadhar_id: user.aadhar_id || "",
@@ -395,8 +440,11 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
       ifsc_code: user.ifsc_code || "",
       // Member-specific fields
       monthly_income: user.monthly_income || "",
-      emergency_contact: user.emergency_contact || "",
-      emergency_phone: user.emergency_phone || ""
+      nominee_name: user.nominee_name || "",
+      nominee_phone: user.nominee_phone || "",
+      relation: user.member?.nominee_relation || "",
+      bank_passbook_path: user.bank_passbook_path || "",
+      bank_passbook_file: null
     });
     setShowUserForm(true);
   };
@@ -510,8 +558,13 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
                 ifsc_code: "",
                 // Member-specific fields
                 monthly_income: "",
-                emergency_contact: "",
-                emergency_phone: ""
+        nominee_name: "",
+        nominee_phone: "",
+        relation: "",
+        bank_passbook_path: "",
+        bank_passbook_file: null,
+        password: "",
+        confirm_password: ""
               });
               setShowUserForm(true);
             }}
@@ -582,7 +635,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Password {!editingUser && "*"}
+                    Password *
                   </label>
                   <div className="relative">
                   <input
@@ -592,7 +645,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
                       className={`w-full px-3 py-2 pr-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                         fieldErrors.password ? 'border-red-500' : 'border-gray-300'
                       }`}
-                    required={!editingUser}
+                    required
                   />
                     <button
                       type="button"
@@ -624,16 +677,21 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Confirm Password {!editingUser && "*"}
+                    Confirm Password *
                   </label>
                   <input
                     type="password"
                     value={userForm.confirm_password}
                     onChange={(e) => setUserForm({...userForm, confirm_password: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required={!editingUser}
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      fieldErrors.confirm_password ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                    required
                   />
-                  {!editingUser && userForm.confirm_password && (
+                  {fieldErrors.confirm_password && (
+                    <div className="mt-1 text-xs text-red-600">{fieldErrors.confirm_password}</div>
+                  )}
+                  {userForm.confirm_password && (
                     <div className={`mt-1 text-xs ${userForm.password === userForm.confirm_password ? 'text-green-600' : 'text-red-600'}`}>
                       {userForm.password === userForm.confirm_password ? '✓ Passwords match' : '✗ Passwords do not match'}
                     </div>
@@ -726,6 +784,26 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Aadhar Document *
                   </label>
+                  {editingUser && userForm.aadhar_document_path && (
+                    <div className="mb-2 p-2 bg-green-50 border border-green-200 rounded-md">
+                      <div className="flex items-center text-green-700">
+                        <span className="text-sm">✓ File selected: {userForm.aadhar_document_path}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setUserForm({
+                              ...userForm,
+                              aadhar_document_path: "",
+                              aadhar_document_file: null
+                            });
+                          }}
+                          className="ml-2 text-red-600 hover:text-red-800 text-sm"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  )}
                   <input
                     type="file"
                     accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
@@ -746,30 +824,10 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
                     className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 ${
                       fieldErrors.aadhar_document ? 'border-red-500' : 'border-gray-300'
                     }`}
-                    required={true}
+                    required={!editingUser}
                   />
                   {fieldErrors.aadhar_document && (
                     <div className="mt-1 text-xs text-red-600">{fieldErrors.aadhar_document}</div>
-                  )}
-                  {userForm.aadhar_document_path && (
-                    <div className="mt-2 flex items-center gap-2">
-                      <div className="text-xs text-green-600">
-                        ✓ File selected: {userForm.aadhar_document_path}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setUserForm({
-                            ...userForm,
-                            aadhar_document_path: "",
-                            aadhar_document_file: null
-                          });
-                        }}
-                        className="text-xs text-red-600 hover:text-red-800 underline"
-                      >
-                        Remove
-                      </button>
-                    </div>
                   )}
                 </div>
                 </div>
@@ -833,6 +891,26 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Bank Passbook *
                     </label>
+                    {editingUser && userForm.bank_passbook_path && (
+                      <div className="mb-2 p-2 bg-green-50 border border-green-200 rounded-md">
+                        <div className="flex items-center text-green-700">
+                          <span className="text-sm">✓ File selected: {userForm.bank_passbook_path}</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setUserForm({
+                                ...userForm,
+                                bank_passbook_path: "",
+                                bank_passbook_file: null
+                              });
+                            }}
+                            className="ml-2 text-red-600 hover:text-red-800 text-sm"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                    )}
                     <input
                       type="file"
                       accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
@@ -853,30 +931,10 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
                       className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 ${
                         fieldErrors.bank_passbook ? 'border-red-500' : 'border-gray-300'
                       }`}
-                      required={true}
+                      required={!editingUser}
                     />
                     {fieldErrors.bank_passbook && (
                       <div className="mt-1 text-xs text-red-600">{fieldErrors.bank_passbook}</div>
-                    )}
-                    {userForm.bank_passbook_path && (
-                      <div className="mt-2 flex items-center gap-2">
-                        <div className="text-xs text-green-600">
-                          ✓ File selected: {userForm.bank_passbook_path}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setUserForm({
-                              ...userForm,
-                              bank_passbook_path: "",
-                              bank_passbook_file: null
-                            });
-                          }}
-                          className="text-xs text-red-600 hover:text-red-800 underline"
-                        >
-                          Remove
-                        </button>
-                      </div>
                     )}
                   </div>
                 </div>
