@@ -10,6 +10,7 @@ import {
 import apiService from "../services/api";
 import { useDashboardData } from "../hooks/useDashboardData";
 import { formatIndianCurrency } from "../utils/formatters";
+import useFormSubmission from "../hooks/useFormSubmission";
 import {
   DashboardHeader,
   StatsCards,
@@ -37,6 +38,10 @@ function AdminDashboard({ user, onLogout }) {
   
   // Use custom hook for dashboard data
   const { data: dashboardStats, loading: isLoading, refreshData: refreshDashboard } = useDashboardData('admin');
+  
+  // Form submission hooks
+  const { isSubmitting: isCreatingGroup, submitForm: submitGroupForm, resetForm: resetGroupForm } = useFormSubmission();
+  const { isSubmitting: isUpdatingGroup, submitForm: submitUpdateGroupForm } = useFormSubmission();
   
   // Modal states
   const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
@@ -279,14 +284,12 @@ function AdminDashboard({ user, onLogout }) {
       return;
     }
     
-    try {
+    await submitGroupForm(async () => {
       // Prepare form data, handling optional fields properly
       const groupData = {
         name: groupForm.name.trim(),
         location: groupForm.location.trim()
       };
-      
-
       
       // Convert bill collector name to ID if selected
       if (groupForm.bill_collector_name && groupForm.bill_collector_name.trim() !== "") {
@@ -296,8 +299,7 @@ function AdminDashboard({ user, onLogout }) {
         if (billCollector) {
           groupData.bill_collector_id = billCollector.id;
         } else {
-          toast.error("Selected bill collector not found");
-          return;
+          throw new Error("Selected bill collector not found");
         }
       }
       
@@ -314,16 +316,18 @@ function AdminDashboard({ user, onLogout }) {
       setGroupForm({ name: "", location: "", bill_collector_name: "" });
       await loadAdditionalData();
       refreshDashboard();
-    } catch (error) {
-      console.error("Error creating group:", error);
-      console.error("Error details:", {
-        message: error.message,
-        stack: error.stack,
-        name: error.name
-      });
-      const errorMessage = error.message || "Failed to create group. Please try again.";
-      toast.error(errorMessage);
-    }
+    }, {
+      onError: (error) => {
+        console.error("Error creating group:", error);
+        console.error("Error details:", {
+          message: error.message,
+          stack: error.stack,
+          name: error.name
+        });
+        const errorMessage = error.message || "Failed to create group. Please try again.";
+        toast.error(errorMessage);
+      }
+    });
   };
 
   const handleEditGroup = (group) => {
@@ -870,12 +874,13 @@ function AdminDashboard({ user, onLogout }) {
         onClose={() => {
           setShowCreateGroupModal(false);
           setGroupForm({ name: "", location: "", bill_collector_name: "" });
+          resetGroupForm();
         }}
         groupForm={groupForm}
         onFormChange={(field, value) => setGroupForm({...groupForm, [field]: value})}
         onSubmit={handleCreateGroup}
         billCollectors={billCollectors}
-        isLoading={false}
+        isLoading={isCreatingGroup}
       />
 
 

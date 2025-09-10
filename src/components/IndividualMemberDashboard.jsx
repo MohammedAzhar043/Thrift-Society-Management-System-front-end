@@ -16,10 +16,14 @@ import {
 import { toast, Toaster } from 'react-hot-toast';
 import apiService from '../services/api';
 import { formatCurrency, formatDate } from '../utils/formatters';
+import useFormSubmission from '../hooks/useFormSubmission';
 
 function IndividualMemberDashboard({ user, onLogout }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Form submission hooks
+  const { isSubmitting: isSubmittingLoan, submitForm: submitLoanForm } = useFormSubmission();
   
   // Dashboard data states
   const [dashboardStats, setDashboardStats] = useState({
@@ -161,15 +165,12 @@ function IndividualMemberDashboard({ user, onLogout }) {
       return;
     }
     
-    try {
-      setLoading(true);
-      
+    await submitLoanForm(async () => {
       // Get current user's member profile to get member_id and group_id
       const memberProfile = await apiService.getMemberProfile();
       
       if (!memberProfile || !memberProfile.id) {
-        toast.error('Unable to get member profile. Please try again.');
-        return;
+        throw new Error('Unable to get member profile. Please try again.');
       }
       
       const loanData = {
@@ -194,20 +195,19 @@ function IndividualMemberDashboard({ user, onLogout }) {
       await loadDashboardData();
       
       toast.success('Loan application submitted successfully! It is now pending approval.');
-      
-    } catch (err) {
-      console.error('Error submitting loan application:', err);
-      let errorMessage = 'Failed to submit loan application. Please try again.';
-      
-      // Use the detailed error message from API service
-      if (err.message) {
-        errorMessage = err.message;
+    }, {
+      onError: (err) => {
+        console.error('Error submitting loan application:', err);
+        let errorMessage = 'Failed to submit loan application. Please try again.';
+        
+        // Use the detailed error message from API service
+        if (err.message) {
+          errorMessage = err.message;
+        }
+        
+        toast.error(errorMessage);
       }
-      
-      toast.error(errorMessage);
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   const handleLogout = async () => {
@@ -873,12 +873,15 @@ function IndividualMemberDashboard({ user, onLogout }) {
                   </button>
                   <button
                     type="submit"
-                    disabled={loading}
-                    className={`px-4 py-2 text-white rounded-md ${
-                      loading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+                    disabled={isSubmittingLoan}
+                    className={`px-4 py-2 text-white rounded-md flex items-center ${
+                      isSubmittingLoan ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
                     }`}
                   >
-                    {loading ? 'Submitting...' : 'Submit Application'}
+                    {isSubmittingLoan && (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    )}
+                    {isSubmittingLoan ? 'Submitting...' : 'Submit Application'}
                   </button>
                 </div>
               </form>

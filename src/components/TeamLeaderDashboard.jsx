@@ -20,6 +20,7 @@ import {
 import apiService from '../services/api';
 import { formatIndianCurrency } from '../utils/formatters';
 import { formatCurrency, formatDate } from '../utils/formatters';
+import useFormSubmission from '../hooks/useFormSubmission';
 
 function TeamLeaderDashboard({ user, onLogout }) {
   const [loading, setLoading] = useState(true);
@@ -41,7 +42,6 @@ function TeamLeaderDashboard({ user, onLogout }) {
   const [showLoanRequestModal, setShowLoanRequestModal] = useState(false);
   const [showMemberDetailsModal, setShowMemberDetailsModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
-  const [isCreatingMember, setIsCreatingMember] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   
   // Form states
@@ -83,6 +83,10 @@ function TeamLeaderDashboard({ user, onLogout }) {
   const aadharFileStateRef = useRef(null);
   const bankPassbookFileStateRef = useRef(null);
   
+  // Form submission hooks
+  const { isSubmitting: isCreatingMember, submitForm: submitMemberForm, resetForm: resetMemberForm } = useFormSubmission();
+  const { isSubmitting: isCreatingLoan, submitForm: submitLoanForm } = useFormSubmission();
+  
   // Reset file inputs when files are cleared
   useEffect(() => {
     if (!newMember.aadhar_document_file && aadharFileRef.current) {
@@ -97,7 +101,6 @@ function TeamLeaderDashboard({ user, onLogout }) {
   }, [newMember.bank_passbook_file]);
   const [fieldErrors, setFieldErrors] = useState({});
   const [currentStep, setCurrentStep] = useState(1);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [newLoanRequest, setNewLoanRequest] = useState({
     requested_amount: '',
@@ -299,7 +302,7 @@ function TeamLeaderDashboard({ user, onLogout }) {
     bankPassbookFileStateRef.current = null;
     setFieldErrors({});
     setCurrentStep(1);
-    setIsSubmitting(false);
+    resetMemberForm();
   };
 
   const loadDashboardData = async () => {
@@ -400,10 +403,7 @@ function TeamLeaderDashboard({ user, onLogout }) {
       return;
     }
     
-    try {
-      setIsSubmitting(true);
-      setError(null); // Clear any previous errors
-      
+    await submitMemberForm(async () => {
       // Create member data with user details (without file paths)
       const memberData = {
         group_id: assignedGroups[0]?.id, // Add the required group_id
@@ -443,8 +443,7 @@ function TeamLeaderDashboard({ user, onLogout }) {
           documentsUploaded++;
         } catch (error) {
           console.error("Failed to upload Aadhar document:", error);
-          setError("Aadhar document upload failed. Please upload manually.");
-          return;
+          throw new Error("Aadhar document upload failed. Please upload manually.");
         }
       }
       
@@ -455,8 +454,7 @@ function TeamLeaderDashboard({ user, onLogout }) {
           documentsUploaded++;
         } catch (error) {
           console.error("Failed to upload bank passbook:", error);
-          setError("Bank passbook upload failed. Please upload manually.");
-          return;
+          throw new Error("Bank passbook upload failed. Please upload manually.");
         }
       }
       
@@ -473,27 +471,28 @@ function TeamLeaderDashboard({ user, onLogout }) {
         : 'Member has been added successfully with user account and is now pending admin approval.';
       setSuccessMessage(successMessage);
       setError(null); // Clear any previous errors
-    } catch (err) {
-      console.error('Error adding member:', err);
-      
-      // Handle specific error cases
-      if (err.message.includes('Member code already exists')) {
-        setError('A member with this code already exists. Please use a different member code.');
-      } else if (err.message.includes('Group not found')) {
-        setError('The selected group was not found. Please refresh the page and try again.');
-      } else if (err.message.includes('not authenticated')) {
-        setError('Your session has expired. Please log in again.');
-      } else {
-        setError('Failed to add member: ' + err.message);
+    }, {
+      onError: (err) => {
+        console.error('Error adding member:', err);
+        
+        // Handle specific error cases
+        if (err.message.includes('Member code already exists')) {
+          setError('A member with this code already exists. Please use a different member code.');
+        } else if (err.message.includes('Group not found')) {
+          setError('The selected group was not found. Please refresh the page and try again.');
+        } else if (err.message.includes('not authenticated')) {
+          setError('Your session has expired. Please log in again.');
+        } else {
+          setError('Failed to add member: ' + err.message);
+        }
       }
-    } finally {
-      setIsSubmitting(false);
-    }
+    });
   };
 
   const handleCreateLoanRequest = async (e) => {
     e.preventDefault();
-    try {
+    
+    await submitLoanForm(async () => {
       const loanRequestData = {
         ...newLoanRequest,
         group_id: assignedGroups[0]?.id
@@ -509,9 +508,11 @@ function TeamLeaderDashboard({ user, onLogout }) {
       });
       await loadGroupData(assignedGroups[0]?.id);
       setSuccessMessage('Loan request created successfully! The request is now pending admin approval.');
-    } catch (err) {
-      setError('Failed to create loan request: ' + err.message);
-    }
+    }, {
+      onError: (err) => {
+        setError('Failed to create loan request: ' + err.message);
+      }
+    });
   };
 
   const getStatusColor = (status) => {
@@ -1670,14 +1671,17 @@ function TeamLeaderDashboard({ user, onLogout }) {
                   </button>
                   <button
                     type="submit"
-                    disabled={isSubmitting}
-                    className={`px-4 py-2 text-white rounded-md ${
-                                              isSubmitting 
-                          ? 'bg-blue-400 cursor-not-allowed' 
-                          : 'bg-blue-600 hover:bg-blue-700'
+                    disabled={isCreatingMember}
+                    className={`px-4 py-2 text-white rounded-md flex items-center ${
+                      isCreatingMember 
+                        ? 'bg-blue-400 cursor-not-allowed' 
+                        : 'bg-blue-600 hover:bg-blue-700'
                     }`}
                   >
-                    {isSubmitting ? 'Creating...' : 'Create Member'}
+                    {isCreatingMember && (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    )}
+                    {isCreatingMember ? 'Creating...' : 'Create Member'}
                   </button>
                 </div>
               </form>
@@ -1758,9 +1762,17 @@ function TeamLeaderDashboard({ user, onLogout }) {
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                    disabled={isCreatingLoan}
+                    className={`px-4 py-2 text-white rounded-md flex items-center ${
+                      isCreatingLoan 
+                        ? 'bg-green-400 cursor-not-allowed' 
+                        : 'bg-green-600 hover:bg-green-700'
+                    }`}
                   >
-                    Create Request
+                    {isCreatingLoan && (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    )}
+                    {isCreatingLoan ? 'Creating...' : 'Create Request'}
                   </button>
                 </div>
               </form>

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import { FaTimes, FaEdit, FaTrash, FaCheck, FaBan, FaPlus } from "react-icons/fa";
 import apiService from "../../../services/api";
+import useFormSubmission from "../../../hooks/useFormSubmission";
 
 function UserManagementModal({ isOpen, onClose, onDataChanged }) {
   const [users, setUsers] = useState([]);
@@ -12,6 +13,10 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [showUserForm, setShowUserForm] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+  
+  // Form submission hook
+  const { isSubmitting, error: submissionError, submitForm, resetForm, clearError } = useFormSubmission();
+
   const [userForm, setUserForm] = useState({
     username: "",
     email: "",
@@ -199,6 +204,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
     
     // Clear previous errors
     setFieldErrors({});
+    clearError();
     
     // Validate form
     if (!validateForm()) {
@@ -216,7 +222,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
       }
     }
 
-    try {
+    await submitForm(async () => {
       const userData = {
         username: userForm.username?.trim() || "",
         email: userForm.email?.trim() || "",
@@ -396,29 +402,31 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
       if (onDataChanged) {
         onDataChanged();
       }
-    } catch (error) {
-      console.error("Error saving user:", error);
-      
-      // Handle specific field errors from backend
-      if (error.message.includes("Username already registered")) {
-        setFieldErrors({...fieldErrors, username: "Username already exists"});
-        toast.error("Username already exists");
-      } else if (error.message.includes("Email already registered")) {
-        setFieldErrors({...fieldErrors, email: "Email already exists"});
-        toast.error("Email already exists");
-      } else if (error.message.includes("Aadhar ID already registered")) {
-        setFieldErrors({...fieldErrors, aadhar_id: "Aadhar ID already exists"});
-        toast.error("Aadhar ID already exists");
-      } else if (error.message.includes("Aadhar document is required")) {
-        setFieldErrors({...fieldErrors, aadhar_document: "Aadhar document is required for all users"});
-        toast.error("Aadhar document is required for all users");
-      } else if (error.message.includes("Group assignment is required for members")) {
-        setFieldErrors({...fieldErrors, group_id: "Group assignment is required for members"});
-        toast.error("Group assignment is required for members");
-      } else {
-      toast.error(error.message || "Failed to save user");
+    }, {
+      onError: (error) => {
+        console.error("Error saving user:", error);
+        
+        // Handle specific field errors from backend
+        if (error.message.includes("Username already registered")) {
+          setFieldErrors({...fieldErrors, username: "Username already exists"});
+          toast.error("Username already exists");
+        } else if (error.message.includes("Email already registered")) {
+          setFieldErrors({...fieldErrors, email: "Email already exists"});
+          toast.error("Email already exists");
+        } else if (error.message.includes("Aadhar ID already registered")) {
+          setFieldErrors({...fieldErrors, aadhar_id: "Aadhar ID already exists"});
+          toast.error("Aadhar ID already exists");
+        } else if (error.message.includes("Aadhar document is required")) {
+          setFieldErrors({...fieldErrors, aadhar_document: "Aadhar document is required for all users"});
+          toast.error("Aadhar document is required for all users");
+        } else if (error.message.includes("Group assignment is required for members")) {
+          setFieldErrors({...fieldErrors, group_id: "Group assignment is required for members"});
+          toast.error("Group assignment is required for members");
+        } else {
+          toast.error(error.message || "Failed to save user");
+        }
       }
-    }
+    });
   };
 
   const handleEditUser = (user) => {
@@ -1127,17 +1135,31 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
               <div className="mt-4 flex gap-2">
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                  disabled={isSubmitting}
+                  className={`px-4 py-2 text-white rounded-md flex items-center ${
+                    isSubmitting 
+                      ? 'bg-green-400 cursor-not-allowed' 
+                      : 'bg-green-600 hover:bg-green-700'
+                  }`}
                 >
-                  {editingUser ? "Update User" : "Create User"}
+                  {isSubmitting && (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  )}
+                  {isSubmitting ? (editingUser ? 'Updating...' : 'Creating...') : (editingUser ? 'Update User' : 'Create User')}
                 </button>
                 <button
                   type="button"
                   onClick={() => {
                     setShowUserForm(false);
                     setEditingUser(null);
+                    resetForm();
                   }}
-                  className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+                  disabled={isSubmitting}
+                  className={`px-4 py-2 text-white rounded-md ${
+                    isSubmitting 
+                      ? 'bg-gray-400 cursor-not-allowed' 
+                      : 'bg-gray-600 hover:bg-gray-700'
+                  }`}
                 >
                   Cancel
                 </button>

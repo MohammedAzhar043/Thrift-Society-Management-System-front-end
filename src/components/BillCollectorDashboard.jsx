@@ -3,10 +3,15 @@ import { useState, useEffect } from 'react';
 import { FaUsers, FaMoneyBillWave, FaHistory, FaHandHoldingUsd, FaSignOutAlt, FaPlus, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import apiService from '../services/api';
 import { formatIndianCurrency } from '../utils/formatters';
+import useFormSubmission from '../hooks/useFormSubmission';
 
 function BillCollectorDashboard({ user, onLogout }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Form submission hooks
+  const { isSubmitting: isSubmittingCollection, submitForm: submitCollectionForm } = useFormSubmission();
+  const { isSubmitting: isSubmittingLoan, submitForm: submitLoanForm } = useFormSubmission();
   const [stats, setStats] = useState({
     assigned_groups: 0,
     today_collections: 0,
@@ -204,32 +209,30 @@ function BillCollectorDashboard({ user, onLogout }) {
   // Handle collection submission
   const handleCollectionSubmit = async (e) => {
     e.preventDefault();
-    try {
-      setLoading(true);
-      
-      // Validate collection items
-      if (collectionForm.collection_items.length === 0) {
-        setError('Please add at least one collection item');
+    
+    // Validate collection items
+    if (collectionForm.collection_items.length === 0) {
+      setError('Please add at least one collection item');
+      return;
+    }
+
+    // Validate all collection items have required fields
+    for (let i = 0; i < collectionForm.collection_items.length; i++) {
+      const item = collectionForm.collection_items[i];
+      if (!item.member_id || !item.amount || !item.payment_type) {
+        setError(`Please fill in all fields for collection item ${i + 1}`);
         return;
       }
-
-      // Validate all collection items have required fields
-      for (let i = 0; i < collectionForm.collection_items.length; i++) {
-        const item = collectionForm.collection_items[i];
-        if (!item.member_id || !item.amount || !item.payment_type) {
-          setError(`Please fill in all fields for collection item ${i + 1}`);
-          return;
-        }
-        if (parseFloat(item.amount) <= 0) {
-          setError(`Amount must be greater than 0 for collection item ${i + 1}`);
-          return;
-        }
+      if (parseFloat(item.amount) <= 0) {
+        setError(`Amount must be greater than 0 for collection item ${i + 1}`);
+        return;
       }
+    }
 
+    await submitCollectionForm(async () => {
       const totalCalculated = collectionForm.collection_items.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0);
       if (Math.abs(totalCalculated - parseFloat(collectionForm.total_collected || 0)) > 0.01) {
-        setError(`Total collected amount (${collectionForm.total_collected}) does not match sum of collection items (${formatIndianCurrency(totalCalculated, false)})`);
-        return;
+        throw new Error(`Total collected amount (${collectionForm.total_collected}) does not match sum of collection items (${formatIndianCurrency(totalCalculated, false)})`);
       }
 
       await apiService.createCollectionRecord(collectionForm);
@@ -243,13 +246,12 @@ function BillCollectorDashboard({ user, onLogout }) {
       });
       setShowCollectionModal(false);
       fetchDashboardData();
-      
-    } catch (err) {
-      console.error('Error creating collection record:', err);
-      setError('Failed to create collection record. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+    }, {
+      onError: (err) => {
+        console.error('Error creating collection record:', err);
+        setError('Failed to create collection record. Please try again.');
+      }
+    });
   };
 
   // Add collection item
@@ -296,9 +298,8 @@ function BillCollectorDashboard({ user, onLogout }) {
   // Handle loan request submission
   const handleLoanRequestSubmit = async (e) => {
     e.preventDefault();
-    try {
-      setLoading(true);
-      
+    
+    await submitLoanForm(async () => {
       const loanRequestData = {
         member_id: parseInt(collectionForm.member_id),
         group_id: parseInt(collectionForm.group_id),
@@ -312,23 +313,22 @@ function BillCollectorDashboard({ user, onLogout }) {
       setShowLoanModal(false);
       resetLoanRequestForm();
       fetchDashboardData();
-      
-    } catch (err) {
-      console.error('Error creating loan request:', err);
-      let errorMessage = 'Failed to create loan request. Please try again.';
-      
-      if (err.message) {
-        errorMessage = err.message;
-      } else if (err.detail) {
-        errorMessage = err.detail;
-      } else if (typeof err === 'string') {
-        errorMessage = err;
+    }, {
+      onError: (err) => {
+        console.error('Error creating loan request:', err);
+        let errorMessage = 'Failed to create loan request. Please try again.';
+        
+        if (err.message) {
+          errorMessage = err.message;
+        } else if (err.detail) {
+          errorMessage = err.detail;
+        } else if (typeof err === 'string') {
+          errorMessage = err;
+        }
+        
+        setError(errorMessage);
       }
-      
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   if (loading && !stats.groups.length) {
@@ -805,10 +805,17 @@ function BillCollectorDashboard({ user, onLogout }) {
                   </button>
                   <button
                     type="submit"
-                    disabled={loading}
-                    className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
+                    disabled={isSubmittingCollection}
+                    className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white flex items-center ${
+                      isSubmittingCollection 
+                        ? 'bg-blue-400 cursor-not-allowed' 
+                        : 'bg-blue-600 hover:bg-blue-700'
+                    }`}
                   >
-                    {loading ? 'Creating...' : 'Create Collection'}
+                    {isSubmittingCollection && (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    )}
+                    {isSubmittingCollection ? 'Creating...' : 'Create Collection'}
                   </button>
                 </div>
               </form>
@@ -1000,10 +1007,17 @@ function BillCollectorDashboard({ user, onLogout }) {
                   </button>
                   <button
                     type="submit"
-                    disabled={loading}
-                    className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
+                    disabled={isSubmittingLoan}
+                    className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white flex items-center ${
+                      isSubmittingLoan 
+                        ? 'bg-blue-400 cursor-not-allowed' 
+                        : 'bg-blue-600 hover:bg-blue-700'
+                    }`}
                   >
-                    {loading ? 'Creating...' : 'Create Loan Request'}
+                    {isSubmittingLoan && (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    )}
+                    {isSubmittingLoan ? 'Creating...' : 'Create Loan Request'}
                   </button>
                 </div>
               </form>
