@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
   FaUsers, 
   FaUserPlus, 
@@ -66,12 +66,35 @@ function TeamLeaderDashboard({ user, onLogout }) {
     ifsc_code: '',
     // File upload
     aadhar_document_file: null,
-    bank_passbook_file: null
+    aadhar_document_path: "",
+    bank_passbook_file: null,
+    bank_passbook_path: ""
   });
   
   // Add state for password visibility, field errors, and form steps
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
+  // Add refs for file inputs
+  const aadharFileRef = useRef(null);
+  const bankPassbookFileRef = useRef(null);
+  
+  // Add refs to store file state for validation
+  const aadharFileStateRef = useRef(null);
+  const bankPassbookFileStateRef = useRef(null);
+  
+  // Reset file inputs when files are cleared
+  useEffect(() => {
+    if (!newMember.aadhar_document_file && aadharFileRef.current) {
+      aadharFileRef.current.value = '';
+    }
+  }, [newMember.aadhar_document_file]);
+  
+  useEffect(() => {
+    if (!newMember.bank_passbook_file && bankPassbookFileRef.current) {
+      bankPassbookFileRef.current.value = '';
+    }
+  }, [newMember.bank_passbook_file]);
   const [fieldErrors, setFieldErrors] = useState({});
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -267,8 +290,13 @@ function TeamLeaderDashboard({ user, onLogout }) {
       bank_branch: '',
       ifsc_code: '',
       aadhar_document_file: null,
-      bank_passbook_file: null
+      aadhar_document_path: "",
+      bank_passbook_file: null,
+      bank_passbook_path: ""
     });
+    // Clear refs for validation
+    aadharFileStateRef.current = null;
+    bankPassbookFileStateRef.current = null;
     setFieldErrors({});
     setCurrentStep(1);
     setIsSubmitting(false);
@@ -1228,9 +1256,9 @@ function TeamLeaderDashboard({ user, onLogout }) {
                 </p>
               </div>
               <form onSubmit={handleAddMember} className="space-y-4">
-                {/* User Details Section */}
+                {/* User Information Section */}
                 <div className="border-b border-gray-200 pb-4">
-                  <h4 className="text-md font-medium text-gray-900 mb-3">User Account Details</h4>
+                  <h4 className="text-md font-medium text-gray-900 mb-3">User Information</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Username *</label>
@@ -1348,9 +1376,9 @@ function TeamLeaderDashboard({ user, onLogout }) {
                   </div>
                 </div>
 
-                {/* Banking Details Section */}
+                {/* Documentation Section */}
                 <div className="border-b border-gray-200 pb-4">
-                  <h4 className="text-md font-medium text-gray-900 mb-3">Banking Details</h4>
+                  <h4 className="text-md font-medium text-gray-900 mb-3">Documentation</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Aadhar ID</label>
@@ -1368,6 +1396,145 @@ function TeamLeaderDashboard({ user, onLogout }) {
                         <div className="mt-1 text-xs text-red-600">{fieldErrors.aadhar_id}</div>
                       )}
                     </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Aadhar Document *</label>
+                      <input
+                        type="file"
+                        ref={aadharFileRef}
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            setNewMember({
+                              ...newMember, 
+                              aadhar_document_path: file.name,
+                              aadhar_document_file: file
+                            });
+                            // Update ref for validation
+                            aadharFileStateRef.current = file;
+                            // Clear error when file is selected
+                            if (fieldErrors.aadhar_document) {
+                              setFieldErrors({...fieldErrors, aadhar_document: null});
+                            }
+                          } else {
+                            // If no file selected, clear both file and path
+                            setNewMember({
+                              ...newMember, 
+                              aadhar_document_path: "",
+                              aadhar_document_file: null
+                            });
+                            // Update ref for validation
+                            aadharFileStateRef.current = null;
+                          }
+                        }}
+                        className={`mt-1 block w-full border rounded-md px-3 py-2 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 ${
+                          fieldErrors.aadhar_document ? 'border-red-500' : 'border-gray-300'
+                        }`}
+                        accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                        required
+                      />
+                      {newMember.aadhar_document_file && (
+                        <div className="mt-2 flex items-center gap-2">
+                          <div className="text-xs text-green-600">
+                            ✓ File selected: {newMember.aadhar_document_file.name}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setNewMember({
+                                ...newMember,
+                                aadhar_document_file: null,
+                                aadhar_document_path: ""
+                              });
+                              // Clear ref for validation
+                              aadharFileStateRef.current = null;
+                              // Clear the file input
+                              if (aadharFileRef.current) {
+                                aadharFileRef.current.value = '';
+                              }
+                            }}
+                            className="text-xs text-red-600 hover:text-red-800 underline"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      )}
+                      {fieldErrors.aadhar_document && (
+                        <div className="mt-1 text-xs text-red-600">{fieldErrors.aadhar_document}</div>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Bank Passbook *</label>
+                      <input
+                        type="file"
+                        ref={bankPassbookFileRef}
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            setNewMember({
+                              ...newMember, 
+                              bank_passbook_path: file.name,
+                              bank_passbook_file: file
+                            });
+                            // Update ref for validation
+                            bankPassbookFileStateRef.current = file;
+                            // Clear error when file is selected
+                            if (fieldErrors.bank_passbook) {
+                              setFieldErrors({...fieldErrors, bank_passbook: null});
+                            }
+                          } else {
+                            // If no file selected, clear both file and path
+                            setNewMember({
+                              ...newMember, 
+                              bank_passbook_path: "",
+                              bank_passbook_file: null
+                            });
+                            // Update ref for validation
+                            bankPassbookFileStateRef.current = null;
+                          }
+                        }}
+                        className={`mt-1 block w-full border rounded-md px-3 py-2 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 ${
+                          fieldErrors.bank_passbook ? 'border-red-500' : 'border-gray-300'
+                        }`}
+                        accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                        required
+                      />
+                      {newMember.bank_passbook_file && (
+                        <div className="mt-2 flex items-center gap-2">
+                          <div className="text-xs text-green-600">
+                            ✓ File selected: {newMember.bank_passbook_file.name}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setNewMember({
+                                ...newMember,
+                                bank_passbook_file: null,
+                                bank_passbook_path: ""
+                              });
+                              // Clear ref for validation
+                              bankPassbookFileStateRef.current = null;
+                              // Clear the file input
+                              if (bankPassbookFileRef.current) {
+                                bankPassbookFileRef.current.value = '';
+                              }
+                            }}
+                            className="text-xs text-red-600 hover:text-red-800 underline"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      )}
+                      {fieldErrors.bank_passbook && (
+                        <div className="mt-1 text-xs text-red-600">{fieldErrors.bank_passbook}</div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Banking Information Section */}
+                <div className="border-b border-gray-200 pb-4">
+                  <h4 className="text-md font-medium text-gray-900 mb-3">Banking Information</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Bank Account Number</label>
                       <input
@@ -1411,92 +1578,6 @@ function TeamLeaderDashboard({ user, onLogout }) {
                       />
                       {fieldErrors.ifsc_code && (
                         <div className="mt-1 text-xs text-red-600">{fieldErrors.ifsc_code}</div>
-                      )}
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Aadhar Document *</label>
-                      <input
-                        type="file"
-                        onChange={(e) => {
-                          const file = e.target.files[0];
-                          if (file) {
-                            setNewMember({...newMember, aadhar_document_file: file});
-                            // Clear error when file is selected
-                            if (fieldErrors.aadhar_document) {
-                              setFieldErrors({...fieldErrors, aadhar_document: null});
-                            }
-                          }
-                        }}
-                        className={`mt-1 block w-full border rounded-md px-3 py-2 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 ${
-                          fieldErrors.aadhar_document ? 'border-red-500' : 'border-gray-300'
-                        }`}
-                        accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                        required
-                      />
-                      {fieldErrors.aadhar_document && (
-                        <div className="mt-1 text-xs text-red-600">{fieldErrors.aadhar_document}</div>
-                      )}
-                      {newMember.aadhar_document_file && (
-                        <div className="mt-2 flex items-center gap-2">
-                          <div className="text-xs text-green-600">
-                            ✓ File selected: {newMember.aadhar_document_file.name}
-                    </div>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setNewMember({
-                                ...newMember,
-                                aadhar_document_file: null
-                              });
-                            }}
-                            className="text-xs text-red-600 hover:text-red-800 underline"
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Bank Passbook *</label>
-                      <input
-                        type="file"
-                        onChange={(e) => {
-                          const file = e.target.files[0];
-                          if (file) {
-                            setNewMember({...newMember, bank_passbook_file: file});
-                            // Clear error when file is selected
-                            if (fieldErrors.bank_passbook) {
-                              setFieldErrors({...fieldErrors, bank_passbook: null});
-                            }
-                          }
-                        }}
-                        className={`mt-1 block w-full border rounded-md px-3 py-2 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 ${
-                          fieldErrors.bank_passbook ? 'border-red-500' : 'border-gray-300'
-                        }`}
-                        accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                        required
-                      />
-                      {fieldErrors.bank_passbook && (
-                        <div className="mt-1 text-xs text-red-600">{fieldErrors.bank_passbook}</div>
-                      )}
-                      {newMember.bank_passbook_file && (
-                        <div className="mt-2 flex items-center gap-2">
-                          <div className="text-xs text-green-600">
-                            ✓ File selected: {newMember.bank_passbook_file.name}
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setNewMember({
-                                ...newMember,
-                                bank_passbook_file: null
-                              });
-                            }}
-                            className="text-xs text-red-600 hover:text-red-800 underline"
-                          >
-                            Remove
-                          </button>
-                        </div>
                       )}
                     </div>
                   </div>

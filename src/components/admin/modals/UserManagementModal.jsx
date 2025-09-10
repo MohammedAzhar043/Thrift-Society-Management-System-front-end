@@ -729,17 +729,6 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    value={userForm.full_name}
-                    onChange={(e) => setUserForm({...userForm, full_name: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Password *
                   </label>
                   <div className="relative">
@@ -801,6 +790,17 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
                       {userForm.password === userForm.confirm_password ? '✓ Passwords match' : '✗ Passwords do not match'}
                     </div>
                   )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    value={userForm.full_name}
+                    onChange={(e) => setUserForm({...userForm, full_name: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
                 </div>
                 </div>
               </div>
