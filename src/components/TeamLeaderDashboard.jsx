@@ -51,6 +51,7 @@ function TeamLeaderDashboard({ user, onLogout }) {
     monthly_income: '',
     nominee_name: '',
     nominee_phone: '',
+    nominee_relation: '',
     // User details
     username: '',
     email: '',
@@ -64,13 +65,16 @@ function TeamLeaderDashboard({ user, onLogout }) {
     bank_branch: '',
     ifsc_code: '',
     // File upload
-    aadhar_document_file: null
+    aadhar_document_file: null,
+    bank_passbook_file: null
   });
   
-  // Add state for password visibility and field errors
+  // Add state for password visibility, field errors, and form steps
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
+  const [currentStep, setCurrentStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [newLoanRequest, setNewLoanRequest] = useState({
     requested_amount: '',
@@ -137,6 +141,11 @@ function TeamLeaderDashboard({ user, onLogout }) {
       errors.aadhar_document = "Aadhar document is required";
     }
     
+    // Bank passbook is required
+    if (!newMember.bank_passbook_file) {
+      errors.bank_passbook = "Bank passbook is required";
+    }
+    
     // Aadhar ID validation
     if (newMember.aadhar_id.trim() && !/^\d{12}$/.test(newMember.aadhar_id.replace(/\s/g, ''))) {
       errors.aadhar_id = "Aadhar ID must be exactly 12 digits";
@@ -154,6 +163,115 @@ function TeamLeaderDashboard({ user, onLogout }) {
     
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
+  };
+
+  // Form step validation
+  const validateStep = (step) => {
+    const errors = {};
+    
+    switch (step) {
+      case 1: // Basic Information
+        if (!newMember.username.trim()) {
+          errors.username = "Username is required";
+        } else if (newMember.username.length < 3) {
+          errors.username = "Username must be at least 3 characters";
+        }
+        
+        if (!newMember.email.trim()) {
+          errors.email = "Email is required";
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newMember.email)) {
+          errors.email = "Please enter a valid email address";
+        }
+        
+        if (!newMember.password.trim()) {
+          errors.password = "Password is required";
+        } else {
+          const passwordError = validatePassword(newMember.password);
+          if (passwordError) {
+            errors.password = passwordError;
+          }
+        }
+        
+        if (!newMember.confirm_password) {
+          errors.confirm_password = "Please confirm your password";
+        } else if (newMember.password !== newMember.confirm_password) {
+          errors.confirm_password = "Passwords do not match";
+        }
+        
+        if (!newMember.full_name.trim()) {
+          errors.full_name = "Full name is required";
+        }
+        break;
+        
+      case 2: // Banking Details
+        if (newMember.aadhar_id.trim() && !/^\d{12}$/.test(newMember.aadhar_id.replace(/\s/g, ''))) {
+          errors.aadhar_id = "Aadhar ID must be exactly 12 digits";
+        }
+        
+        if (newMember.ifsc_code.trim() && !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(newMember.ifsc_code)) {
+          errors.ifsc_code = "IFSC code must be 11 characters (e.g., SBIN0001234)";
+        }
+        
+        // Aadhar document is required
+        if (!newMember.aadhar_document_file) {
+          errors.aadhar_document = "Aadhar document is required";
+        }
+        
+        // Bank passbook is required
+        if (!newMember.bank_passbook_file) {
+          errors.bank_passbook = "Bank passbook is required";
+        }
+        break;
+        
+      case 3: // Member & Nominee Information
+        if (!newMember.joined_date.trim()) {
+          errors.joined_date = "Join date is required";
+        }
+        
+        if (newMember.nominee_phone.trim() && !/^[6-9]\d{9}$/.test(newMember.nominee_phone.replace(/\s/g, ''))) {
+          errors.nominee_phone = "Nominee phone must be a valid 10-digit Indian mobile number";
+        }
+        break;
+    }
+    
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  // Form navigation functions
+  const nextStep = () => {
+    if (validateStep(currentStep)) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const prevStep = () => {
+    setCurrentStep(currentStep - 1);
+  };
+
+  const resetForm = () => {
+    setNewMember({
+      joined_date: '',
+      monthly_income: '',
+      nominee_name: '',
+      nominee_phone: '',
+      nominee_relation: '',
+      username: '',
+      email: '',
+      password: '',
+      confirm_password: '',
+      full_name: '',
+      aadhar_id: '',
+      bank_account_number: '',
+      bank_name: '',
+      bank_branch: '',
+      ifsc_code: '',
+      aadhar_document_file: null,
+      bank_passbook_file: null
+    });
+    setFieldErrors({});
+    setCurrentStep(1);
+    setIsSubmitting(false);
   };
 
   const loadDashboardData = async () => {
@@ -255,10 +373,10 @@ function TeamLeaderDashboard({ user, onLogout }) {
     }
     
     try {
-      setIsCreatingMember(true);
+      setIsSubmitting(true);
       setError(null); // Clear any previous errors
       
-      // Create member data with user details
+      // Create member data with user details (without file paths)
       const memberData = {
         group_id: assignedGroups[0]?.id, // Add the required group_id
         member_code: `M${Date.now().toString().slice(-4)}`, // Generate unique member code
@@ -266,6 +384,7 @@ function TeamLeaderDashboard({ user, onLogout }) {
         monthly_income: newMember.monthly_income ? parseFloat(newMember.monthly_income) : null,
         nominee_name: newMember.nominee_name?.trim() || null,
         nominee_phone: newMember.nominee_phone?.trim() || null,
+        nominee_relation: newMember.nominee_relation?.trim() || null,
         // User details
         username: newMember.username.trim(),
         email: newMember.email.trim(),
@@ -277,42 +396,54 @@ function TeamLeaderDashboard({ user, onLogout }) {
         bank_name: newMember.bank_name?.trim() || null,
         bank_branch: newMember.bank_branch?.trim() || null,
         ifsc_code: newMember.ifsc_code?.trim() || null,
-        // File upload - handle properly
-        aadhar_document_file: newMember.aadhar_document_file ? "pending_upload" : null
+        // File paths - set to null initially, will be updated after upload
+        bank_passbook_path: null,
+        aadhar_document_path: null
       };
       
-      await apiService.requestAddMember(assignedGroups[0]?.id, memberData);
+      // Create member first
+      const result = await apiService.requestAddMember(assignedGroups[0]?.id, memberData);
+      
+      // Upload documents if provided
+      let documentsUploaded = 0;
+      let totalDocuments = 0;
+      
+      if (newMember.aadhar_document_file) {
+        totalDocuments++;
+        try {
+          await apiService.uploadUserDocument(result.user_id, newMember.aadhar_document_file);
+          documentsUploaded++;
+        } catch (error) {
+          console.error("Failed to upload Aadhar document:", error);
+          setError("Aadhar document upload failed. Please upload manually.");
+          return;
+        }
+      }
+      
+      if (newMember.bank_passbook_file) {
+        totalDocuments++;
+        try {
+          await apiService.uploadBankPassbook(result.user_id, newMember.bank_passbook_file);
+          documentsUploaded++;
+        } catch (error) {
+          console.error("Failed to upload bank passbook:", error);
+          setError("Bank passbook upload failed. Please upload manually.");
+          return;
+        }
+      }
       
       // Success - close modal and refresh data
       setShowAddMemberModal(false);
-      setNewMember({
-        joined_date: '',
-        // Member Information
-        monthly_income: '',
-        nominee_name: '',
-        nominee_phone: '',
-        // User details
-        username: '',
-        email: '',
-        password: '',
-        confirm_password: '',
-        full_name: '',
-        // Banking details
-        aadhar_id: '',
-        bank_account_number: '',
-        bank_name: '',
-        bank_branch: '',
-        ifsc_code: '',
-        // File upload
-        aadhar_document_file: null
-      });
-      setFieldErrors({});
+      resetForm();
       
       // Refresh group data to show new member
       await loadGroupData(assignedGroups[0]?.id);
       
       // Show success message
-      setSuccessMessage('Member has been added successfully with user account and is now pending admin approval.');
+      const successMessage = documentsUploaded > 0 
+        ? `Member has been added successfully with ${documentsUploaded} document(s) uploaded and is now pending admin approval.`
+        : 'Member has been added successfully with user account and is now pending admin approval.';
+      setSuccessMessage(successMessage);
       setError(null); // Clear any previous errors
     } catch (err) {
       console.error('Error adding member:', err);
@@ -328,7 +459,7 @@ function TeamLeaderDashboard({ user, onLogout }) {
         setError('Failed to add member: ' + err.message);
       }
     } finally {
-      setIsCreatingMember(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -1325,6 +1456,49 @@ function TeamLeaderDashboard({ user, onLogout }) {
                         </div>
                       )}
                     </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Bank Passbook *</label>
+                      <input
+                        type="file"
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            setNewMember({...newMember, bank_passbook_file: file});
+                            // Clear error when file is selected
+                            if (fieldErrors.bank_passbook) {
+                              setFieldErrors({...fieldErrors, bank_passbook: null});
+                            }
+                          }
+                        }}
+                        className={`mt-1 block w-full border rounded-md px-3 py-2 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 ${
+                          fieldErrors.bank_passbook ? 'border-red-500' : 'border-gray-300'
+                        }`}
+                        accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                        required
+                      />
+                      {fieldErrors.bank_passbook && (
+                        <div className="mt-1 text-xs text-red-600">{fieldErrors.bank_passbook}</div>
+                      )}
+                      {newMember.bank_passbook_file && (
+                        <div className="mt-2 flex items-center gap-2">
+                          <div className="text-xs text-green-600">
+                            ✓ File selected: {newMember.bank_passbook_file.name}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setNewMember({
+                                ...newMember,
+                                bank_passbook_file: null
+                              });
+                            }}
+                            className="text-xs text-red-600 hover:text-red-800 underline"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -1382,6 +1556,21 @@ function TeamLeaderDashboard({ user, onLogout }) {
                         <div className="mt-1 text-xs text-red-600">{fieldErrors.nominee_phone}</div>
                       )}
                     </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Nominee Relation</label>
+                      <select
+                        value={newMember.nominee_relation}
+                        onChange={(e) => setNewMember({...newMember, nominee_relation: e.target.value})}
+                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                      >
+                        <option value="">Select relationship</option>
+                        <option value="spouse">Spouse</option>
+                        <option value="parent">Parent</option>
+                        <option value="sibling">Sibling</option>
+                        <option value="child">Child</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
                 
@@ -1392,28 +1581,7 @@ function TeamLeaderDashboard({ user, onLogout }) {
                     type="button"
                     onClick={() => {
                       setShowAddMemberModal(false);
-                      setNewMember({
-                        joined_date: '',
-                        // Member Information
-                        monthly_income: '',
-                        nominee_name: '',
-                        nominee_phone: '',
-                        // User details
-                        username: '',
-                        email: '',
-                        password: '',
-                        confirm_password: '',
-                        full_name: '',
-                        // Banking details
-                        aadhar_id: '',
-                        bank_account_number: '',
-                        bank_name: '',
-                        bank_branch: '',
-                        ifsc_code: '',
-                        // File upload
-                        aadhar_document_file: null
-                      });
-                      setFieldErrors({});
+                      resetForm();
                     }}
                     className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                   >
@@ -1421,14 +1589,14 @@ function TeamLeaderDashboard({ user, onLogout }) {
                   </button>
                   <button
                     type="submit"
-                    disabled={isCreatingMember}
+                    disabled={isSubmitting}
                     className={`px-4 py-2 text-white rounded-md ${
-                                              isCreatingMember 
+                                              isSubmitting 
                           ? 'bg-blue-400 cursor-not-allowed' 
                           : 'bg-blue-600 hover:bg-blue-700'
                     }`}
                   >
-                    {isCreatingMember ? 'Creating...' : 'Create Member'}
+                    {isSubmitting ? 'Creating...' : 'Create Member'}
                   </button>
                 </div>
               </form>
