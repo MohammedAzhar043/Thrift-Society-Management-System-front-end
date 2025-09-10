@@ -27,7 +27,6 @@ function TeamLeaderDashboard({ user, onLogout }) {
   
   // Data states
   const [assignedGroups, setAssignedGroups] = useState([]);
-  const [selectedGroup, setSelectedGroup] = useState(null);
   const [groupMembers, setGroupMembers] = useState([]);
   const [pendingMembers, setPendingMembers] = useState([]);
   const [groupLoans, setGroupLoans] = useState([]);
@@ -50,8 +49,8 @@ function TeamLeaderDashboard({ user, onLogout }) {
     joined_date: '',
     // Member Information
     monthly_income: '',
-    emergency_contact: '',
-    emergency_phone: '',
+    nominee_name: '',
+    nominee_phone: '',
     // User details
     username: '',
     email: '',
@@ -149,8 +148,8 @@ function TeamLeaderDashboard({ user, onLogout }) {
     }
     
     // Emergency phone validation
-    if (newMember.emergency_phone.trim() && !/^[6-9]\d{9}$/.test(newMember.emergency_phone.replace(/\s/g, ''))) {
-      errors.emergency_phone = "Emergency phone must be a valid 10-digit Indian mobile number";
+    if (newMember.nominee_phone.trim() && !/^[6-9]\d{9}$/.test(newMember.nominee_phone.replace(/\s/g, ''))) {
+      errors.nominee_phone = "Nominee phone must be a valid 10-digit Indian mobile number";
     }
     
     setFieldErrors(errors);
@@ -168,7 +167,6 @@ function TeamLeaderDashboard({ user, onLogout }) {
       setAssignedGroups(groups);
       
       if (groups.length > 0) {
-        setSelectedGroup(groups[0]);
         await loadGroupData(groups[0].id);
       } else {
         console.warn('No assigned groups found for team leader');
@@ -243,11 +241,6 @@ function TeamLeaderDashboard({ user, onLogout }) {
   };
 
 
-  const handleGroupChange = async (groupId) => {
-    const group = assignedGroups.find(g => g.id === parseInt(groupId));
-    setSelectedGroup(group);
-    await loadGroupData(group.id);
-  };
 
   const handleAddMember = async (e) => {
     e.preventDefault();
@@ -267,12 +260,12 @@ function TeamLeaderDashboard({ user, onLogout }) {
       
       // Create member data with user details
       const memberData = {
-        group_id: selectedGroup.id, // Add the required group_id
+        group_id: assignedGroups[0]?.id, // Add the required group_id
         member_code: `M${Date.now().toString().slice(-4)}`, // Generate unique member code
         joined_date: newMember.joined_date,
         monthly_income: newMember.monthly_income ? parseFloat(newMember.monthly_income) : null,
-        emergency_contact: newMember.emergency_contact?.trim() || null,
-        emergency_phone: newMember.emergency_phone?.trim() || null,
+        nominee_name: newMember.nominee_name?.trim() || null,
+        nominee_phone: newMember.nominee_phone?.trim() || null,
         // User details
         username: newMember.username.trim(),
         email: newMember.email.trim(),
@@ -288,7 +281,7 @@ function TeamLeaderDashboard({ user, onLogout }) {
         aadhar_document_file: newMember.aadhar_document_file ? "pending_upload" : null
       };
       
-      await apiService.requestAddMember(selectedGroup.id, memberData);
+      await apiService.requestAddMember(assignedGroups[0]?.id, memberData);
       
       // Success - close modal and refresh data
       setShowAddMemberModal(false);
@@ -296,8 +289,8 @@ function TeamLeaderDashboard({ user, onLogout }) {
         joined_date: '',
         // Member Information
         monthly_income: '',
-        emergency_contact: '',
-        emergency_phone: '',
+        nominee_name: '',
+        nominee_phone: '',
         // User details
         username: '',
         email: '',
@@ -316,7 +309,7 @@ function TeamLeaderDashboard({ user, onLogout }) {
       setFieldErrors({});
       
       // Refresh group data to show new member
-      await loadGroupData(selectedGroup.id);
+      await loadGroupData(assignedGroups[0]?.id);
       
       // Show success message
       setSuccessMessage('Member has been added successfully with user account and is now pending admin approval.');
@@ -344,7 +337,7 @@ function TeamLeaderDashboard({ user, onLogout }) {
     try {
       const loanRequestData = {
         ...newLoanRequest,
-        group_id: selectedGroup.id
+        group_id: assignedGroups[0]?.id
       };
       
       await apiService.createLoanRequest(loanRequestData);
@@ -355,7 +348,7 @@ function TeamLeaderDashboard({ user, onLogout }) {
         term_months: '',
         member_id: ''
       });
-      await loadGroupData(selectedGroup.id);
+      await loadGroupData(assignedGroups[0]?.id);
       setSuccessMessage('Loan request created successfully! The request is now pending admin approval.');
     } catch (err) {
       setError('Failed to create loan request: ' + err.message);
@@ -439,19 +432,6 @@ function TeamLeaderDashboard({ user, onLogout }) {
               <p className="text-sm text-gray-600">Welcome back, {user?.full_name || user?.username}</p>
             </div>
             <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
-              {assignedGroups.length > 0 && (
-                <select
-                  value={selectedGroup?.id || ''}
-                  onChange={(e) => handleGroupChange(e.target.value)}
-                  className="w-full sm:w-auto border border-gray-300 rounded-md px-3 py-2 text-sm"
-                >
-                  {assignedGroups.map(group => (
-                    <option key={group.id} value={group.id}>
-                      {group.name}
-                    </option>
-                  ))}
-                </select>
-              )}
               <button
                 onClick={onLogout}
                 className="w-full sm:w-auto flex items-center justify-center text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md hover:bg-gray-100"
@@ -575,20 +555,20 @@ function TeamLeaderDashboard({ user, onLogout }) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   <div className="bg-gray-50 rounded-lg p-6">
                     <h3 className="text-lg font-medium text-gray-900 mb-4">Group Information</h3>
-                    {selectedGroup && (
+                    {assignedGroups.length > 0 && (
                       <div className="space-y-3">
                         <div className="flex justify-between">
                           <span className="text-gray-600">Group Name:</span>
-                          <span className="font-medium">{selectedGroup.name}</span>
+                          <span className="font-medium">{assignedGroups[0].name}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">Location:</span>
-                          <span className="font-medium">{selectedGroup.location}</span>
+                          <span className="font-medium">{assignedGroups[0].location}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">Status:</span>
-                          <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(selectedGroup.status)}`}>
-                            {selectedGroup.status}
+                          <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(assignedGroups[0].status)}`}>
+                            {assignedGroups[0].status}
                           </span>
                         </div>
                         <div className="flex justify-between">
@@ -642,8 +622,8 @@ function TeamLeaderDashboard({ user, onLogout }) {
                         joined_date: '',
                         // Member Information
                         monthly_income: '',
-                        emergency_contact: '',
-                        emergency_phone: '',
+                        nominee_name: '',
+                        nominee_phone: '',
                         // User details
                         username: '',
                         email: '',
@@ -1378,28 +1358,28 @@ function TeamLeaderDashboard({ user, onLogout }) {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Emergency Contact</label>
+                      <label className="block text-sm font-medium text-gray-700">Nominee Name</label>
                       <input
                         type="text"
-                        value={newMember.emergency_contact}
-                        onChange={(e) => setNewMember({...newMember, emergency_contact: e.target.value})}
+                        value={newMember.nominee_name}
+                        onChange={(e) => setNewMember({...newMember, nominee_name: e.target.value})}
                         className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                        placeholder="Emergency contact name"
+                        placeholder="Nominee name"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Emergency Phone</label>
+                      <label className="block text-sm font-medium text-gray-700">Nominee Phone</label>
                       <input
                         type="text"
-                        value={newMember.emergency_phone}
-                        onChange={(e) => setNewMember({...newMember, emergency_phone: e.target.value})}
+                        value={newMember.nominee_phone}
+                        onChange={(e) => setNewMember({...newMember, nominee_phone: e.target.value})}
                         className={`mt-1 block w-full border rounded-md px-3 py-2 ${
-                          fieldErrors.emergency_phone ? 'border-red-500' : 'border-gray-300'
+                          fieldErrors.nominee_phone ? 'border-red-500' : 'border-gray-300'
                         }`}
-                        placeholder="Emergency contact phone"
+                        placeholder="Nominee phone number"
                       />
-                      {fieldErrors.emergency_phone && (
-                        <div className="mt-1 text-xs text-red-600">{fieldErrors.emergency_phone}</div>
+                      {fieldErrors.nominee_phone && (
+                        <div className="mt-1 text-xs text-red-600">{fieldErrors.nominee_phone}</div>
                       )}
                     </div>
                   </div>
@@ -1416,8 +1396,8 @@ function TeamLeaderDashboard({ user, onLogout }) {
                         joined_date: '',
                         // Member Information
                         monthly_income: '',
-                        emergency_contact: '',
-                        emergency_phone: '',
+                        nominee_name: '',
+                        nominee_phone: '',
                         // User details
                         username: '',
                         email: '',
@@ -1566,12 +1546,12 @@ function TeamLeaderDashboard({ user, onLogout }) {
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Emergency Contact:</span>
-                  <span className="font-medium">{selectedMember.emergency_contact || 'N/A'}</span>
+                  <span className="text-gray-600">Nominee Name:</span>
+                  <span className="font-medium">{selectedMember.nominee_name || 'N/A'}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Emergency Phone:</span>
-                  <span className="font-medium">{selectedMember.emergency_phone || 'N/A'}</span>
+                  <span className="text-gray-600">Nominee Phone:</span>
+                  <span className="font-medium">{selectedMember.nominee_phone || 'N/A'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Status:</span>
