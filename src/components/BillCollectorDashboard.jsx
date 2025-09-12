@@ -68,47 +68,68 @@ function BillCollectorDashboard({ user, onLogout }) {
   }, []);
 
   // Load group members when group is selected
-  const loadGroupMembers = async (groupId) => {
+  const loadGroupMembers = async (groupId, forLoanRequest = false) => {
     try {
       setLoadingMembers(true);
-      console.log('Loading members for group ID:', groupId);
+      console.log('Loading members for group ID:', groupId, 'forLoanRequest:', forLoanRequest);
       
       // Load both members and loans for the group
       const [members, loans] = await Promise.all([
-        apiService.getCollectorGroupMembers(groupId),
+        apiService.getCollectorGroupMembers(groupId, forLoanRequest ? 'ACTIVE' : null),
         apiService.getCollectorGroupLoans(groupId)
       ]);
       
       console.log('Loaded members:', members);
       console.log('Loaded loans:', loans);
       
-      // Filter members who have active loans
-      const activeLoanMemberIds = new Set(
-        loans
-          .filter(loan => loan.status === 'ACTIVE' || loan.status === 'DISBURSED' || loan.status === 'APPROVED')
-          .map(loan => loan.member_id)
-      );
+      let filteredMembers;
       
-      // Filter members to only include those with active loans
-      const membersWithLoans = members.filter(member => activeLoanMemberIds.has(member.id));
+      if (forLoanRequest) {
+        // For loan requests, use all members (already filtered by ACTIVE status from API)
+        filteredMembers = members;
+        console.log('Active members for loan request:', filteredMembers);
+      } else {
+        // For collections, filter members who have active loans
+        const activeLoanMemberIds = new Set(
+          loans
+            .filter(loan => loan.status === 'ACTIVE' || loan.status === 'DISBURSED' || loan.status === 'APPROVED')
+            .map(loan => loan.member_id)
+        );
+        
+        // Filter members to only include those with active loans
+        filteredMembers = members.filter(member => activeLoanMemberIds.has(member.id));
+        console.log('Members with active loans:', filteredMembers);
+      }
       
-      console.log('Members with active loans:', membersWithLoans);
-      
-      // Add EMI calculation for each member with loan
-      const membersWithEMI = membersWithLoans.map(member => {
+      // Add EMI calculation for each member
+      const membersWithEMI = await Promise.all(filteredMembers.map(async (member) => {
         // Find the member's active loan
         const memberLoan = loans.find(loan => 
           loan.member_id === member.id && 
           (loan.status === 'ACTIVE' || loan.status === 'DISBURSED' || loan.status === 'APPROVED')
         );
         
+        // Fetch payment history for this member's loan
+        let paymentsMade = 0;
+        if (memberLoan) {
+          try {
+            const paymentData = await apiService.getLoanPayments(memberLoan.id);
+            paymentsMade = paymentData.total_payments || 0;
+          } catch (error) {
+            console.warn(`Failed to fetch payments for loan ${memberLoan.id}:`, error);
+            paymentsMade = 0;
+          }
+        }
+        
         return {
           ...member,
           current_emi_due: calculateEMIDue(member, memberLoan),
           carry_forward_amount: member.carry_forward_amount || 0,
+          remaining_loan_amount: calculateRemainingLoanAmount({...member, payments_made: paymentsMade}, memberLoan),
+          payments_made: paymentsMade,
           loan_info: memberLoan
         };
-      });
+      }));
       
       console.log('Members with EMI calculation:', membersWithEMI);
       setGroupMembers(membersWithEMI);
@@ -155,38 +176,66 @@ function BillCollectorDashboard({ user, onLogout }) {
     }
   };
 
-  // Calculate EMI due for a member based on the logic provided
+  // Calculate EMI due for a member using correct compound interest formula
   const calculateEMIDue = (member, loanInfo) => {
     // If no loan info, return 0
     if (!loanInfo) {
-      return '0.00';
+      return 0;
     }
     
-    // Calculate EMI based on loan amount and term
-    // This is a simplified calculation - in a real system, this would come from the backend
     const loanAmount = loanInfo.loan_amount || 0;
     const termMonths = loanInfo.term_months || 12;
-    const interestRate = 0.02; // 2% monthly interest rate
+    const annualInterestRate = loanInfo.interest_rate || 12.0; // Use actual loan interest rate
     
-    // Calculate monthly EMI using simple interest formula
-    // EMI = (Principal + Interest) / Number of months
-    const totalInterest = loanAmount * interestRate * termMonths;
-    const monthlyEMI = (loanAmount + totalInterest) / termMonths;
+    // Convert annual rate to monthly rate
+    const monthlyRate = annualInterestRate / 100 / 12;
+    
+    // Calculate EMI using compound interest formula
+    // EMI = P × r × (1+r)^n / ((1+r)^n - 1)
+    const emi = loanAmount * monthlyRate * Math.pow(1 + monthlyRate, termMonths) / 
+                (Math.pow(1 + monthlyRate, termMonths) - 1);
     
     const carryForward = member.carry_forward_amount || 0;
     
-    // Calculate interest on carry-forward amount
-    const interestOnCarryForward = carryForward * interestRate;
+    // Calculate interest on carry-forward amount (monthly rate)
+    const interestOnCarryForward = carryForward * monthlyRate;
     
     // Total due = This month's EMI + Carry forward + Interest on carry forward
-    const totalDue = monthlyEMI + carryForward + interestOnCarryForward;
+    const totalDue = emi + carryForward + interestOnCarryForward;
     
-    return totalDue.toFixed(2);
+    return totalDue;
+  };
+
+  // Calculate remaining loan amount
+  const calculateRemainingLoanAmount = (member, loanInfo) => {
+    if (!loanInfo) {
+      return 0;
+    }
+    
+    const loanAmount = loanInfo.loan_amount || 0;
+    const termMonths = loanInfo.term_months || 12;
+    const annualInterestRate = loanInfo.interest_rate || 12.0;
+    const monthlyRate = annualInterestRate / 100 / 12;
+    
+    // Calculate EMI
+    const emi = loanAmount * monthlyRate * Math.pow(1 + monthlyRate, termMonths) / 
+                (Math.pow(1 + monthlyRate, termMonths) - 1);
+    
+    // Calculate total amount to be paid
+    const totalAmount = emi * termMonths;
+    
+    // Get payments made from member's payment history
+    const paymentsMade = member.payments_made || 0;
+    
+    // Calculate remaining amount
+    const remainingAmount = totalAmount - paymentsMade;
+    
+    return Math.max(0, remainingAmount);
   };
 
   // Calculate carry-forward amount after partial payment
   const calculateCarryForward = (member, amountPaid) => {
-    const totalDue = parseFloat(calculateEMIDue(member, member.loan_info));
+    const totalDue = calculateEMIDue(member, member.loan_info);
     const remaining = totalDue - amountPaid;
     return remaining > 0 ? remaining : 0;
   };
@@ -260,7 +309,7 @@ function BillCollectorDashboard({ user, onLogout }) {
       ...prev,
       collection_items: [
         ...prev.collection_items,
-        { member_id: '', amount: '', payment_type: 'principal' }
+        { member_id: '', amount: '', payment_type: 'principal', loan_id: null }
       ]
     }));
   };
@@ -277,9 +326,22 @@ function BillCollectorDashboard({ user, onLogout }) {
   const updateCollectionItem = (index, field, value) => {
     setCollectionForm(prev => ({
       ...prev,
-      collection_items: prev.collection_items.map((item, i) => 
-        i === index ? { ...item, [field]: value } : item
-      )
+      collection_items: prev.collection_items.map((item, i) => {
+        if (i === index) {
+          const updatedItem = { ...item, [field]: value };
+          
+          // If member_id is being updated, also set the loan_id
+          if (field === 'member_id') {
+            const selectedMember = getMemberById(value);
+            if (selectedMember && selectedMember.loan_info) {
+              updatedItem.loan_id = selectedMember.loan_info.id;
+            }
+          }
+          
+          return updatedItem;
+        }
+        return item;
+      })
     }));
   };
 
@@ -483,7 +545,7 @@ function BillCollectorDashboard({ user, onLogout }) {
                                 setCollectionForm(prev => ({ ...prev, group_id: group.id }));
                                 setShowCollectionModal(true);
                                 // Load group members when opening collection modal
-                                await loadGroupMembers(group.id);
+                                await loadGroupMembers(group.id, false);
                               }}
                               className="px-3 py-1 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
                             >
@@ -494,7 +556,7 @@ function BillCollectorDashboard({ user, onLogout }) {
                                 setSelectedGroup(group);
                                 setShowTransactionModal(true);
                                 // Load group members for transaction history display
-                                await loadGroupMembers(group.id);
+                                await loadGroupMembers(group.id, false);
                               }}
                               className="px-3 py-1 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
                             >
@@ -628,7 +690,7 @@ function BillCollectorDashboard({ user, onLogout }) {
                         const groupId = e.target.value;
                         setCollectionForm(prev => ({ ...prev, group_id: groupId }));
                         if (groupId) {
-                          loadGroupMembers(groupId);
+                          loadGroupMembers(groupId, false); // false for collections
                         } else {
                           setGroupMembers([]);
                         }
@@ -712,11 +774,16 @@ function BillCollectorDashboard({ user, onLogout }) {
                           </div>
                         </div>
                         
-                        {/* Hidden payment_type field for backend compatibility */}
+                        {/* Hidden fields for backend compatibility */}
                         <input
                           type="hidden"
                           value={item.payment_type || 'principal'}
                           onChange={(e) => updateCollectionItem(index, 'payment_type', e.target.value)}
+                        />
+                        <input
+                          type="hidden"
+                          value={item.loan_id || ''}
+                          onChange={(e) => updateCollectionItem(index, 'loan_id', e.target.value)}
                         />
                         
                         {/* Show due amount and remaining for selected member */}
@@ -749,28 +816,56 @@ function BillCollectorDashboard({ user, onLogout }) {
                         Loading members...
                       </div>
                     ) : groupMembers.length > 0 ? (
-                      <div className="space-y-2 max-h-40 overflow-y-auto">
+                      <div className="space-y-3 max-h-96 overflow-y-auto">
                         {groupMembers.map(member => (
-                          <div key={member.id} className="flex justify-between items-center text-sm">
-                            <div>
-                              <span className="text-gray-600 font-medium">
-                                {member.user?.full_name || member.member_code}
-                              </span>
-                              {member.loan_info && (
-                                <div className="text-xs text-gray-500">
-                                  Loan: ₹{member.loan_info.loan_amount?.toLocaleString() || 'N/A'}
+                          <div key={member.id} className="bg-white p-3 rounded-lg border border-gray-200">
+                            <div className="flex justify-between items-start">
+                              <div className="flex-1">
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="text-gray-800 font-semibold">
+                                    {member.user?.full_name || member.member_code}
+                                  </span>
+                                  <span className="text-xs text-gray-500">
+                                    {member.loan_info?.interest_rate || 12.0}% p.a.
+                                  </span>
                                 </div>
-                              )}
-                            </div>
-                            <div className="text-right">
-                              <span className="text-gray-900 font-medium">
-                                Due: ₹{member.current_emi_due || '0.00'}
-                              </span>
-                              {member.carry_forward_amount > 0 && (
-                                <span className="text-red-600 text-xs block">
-                                  Carry Forward: ₹{member.carry_forward_amount}
-                                </span>
-                              )}
+                                
+                                {member.loan_info && (
+                                  <div className="grid grid-cols-3 gap-2 text-xs text-gray-600">
+                                    <div>
+                                      <span className="font-medium">Principal:</span><br/>
+                                      {formatIndianCurrency(member.loan_info.loan_amount || 0)}
+                                    </div>
+                                    <div>
+                                      <span className="font-medium">Paid:</span><br/>
+                                      <span className="text-green-600 font-semibold">
+                                        {formatIndianCurrency(member.payments_made || 0)}
+                                      </span>
+                                    </div>
+                                    <div>
+                                      <span className="font-medium">Remaining:</span><br/>
+                                      <span className="text-orange-600 font-semibold">
+                                        {formatIndianCurrency(member.remaining_loan_amount || 0)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                              
+                              <div className="text-right ml-4">
+                                <div className="bg-blue-50 px-3 py-2 rounded-lg">
+                                  <div className="text-xs text-gray-600 mb-1">This Month Due</div>
+                                  <div className="text-lg font-bold text-blue-700">
+                                    {formatIndianCurrency(member.current_emi_due || 0)}
+                                  </div>
+                                </div>
+                                
+                                {member.carry_forward_amount > 0 && (
+                                  <div className="mt-2 text-xs text-red-600 bg-red-50 px-2 py-1 rounded">
+                                    Carry Forward: {formatIndianCurrency(member.carry_forward_amount)}
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           </div>
                         ))}
@@ -886,7 +981,7 @@ function BillCollectorDashboard({ user, onLogout }) {
                                 {collection.collection_items.map((item, index) => (
                                   <div key={index} className="flex justify-between text-sm">
                                     <span className="text-gray-600">
-                                      {getMemberNameById(item.member_id)}
+                                      {item.member?.user?.full_name || item.member?.member_code || `Member ${item.member_id}`}
                                     </span>
                                     <span className="font-medium">{formatIndianCurrency(item.amount)}</span>
                                   </div>
@@ -922,7 +1017,7 @@ function BillCollectorDashboard({ user, onLogout }) {
                         const groupId = e.target.value;
                         setCollectionForm(prev => ({ ...prev, group_id: groupId, member_id: '' }));
                         if (groupId) {
-                          loadGroupMembers(parseInt(groupId));
+                          loadGroupMembers(parseInt(groupId), true); // true for loan requests
                         } else {
                           setGroupMembers([]);
                         }

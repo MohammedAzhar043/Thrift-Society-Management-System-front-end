@@ -1290,10 +1290,10 @@ function AdminDashboard({ user, onLogout }) {
                          </td>
                        </tr>
                      ) : (
-                       filteredMembers.map((member) => (
+                       filteredMembers.map((member, index) => (
                         <tr key={member.id}>
                           <td className="px-6 py-4 text-sm text-gray-900">
-                            {member.id}
+                            {index + 1}
                           </td>
                           <td className="px-6 py-4 text-sm font-medium text-gray-900">
                             {member.member_code || "N/A"}
@@ -1375,7 +1375,7 @@ function AdminDashboard({ user, onLogout }) {
                   <h4 className="font-medium text-blue-900">Loan Details:</h4>
                   <p className="text-sm text-blue-800">
                     <strong>Member:</strong> {selectedLoanForApproval.name}<br/>
-                    <strong>Amount:</strong> ₹{formatIndianCurrency(selectedLoanForApproval.amount)}<br/>
+                    <strong>Amount:</strong> {formatIndianCurrency(selectedLoanForApproval.amount)}<br/>
                     <strong>Group:</strong> {selectedLoanForApproval.group_name}
                   </p>
                 </div>

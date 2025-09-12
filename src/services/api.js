@@ -327,6 +327,10 @@ class ApiService {
     return await this.request(`/collector/collections/${recordId}`);
   }
 
+  async getLoanPayments(loanId) {
+    return await this.request(`/collector/loans/${loanId}/payments`);
+  }
+
   async getCollectionItems(recordId) {
     return await this.request(`/collector/collections/${recordId}/items`);
   }
