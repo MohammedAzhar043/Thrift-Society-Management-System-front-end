@@ -41,7 +41,8 @@ function AdminDashboard({ user, onLogout }) {
   
   // Form submission hooks
   const { isSubmitting: isCreatingGroup, submitForm: submitGroupForm, resetForm: resetGroupForm } = useFormSubmission();
-  const { isSubmitting: isUpdatingGroup, submitForm: submitUpdateGroupForm } = useFormSubmission();
+  const { isSubmitting: isUpdatingGroup, submitForm: submitUpdateGroupForm, resetForm: resetUpdateGroupForm } = useFormSubmission();
+  const { isSubmitting: isGeneratingReport, submitForm: submitGenerateReportForm } = useFormSubmission();
   
   // Modal states
   const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
@@ -50,6 +51,10 @@ function AdminDashboard({ user, onLogout }) {
   const [showReportsModal, setShowReportsModal] = useState(false);
   const [showMembersModal, setShowMembersModal] = useState(false);
   const [showUserManagementModal, setShowUserManagementModal] = useState(false);
+  const [selectedLoanForApproval, setSelectedLoanForApproval] = useState(null);
+  const [interestRate, setInterestRate] = useState("");
+  const [showInterestRateModal, setShowInterestRateModal] = useState(false);
+  
   
   // Form states
   const [groupForm, setGroupForm] = useState({
@@ -61,7 +66,6 @@ function AdminDashboard({ user, onLogout }) {
   // Reports state
   const [reportType, setReportType] = useState("members");
   const [reportDate, setReportDate] = useState(new Date().toISOString().split('T')[0]);
-  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
   const [isRefreshingReports, setIsRefreshingReports] = useState(false);
   
   // Members filter state
@@ -201,7 +205,18 @@ function AdminDashboard({ user, onLogout }) {
   };
 
   const handleApproval = async (approvalType, recordId, action, notes = "") => {
-    // Show confirmation toast before proceeding
+    // If approving a loan, show interest rate modal first
+    if (approvalType === 'loan' && action === 'approve') {
+      const loan = loanApprovals.find(l => l.id === recordId);
+      if (loan) {
+        setSelectedLoanForApproval(loan);
+        setInterestRate(""); // Reset interest rate
+        setShowInterestRateModal(true);
+        return;
+      }
+    }
+    
+    // For other cases, show confirmation toast
     const actionText = action === 'approve' ? 'approve' : 'reject';
     const recordType = approvalType === 'member' ? 'member' : 'loan request';
     
@@ -234,6 +249,53 @@ function AdminDashboard({ user, onLogout }) {
       duration: 10000,
       position: "top-center",
     });
+  };
+
+  const handleInterestRateApproval = async () => {
+    let rate = null;
+    
+    // If interest rate is provided, validate it
+    if (interestRate && interestRate.trim() !== "") {
+      if (isNaN(parseFloat(interestRate))) {
+        toast.error("Please enter a valid interest rate");
+        return;
+      }
+      
+      rate = parseFloat(interestRate);
+      if (rate < 0 || rate > 100) {
+        toast.error("Interest rate must be between 0 and 100");
+        return;
+      }
+    }
+
+    try {
+      const approvalData = {
+        approval_type: 'loan',
+        record_id: selectedLoanForApproval.id,
+        action: 'approve',
+        notes: rate ? `Interest rate set to ${interestRate}%` : 'Using default interest rate',
+        interest_rate: rate
+      };
+      
+      await apiService.approveRecord(approvalData);
+      
+      // Close modal and reset
+      setShowInterestRateModal(false);
+      setSelectedLoanForApproval(null);
+      setInterestRate("");
+      
+      // Reload data after approval
+      await loadAdditionalData();
+      refreshDashboard();
+      
+      // Show success message
+      const rateMessage = rate ? `${interestRate}%` : 'default';
+      toast.success(`Loan approved with ${rateMessage} interest rate!`);
+      
+    } catch (error) {
+      console.error("Error processing loan approval:", error);
+      toast.error(`Failed to approve loan: ${error.message}`);
+    }
   };
 
   const confirmApproval = async (approvalType, recordId, action, notes = "") => {
@@ -355,7 +417,7 @@ function AdminDashboard({ user, onLogout }) {
       return;
     }
     
-    try {
+    await submitUpdateGroupForm(async () => {
       // Prepare form data, handling optional integer fields properly
       const groupData = {
         name: groupForm.name.trim(),
@@ -373,8 +435,7 @@ function AdminDashboard({ user, onLogout }) {
           groupData.team_leader_id = teamLeaderMember.user_id;
           selectedTeamLeaderUserId = teamLeaderMember.user_id;
         } else {
-          toast.error("Selected team leader not found in this group");
-          return;
+          throw new Error("Selected team leader not found in this group");
         }
       }
       
@@ -386,8 +447,7 @@ function AdminDashboard({ user, onLogout }) {
         if (billCollector) {
           groupData.bill_collector_id = billCollector.id;
         } else {
-          toast.error("Selected bill collector not found");
-          return;
+          throw new Error("Selected bill collector not found");
         }
       }
       
@@ -429,13 +489,12 @@ function AdminDashboard({ user, onLogout }) {
       });
       
       toast.success("Group updated successfully!");
-      
-    } catch (error) {
-      console.error("Error updating group:", error);
-      setError(error.message || "Failed to update group");
-    } finally {
-      // Loading state handled by custom hook
-    }
+    }, {
+      onError: (error) => {
+        console.error("Error updating group:", error);
+        toast.error(error.message || "Failed to update group");
+      }
+    });
   };
 
   const handleDeleteGroup = async (groupId) => {
@@ -512,9 +571,7 @@ function AdminDashboard({ user, onLogout }) {
   };
 
   const generateReport = async () => {
-    try {
-      setIsGeneratingReport(true);
-      
+    await submitGenerateReportForm(async () => {
       let reportData = [];
       let reportTitle = "";
       
@@ -544,12 +601,12 @@ function AdminDashboard({ user, onLogout }) {
       downloadCSV(csvContent, filename);
       
       toast.success(`${reportTitle} generated and downloaded successfully!`);
-    } catch (error) {
-      console.error("Error generating report:", error);
-      toast.error("Failed to generate report. Please try again.");
-    } finally {
-      setIsGeneratingReport(false);
-    }
+    }, {
+      onError: (error) => {
+        console.error("Error generating report:", error);
+        toast.error("Failed to generate report. Please try again.");
+      }
+    });
   };
 
 
@@ -650,16 +707,17 @@ function AdminDashboard({ user, onLogout }) {
       />
 
       <main className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-6 lg:py-8">
-        <StatsCards 
-          dashboardStats={dashboardStats}
-          memberApprovals={memberApprovals}
-          loanApprovals={loanApprovals}
-        />
+        {/* Main Content */}
+            <StatsCards 
+              dashboardStats={dashboardStats}
+              memberApprovals={memberApprovals}
+              loanApprovals={loanApprovals}
+            />
 
-        {/* Pending Approvals Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-1 gap-8 mb-8">
-          {/* Pending Member Approvals */}
-          <Card>
+            {/* Pending Approvals Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-1 gap-8 mb-8">
+              {/* Pending Member Approvals */}
+              <Card>
             <SectionHeader
               title="Pending Member Approvals"
               description="Members awaiting approval"
@@ -867,7 +925,6 @@ function AdminDashboard({ user, onLogout }) {
               </div>
             </SectionContent>
         </Card>
-      </main>
 
       <CreateGroupModal
         isOpen={showCreateGroupModal}
@@ -986,9 +1043,17 @@ function AdminDashboard({ user, onLogout }) {
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                    disabled={isUpdatingGroup}
+                    className={`px-4 py-2 text-sm font-medium rounded-md flex items-center ${
+                      isUpdatingGroup 
+                        ? 'bg-blue-400 cursor-not-allowed' 
+                        : 'bg-blue-600 hover:bg-blue-700'
+                    } text-white`}
                   >
-                    Update Group
+                    {isUpdatingGroup && (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    )}
+                    {isUpdatingGroup ? 'Updating...' : 'Update Group'}
                   </button>
                 </div>
               </form>
@@ -1071,20 +1136,16 @@ function AdminDashboard({ user, onLogout }) {
                    type="button"
                    onClick={generateReport}
                    disabled={isGeneratingReport}
-                   className={`px-4 py-2 text-sm font-medium rounded-md ${
+                   className={`px-4 py-2 text-sm font-medium rounded-md flex items-center ${
                      isGeneratingReport 
                        ? 'bg-gray-400 cursor-not-allowed' 
                        : 'bg-green-600 hover:bg-green-700'
                    } text-white`}
                  >
-                   {isGeneratingReport ? (
-                     <>
-                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                       Generating...
-                     </>
-                   ) : (
-                     'Generate Report'
+                   {isGeneratingReport && (
+                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                    )}
+                   {isGeneratingReport ? 'Generating...' : 'Generate Report'}
                  </button>
                </div>
             </div>
@@ -1094,6 +1155,7 @@ function AdminDashboard({ user, onLogout }) {
 
       {/* Members Management Modal */}
        {showMembersModal && (
+           <>
          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
            <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-6xl shadow-lg rounded-md bg-white">
              <div className="mt-3">
@@ -1272,10 +1334,13 @@ function AdminDashboard({ user, onLogout }) {
                   </tbody>
                 </table>
               </div>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+          </>
+        )}
+
+      </main>
 
       {/* User Management Modal */}
       <UserManagementModal
@@ -1285,6 +1350,79 @@ function AdminDashboard({ user, onLogout }) {
           await loadAdditionalData();
         }}
       />
+
+      {/* Interest Rate Modal */}
+      {showInterestRateModal && selectedLoanForApproval && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-medium text-gray-900">Set Interest Rate</h3>
+                <button
+                  onClick={() => {
+                    setShowInterestRateModal(false);
+                    setSelectedLoanForApproval(null);
+                    setInterestRate("");
+                  }}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <FaTimes className="h-6 w-6" />
+                </button>
+              </div>
+              
+              <div className="mb-4">
+                <div className="bg-blue-50 p-3 rounded-md mb-4">
+                  <h4 className="font-medium text-blue-900">Loan Details:</h4>
+                  <p className="text-sm text-blue-800">
+                    <strong>Member:</strong> {selectedLoanForApproval.name}<br/>
+                    <strong>Amount:</strong> ₹{formatIndianCurrency(selectedLoanForApproval.amount)}<br/>
+                    <strong>Group:</strong> {selectedLoanForApproval.group_name}
+                  </p>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Interest Rate (%)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="100"
+                    value={interestRate}
+                    onChange={(e) => setInterestRate(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="e.g., 12.5"
+                    autoFocus
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Enter the interest rate percentage (e.g., 12.5 for 12.5%). Leave empty to use default rate.
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => {
+                    setShowInterestRateModal(false);
+                    setSelectedLoanForApproval(null);
+                    setInterestRate("");
+                  }}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleInterestRateApproval}
+                  className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
+                >
+                  {interestRate ? `Approve with ${interestRate}% Rate` : 'Approve with Default Rate'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

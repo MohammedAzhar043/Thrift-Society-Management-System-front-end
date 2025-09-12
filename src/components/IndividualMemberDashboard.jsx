@@ -58,7 +58,7 @@ function IndividualMemberDashboard({ user, onLogout }) {
   const [loanCalculator, setLoanCalculator] = useState({
     amount: '',
     term_months: '12',
-    interest_rate: '12.5'
+    interest_rate: ''
   });
   const [calculatedResults, setCalculatedResults] = useState(null);
 
@@ -252,7 +252,9 @@ function IndividualMemberDashboard({ user, onLogout }) {
 
   const calculateLoan = () => {
     const principal = parseFloat(loanCalculator.amount);
-    const rate = parseFloat(loanCalculator.interest_rate) / 100;
+    // Use provided interest rate or fall back to dashboard stats rate
+    const interestRate = loanCalculator.interest_rate || dashboardStats.interest_rate || 12.0;
+    const rate = parseFloat(interestRate) / 100;
     const term = parseInt(loanCalculator.term_months);
 
     if (isNaN(principal) || isNaN(rate) || isNaN(term) || principal <= 0 || rate <= 0 || term <= 0) {
@@ -280,7 +282,7 @@ function IndividualMemberDashboard({ user, onLogout }) {
     setLoanCalculator({
       amount: '',
       term_months: '12',
-      interest_rate: '12.5'
+      interest_rate: ''
     });
     setCalculatedResults(null);
   };

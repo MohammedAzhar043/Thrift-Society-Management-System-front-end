@@ -144,6 +144,14 @@ class ApiService {
     return await this.request(`/admin/members${params}`);
   }
 
+  async getMemberLoans(memberId) {
+    return await this.request(`/admin/loans?member_id=${memberId}`);
+  }
+
+  async getMemberLoanRequests(memberId) {
+    return await this.request(`/admin/loan-requests?member_id=${memberId}`);
+  }
+
   async createMember(memberData) {
     return await this.request('/admin/members', {
       method: 'POST',
@@ -562,6 +570,8 @@ class ApiService {
 
     return await response.json();
   }
+
+
 }
 
 // Create and export a single instance
