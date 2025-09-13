@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaUsers, FaChartBar, FaUserPlus, FaUserCog } from 'react-icons/fa';
+import { FaUsers, FaChartBar, FaUserPlus, FaUserCog, FaGift } from 'react-icons/fa';
 import Button from './Button';
 
 const QuickActions = ({ 
@@ -7,6 +7,7 @@ const QuickActions = ({
   onViewReports, 
   onViewMembers,
   onManageUsers,
+  onManageBonuses,
   className = "" 
 }) => {
   const actions = [
@@ -29,6 +30,12 @@ const QuickActions = ({
       variant: "success"
     },
     {
+      icon: FaGift,
+      label: "Manage Bonuses",
+      onClick: onManageBonuses,
+      variant: "secondary"
+    },
+    {
       icon: FaUserCog,
       label: "Manage Users",
       onClick: onManageUsers,
@@ -47,7 +54,7 @@ const QuickActions = ({
         </p>
       </div>
       <div className="px-4 py-5 sm:p-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
           {actions.map((action, index) => (
             <Button
               key={index}

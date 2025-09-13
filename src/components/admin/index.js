@@ -16,5 +16,8 @@ export { default as QuickActions } from './components/QuickActions';
 export { default as CreateGroupModal } from './modals/CreateGroupModal';
 export { default as UserManagementModal } from './modals/UserManagementModal';
 
+// Management Components
+export { default as BonusManagement } from './BonusManagement';
+
 // Utility Functions
 export * from './utils/csvUtils';

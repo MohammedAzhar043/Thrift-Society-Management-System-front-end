@@ -26,6 +26,7 @@ import {
   downloadCSV,
   generateFilename
 } from "./admin";
+import BonusManagement from "./admin/BonusManagement";
 
 function AdminDashboard({ user, onLogout }) {
   const [pendingApprovals, setPendingApprovals] = useState([]);
@@ -51,6 +52,7 @@ function AdminDashboard({ user, onLogout }) {
   const [showReportsModal, setShowReportsModal] = useState(false);
   const [showMembersModal, setShowMembersModal] = useState(false);
   const [showUserManagementModal, setShowUserManagementModal] = useState(false);
+  const [showBonusManagement, setShowBonusManagement] = useState(false);
   const [selectedLoanForApproval, setSelectedLoanForApproval] = useState(null);
   const [interestRate, setInterestRate] = useState("");
   const [showInterestRateModal, setShowInterestRateModal] = useState(false);
@@ -553,6 +555,10 @@ function AdminDashboard({ user, onLogout }) {
     setShowMembersModal(true);
   };
 
+  const handleManageBonuses = () => {
+    setShowBonusManagement(true);
+  };
+
 
 
 
@@ -855,6 +861,7 @@ function AdminDashboard({ user, onLogout }) {
           onViewReports={handleViewReports}
           onViewMembers={handleViewMembers}
           onManageUsers={() => setShowUserManagementModal(true)}
+          onManageBonuses={handleManageBonuses}
         />
 
 
@@ -1350,6 +1357,26 @@ function AdminDashboard({ user, onLogout }) {
           await loadAdditionalData();
         }}
       />
+
+      {/* Bonus Management Modal */}
+      {showBonusManagement && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-4 mx-auto p-5 border w-11/12 max-w-7xl shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-medium text-gray-900">Bonus Management</h3>
+                <button
+                  onClick={() => setShowBonusManagement(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <FaTimes className="h-6 w-6" />
+                </button>
+              </div>
+              <BonusManagement />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Interest Rate Modal */}
       {showInterestRateModal && selectedLoanForApproval && (

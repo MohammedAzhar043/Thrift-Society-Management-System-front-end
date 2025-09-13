@@ -575,6 +575,60 @@ class ApiService {
     return await response.json();
   }
 
+  // Bonus Management APIs
+  async createMemberBonus(bonusData) {
+    return await this.request('/admin/bonuses', {
+      method: 'POST',
+      body: JSON.stringify(bonusData),
+    });
+  }
+
+  async getMemberBonuses(filters = {}) {
+    const params = new URLSearchParams();
+    if (filters.member_id && filters.member_id !== '') params.append('member_id', filters.member_id);
+    if (filters.status && filters.status !== '') params.append('status', filters.status);
+    if (filters.bonus_type && filters.bonus_type !== '') params.append('bonus_type', filters.bonus_type);
+    if (filters.skip !== undefined) params.append('skip', filters.skip);
+    if (filters.limit !== undefined) params.append('limit', filters.limit);
+    
+    const queryString = params.toString();
+    return await this.request(`/admin/bonuses${queryString ? `?${queryString}` : ''}`);
+  }
+
+  async getMemberBonus(bonusId) {
+    return await this.request(`/admin/bonuses/${bonusId}`);
+  }
+
+  async updateMemberBonus(bonusId, bonusData) {
+    return await this.request(`/admin/bonuses/${bonusId}`, {
+      method: 'PUT',
+      body: JSON.stringify(bonusData),
+    });
+  }
+
+  async approveMemberBonus(bonusId) {
+    return await this.request(`/admin/bonuses/${bonusId}/approve`, {
+      method: 'POST',
+    });
+  }
+
+  async markBonusPaid(bonusId) {
+    return await this.request(`/admin/bonuses/${bonusId}/mark-paid`, {
+      method: 'POST',
+    });
+  }
+
+  async cancelMemberBonus(bonusId) {
+    return await this.request(`/admin/bonuses/${bonusId}/cancel`, {
+      method: 'POST',
+    });
+  }
+
+  async getBonusSummary(memberId = null) {
+    const params = memberId ? `?member_id=${memberId}` : '';
+    return await this.request(`/admin/bonuses/summary${params}`);
+  }
+
 
 }
 

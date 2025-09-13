@@ -81,6 +81,7 @@ function BillCollectorDashboard({ user, onLogout }) {
       
       console.log('Loaded members:', members);
       console.log('Loaded loans:', loans);
+      console.log('Loan statuses:', loans.map(loan => ({ id: loan.id, member_id: loan.member_id, status: loan.status })));
       
       let filteredMembers;
       
@@ -98,7 +99,9 @@ function BillCollectorDashboard({ user, onLogout }) {
         
         // Filter members to only include those with active loans
         filteredMembers = members.filter(member => activeLoanMemberIds.has(member.id));
+        console.log('Active loan member IDs:', Array.from(activeLoanMemberIds));
         console.log('Members with active loans:', filteredMembers);
+        console.log('Members without loans:', members.filter(member => !activeLoanMemberIds.has(member.id)));
       }
       
       // Add EMI calculation for each member
@@ -735,6 +738,16 @@ function BillCollectorDashboard({ user, onLogout }) {
                     const amountPaid = parseFloat(item.amount || 0);
                     const remaining = dueAmount - amountPaid;
                     
+                    // Debug logging
+                    console.log('Collection item debug:', {
+                      memberId: item.member_id,
+                      selectedMember: selectedMember,
+                      loanInfo: selectedMember?.loan_info,
+                      dueAmount,
+                      amountPaid,
+                      remaining
+                    });
+                    
                     return (
                       <div key={index} className="border border-gray-200 rounded-lg p-3 mb-3">
                         <div className="grid grid-cols-2 gap-2 mb-2">
@@ -789,15 +802,23 @@ function BillCollectorDashboard({ user, onLogout }) {
                         {/* Show due amount and remaining for selected member */}
                         {selectedMember && (
                           <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded">
-                            <div className="flex justify-between">
-                              <span>Due Amount: {formatIndianCurrency(dueAmount)}</span>
-                              <span className={remaining > 0 ? 'text-red-600' : 'text-green-600'}>
-                                {remaining > 0 ? `Remaining: ${formatIndianCurrency(remaining)}` : 'Fully Paid'}
-                              </span>
-                            </div>
-                            {remaining > 0 && (
-                              <div className="text-red-500 text-xs mt-1">
-                                ⚠️ This amount will carry forward to next month with interest
+                            {selectedMember.loan_info ? (
+                              <>
+                                <div className="flex justify-between">
+                                  <span>Due Amount: {formatIndianCurrency(dueAmount)}</span>
+                                  <span className={remaining > 0 ? 'text-red-600' : 'text-green-600'}>
+                                    {remaining > 0 ? `Remaining: ${formatIndianCurrency(remaining)}` : 'Fully Paid'}
+                                  </span>
+                                </div>
+                                {remaining > 0 && (
+                                  <div className="text-red-500 text-xs mt-1">
+                                    ⚠️ This amount will carry forward to next month with interest
+                                  </div>
+                                )}
+                              </>
+                            ) : (
+                              <div className="text-yellow-600 text-xs">
+                                ⚠️ No active loan found for this member
                               </div>
                             )}
                           </div>
