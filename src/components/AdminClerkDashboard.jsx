@@ -690,10 +690,10 @@ function AdminClerkDashboard({ user, onLogout }) {
         {/* Tab Navigation */}
         <div className="bg-white shadow rounded-lg mb-8">
           <div className="border-b border-gray-200">
-            <nav className="-mb-px flex space-x-8 px-6">
+            <nav className="-mb-px flex space-x-2 sm:space-x-4 lg:space-x-8 px-2 sm:px-4 lg:px-6 overflow-x-auto">
               <button
                 onClick={() => setActiveTab('overview')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
                   activeTab === 'overview'
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -704,7 +704,7 @@ function AdminClerkDashboard({ user, onLogout }) {
               </button>
               <button
                 onClick={() => setActiveTab('pending-approvals')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
                   activeTab === 'pending-approvals'
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -715,7 +715,7 @@ function AdminClerkDashboard({ user, onLogout }) {
               </button>
               <button
                 onClick={() => setActiveTab('collections')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
                   activeTab === 'collections'
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -726,7 +726,7 @@ function AdminClerkDashboard({ user, onLogout }) {
               </button>
               <button
                 onClick={() => setActiveTab('reports')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
                   activeTab === 'reports'
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -737,7 +737,7 @@ function AdminClerkDashboard({ user, onLogout }) {
               </button>
               <button
                 onClick={() => setActiveTab('monitoring')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
                   activeTab === 'monitoring'
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -748,7 +748,7 @@ function AdminClerkDashboard({ user, onLogout }) {
               </button>
               <button
                 onClick={() => setActiveTab('transactions')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
                   activeTab === 'transactions'
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -1275,20 +1275,26 @@ function AdminClerkDashboard({ user, onLogout }) {
                     {/* Transaction Table */}
                     <div className="bg-white shadow rounded-lg">
                       <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
+                        <table className="min-w-full divide-y divide-gray-200 table-fixed" style={{minWidth: '600px'}}>
                           <thead className="bg-gray-50">
                             <tr>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reference</th>
+                              <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32 min-w-24 whitespace-nowrap">Date</th>
+                              <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24 min-w-20 whitespace-nowrap">Type</th>
+                              <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48 min-w-32 whitespace-nowrap">Description</th>
+                              <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24 min-w-20 whitespace-nowrap">Amount</th>
+                              <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32 min-w-24 whitespace-nowrap">Reference</th>
                             </tr>
                           </thead>
                           <tbody className="bg-white divide-y divide-gray-200">
                             {transactionHistory.map((transaction) => (
                               <tr key={transaction.id} className="hover:bg-gray-50">
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900 truncate" title={new Date(transaction.created_at).toLocaleDateString('en-US', {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}>
                                   {new Date(transaction.created_at).toLocaleDateString('en-US', {
                                     year: 'numeric',
                                     month: 'short',
@@ -1297,7 +1303,7 @@ function AdminClerkDashboard({ user, onLogout }) {
                                     minute: '2-digit'
                                   })}
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
+                                <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap">
                                   <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                                     transaction.transaction_type === 'collection' 
                                       ? 'bg-green-100 text-green-800' 
@@ -1306,14 +1312,14 @@ function AdminClerkDashboard({ user, onLogout }) {
                                     {transaction.transaction_type}
                                   </span>
                                 </td>
-                                <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
+                                <td className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 truncate" title={transaction.description}>
                                   {transaction.description}
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900">
                                   {formatCurrency(transaction.amount)}
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                  {transaction.reference}
+                                <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 truncate" title={transaction.reference}>
+                                  {transaction.reference || '-'}
                                 </td>
                               </tr>
                             ))}

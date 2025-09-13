@@ -1260,62 +1260,70 @@ function AdminDashboard({ user, onLogout }) {
                   </div>
                 </div>
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
+                <table className="min-w-full divide-y divide-gray-200 table-fixed" style={{minWidth: '800px'}}>
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">
                         ID
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Member Code
+                      <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24 min-w-20 whitespace-nowrap">
+                        Code
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32 min-w-24 whitespace-nowrap">
                         Name
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28 min-w-20 whitespace-nowrap">
                         Group
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32 min-w-24 whitespace-nowrap">
                         Location
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                      <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20 min-w-16 whitespace-nowrap">
                         Status
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Active Loans
+                      <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20 min-w-16 whitespace-nowrap">
+                        Loans
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        Joined Date
+                      <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24 min-w-20 whitespace-nowrap">
+                        Joined
                       </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                                          {filteredMembers.length === 0 ? (
                        <tr>
-                         <td colSpan="8" className="px-6 py-4 text-center text-gray-500">
+                         <td colSpan="8" className="px-2 sm:px-4 lg:px-6 py-4 text-center text-xs sm:text-sm text-gray-500">
                            {memberFilter.trim() === "" ? "No members found" : "No members match your search"}
                          </td>
                        </tr>
                      ) : (
                        filteredMembers.map((member, index) => (
                         <tr key={member.id}>
-                          <td className="px-6 py-4 text-sm text-gray-900">
+                          <td className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-900 whitespace-nowrap w-12">
                             {index + 1}
                           </td>
-                          <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                            {member.member_code || "N/A"}
+                          <td className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm font-medium text-gray-900 whitespace-nowrap w-24 min-w-20">
+                            <div className="truncate" title={member.member_code || "N/A"}>
+                              {member.member_code || "N/A"}
+                            </div>
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-900">
-                            {member.user?.full_name || member.user?.username || "N/A"}
+                          <td className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-900 whitespace-nowrap w-32 min-w-24">
+                            <div className="truncate" title={member.user?.full_name || member.user?.username || "N/A"}>
+                              {member.user?.full_name || member.user?.username || "N/A"}
+                            </div>
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-500">
-                            {member.group?.name || "N/A"}
+                          <td className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap w-28 min-w-20">
+                            <div className="truncate" title={member.group?.name || "N/A"}>
+                              {member.group?.name || "N/A"}
+                            </div>
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-500">
-                            {member.group?.location || "N/A"}
+                          <td className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap w-32 min-w-24">
+                            <div className="truncate" title={member.group?.location || "N/A"}>
+                              {member.group?.location || "N/A"}
+                            </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                          <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap w-20 min-w-16">
+                            <span className={`px-1 py-1 text-xs font-semibold rounded-full ${
                               member.status?.toLowerCase() === 'active' 
                                 ? "bg-green-100 text-green-800" 
                                 : member.status?.toLowerCase() === 'pending'
@@ -1329,11 +1337,13 @@ function AdminDashboard({ user, onLogout }) {
                               {member.status}
                             </span>
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-500">
+                          <td className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap w-20 min-w-16 text-center">
                             {loans.filter(loan => loan.member_id === member.id && (loan.status === 'ACTIVE' || loan.status === 'DISBURSED' || loan.status === 'APPROVED')).length}
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-500">
-                            {member.joined_date ? new Date(member.joined_date).toLocaleDateString() : "N/A"}
+                          <td className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap w-24 min-w-20">
+                            <div className="truncate" title={member.joined_date ? new Date(member.joined_date).toLocaleDateString() : "N/A"}>
+                              {member.joined_date ? new Date(member.joined_date).toLocaleDateString() : "N/A"}
+                            </div>
                           </td>
                         </tr>
                       ))

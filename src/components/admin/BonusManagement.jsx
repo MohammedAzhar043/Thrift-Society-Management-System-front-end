@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
 import Card from './components/Card';
 import Button from './components/Button';
 import SectionHeader from './components/SectionHeader';
@@ -42,6 +43,7 @@ const BonusManagement = () => {
       setMembers(membersData);
       setBonusSummary(summaryData);
     } catch (err) {
+      toast.error(err.message || 'Failed to load data');
       setError(err.message || 'Failed to load data');
     } finally {
       setLoading(false);
@@ -53,6 +55,7 @@ const BonusManagement = () => {
       const bonusesData = await apiService.getMemberBonuses(filters);
       setBonuses(bonusesData);
     } catch (err) {
+      toast.error(err.message || 'Failed to load bonuses');
       setError(err.message || 'Failed to load bonuses');
     }
   };
@@ -73,39 +76,108 @@ const BonusManagement = () => {
   };
 
   const handleApprove = async (bonusId) => {
-    if (window.confirm('Are you sure you want to approve this bonus?')) {
-      try {
-        await apiService.approveMemberBonus(bonusId);
-        loadBonuses();
-        loadData(); // Reload summary
-      } catch (err) {
-        setError(err.message || 'Failed to approve bonus');
-      }
-    }
+    toast((t) => (
+      <div className="flex items-center space-x-4">
+        <span>Are you sure you want to approve this bonus?</span>
+        <div className="flex space-x-2">
+          <button
+            onClick={async () => {
+              toast.dismiss(t.id);
+              try {
+                await apiService.approveMemberBonus(bonusId);
+                toast.success('Bonus approved successfully!');
+                loadBonuses();
+                loadData(); // Reload summary
+              } catch (err) {
+                toast.error(err.message || 'Failed to approve bonus');
+              }
+            }}
+            className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+          >
+            Yes
+          </button>
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            className="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700"
+          >
+            No
+          </button>
+        </div>
+      </div>
+    ), {
+      duration: 10000,
+      position: "top-center",
+    });
   };
 
   const handleMarkPaid = async (bonusId) => {
-    if (window.confirm('Are you sure you want to mark this bonus as paid?')) {
-      try {
-        await apiService.markBonusPaid(bonusId);
-        loadBonuses();
-        loadData(); // Reload summary
-      } catch (err) {
-        setError(err.message || 'Failed to mark bonus as paid');
-      }
-    }
+    toast((t) => (
+      <div className="flex items-center space-x-4">
+        <span>Are you sure you want to mark this bonus as paid?</span>
+        <div className="flex space-x-2">
+          <button
+            onClick={async () => {
+              toast.dismiss(t.id);
+              try {
+                await apiService.markBonusPaid(bonusId);
+                toast.success('Bonus marked as paid successfully!');
+                loadBonuses();
+                loadData(); // Reload summary
+              } catch (err) {
+                toast.error(err.message || 'Failed to mark bonus as paid');
+              }
+            }}
+            className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+          >
+            Yes
+          </button>
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            className="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700"
+          >
+            No
+          </button>
+        </div>
+      </div>
+    ), {
+      duration: 10000,
+      position: "top-center",
+    });
   };
 
   const handleCancel = async (bonusId) => {
-    if (window.confirm('Are you sure you want to cancel this bonus?')) {
-      try {
-        await apiService.cancelMemberBonus(bonusId);
-        loadBonuses();
-        loadData(); // Reload summary
-      } catch (err) {
-        setError(err.message || 'Failed to cancel bonus');
-      }
-    }
+    toast((t) => (
+      <div className="flex items-center space-x-4">
+        <span>Are you sure you want to cancel this bonus?</span>
+        <div className="flex space-x-2">
+          <button
+            onClick={async () => {
+              toast.dismiss(t.id);
+              try {
+                await apiService.cancelMemberBonus(bonusId);
+                toast.success('Bonus cancelled successfully!');
+                loadBonuses();
+                loadData(); // Reload summary
+              } catch (err) {
+                toast.error(err.message || 'Failed to cancel bonus');
+              }
+            }}
+            className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+          >
+            Yes
+          </button>
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            className="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700"
+          >
+            No
+          </button>
+        </div>
+      </div>
+    ), {
+      duration: 10000,
+      position: "top-center",
+    });
   };
 
   const handleFilterChange = (field, value) => {
