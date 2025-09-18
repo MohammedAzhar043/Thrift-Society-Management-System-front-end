@@ -312,13 +312,11 @@ function TeamLeaderDashboard({ user, onLogout }) {
       
       // Load assigned groups
       const groups = await apiService.getAssignedGroups();
-      console.log('Loaded assigned groups:', groups);
       setAssignedGroups(groups);
       
       if (groups.length > 0) {
         await loadGroupData(groups[0].id);
       } else {
-        console.warn('No assigned groups found for team leader');
       }
       
       // Load loan overview
@@ -328,7 +326,6 @@ function TeamLeaderDashboard({ user, onLogout }) {
       
     } catch (err) {
       setError('Failed to load dashboard data: ' + err.message);
-      console.error('Dashboard load error:', err);
     } finally {
       setLoading(false);
     }
@@ -338,46 +335,33 @@ function TeamLeaderDashboard({ user, onLogout }) {
 
   const loadGroupData = async (groupId) => {
     try {
-      console.log('Loading group data for group ID:', groupId);
       
       const [members, loans, requests, transactions, pending] = await Promise.all([
         apiService.getGroupMembers(groupId).catch(err => {
-          console.error('Error loading group members:', err);
           return [];
         }),
         apiService.getGroupLoans(groupId).catch(err => {
-          console.error('Error loading group loans:', err);
           return [];
         }),
-        apiService.getGroupLoanRequests(groupId).catch(err => {
-          console.error('Error loading loan requests:', err);
+        apiService.getGroupLoanRequests(groupId, 'REQUEST').catch(err => {
           return [];
         }),
         apiService.getGroupTransactionHistory(groupId).catch(err => {
-          console.error('Error loading transaction history:', err);
           return [];
         }),
         apiService.getPendingMembers(groupId).catch(err => {
-          console.error('Error loading pending members:', err);
           return [];
         })
       ]);
       
-      console.log('Loaded data:', {
+      const data = {
         members: members.length,
         loans: loans.length,
         requests: requests.length,
         transactions: transactions.length,
         pending: pending.length
-      });
+      };
       
-      // Debug loan data
-      console.log('Loan data details:', loans.map(loan => ({
-        id: loan.id,
-        status: loan.status,
-        amount: loan.loan_amount,
-        member: loan.member?.user?.full_name || 'N/A'
-      })));
       
       setGroupMembers(members);
       setGroupLoans(loans);
@@ -385,7 +369,6 @@ function TeamLeaderDashboard({ user, onLogout }) {
       setTransactionHistory(transactions);
       setPendingMembers(pending);
     } catch (err) {
-      console.error('Group data load error:', err);
     }
   };
 
@@ -442,7 +425,6 @@ function TeamLeaderDashboard({ user, onLogout }) {
           await apiService.uploadUserDocument(result.user_id, newMember.aadhar_document_file);
           documentsUploaded++;
         } catch (error) {
-          console.error("Failed to upload Aadhar document:", error);
           throw new Error("Aadhar document upload failed. Please upload manually.");
         }
       }
@@ -453,7 +435,6 @@ function TeamLeaderDashboard({ user, onLogout }) {
           await apiService.uploadBankPassbook(result.user_id, newMember.bank_passbook_file);
           documentsUploaded++;
         } catch (error) {
-          console.error("Failed to upload bank passbook:", error);
           throw new Error("Bank passbook upload failed. Please upload manually.");
         }
       }
@@ -473,7 +454,6 @@ function TeamLeaderDashboard({ user, onLogout }) {
       setError(null); // Clear any previous errors
     }, {
       onError: (err) => {
-        console.error('Error adding member:', err);
         
         // Handle specific error cases
         if (err.message.includes('Member code already exists')) {
@@ -495,7 +475,8 @@ function TeamLeaderDashboard({ user, onLogout }) {
     await submitLoanForm(async () => {
       const loanRequestData = {
         ...newLoanRequest,
-        group_id: assignedGroups[0]?.id
+        group_id: assignedGroups[0]?.id,
+        loan_amount: newLoanRequest.requested_amount
       };
       
       await apiService.createLoanRequest(loanRequestData);
@@ -586,17 +567,18 @@ function TeamLeaderDashboard({ user, onLogout }) {
             </div>
           )}
           
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Team Leader Dashboard</h1>
-              <p className="text-sm text-gray-600">Welcome back, {user?.full_name || user?.username}</p>
+          <div className="flex items-center justify-between py-4 gap-4">
+            <div className="flex-1 min-w-0 overflow-hidden">
+              <h1 className="text-lg sm:text-xl font-bold text-gray-900 truncate">Team Leader Dashboard</h1>
+              <p className="text-sm text-gray-600 truncate">Welcome back, {user?.full_name || user?.username}</p>
             </div>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
+            <div className="flex-shrink-0">
               <button
                 onClick={onLogout}
-                className="w-full sm:w-auto flex items-center justify-center text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md hover:bg-gray-100"
+                className="inline-flex items-center px-2 sm:px-3 py-1.5 sm:py-2 border border-transparent text-xs sm:text-sm font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-red-500 transition-colors duration-200"
               >
-                <FaSignOutAlt className="mr-2" /> Logout
+                <FaSignOutAlt className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+                <span className="hidden sm:inline">Logout</span>
               </button>
             </div>
           </div>
@@ -650,7 +632,7 @@ function TeamLeaderDashboard({ user, onLogout }) {
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">Pending Requests</dt>
                     <dd className="text-2xl font-semibold text-gray-900">
-                      {loanRequests.filter(r => r.status === 'PENDING').length}
+                      {loanRequests.filter(r => r.status === 'REQUEST' || r.status === 'PENDING').length + pendingMembers.length}
                     </dd>
                   </dl>
                 </div>
@@ -755,7 +737,7 @@ function TeamLeaderDashboard({ user, onLogout }) {
                       <div className="flex justify-between">
                         <span className="text-gray-600">Pending Requests:</span>
                         <span className="font-medium">
-                          {loanRequests.filter(r => r.status === 'PENDING').length}
+                          {loanRequests.filter(r => r.status === 'REQUEST' || r.status === 'PENDING').length}
                         </span>
                       </div>
                       <div className="flex justify-between">
@@ -810,57 +792,59 @@ function TeamLeaderDashboard({ user, onLogout }) {
 
 
 
+                {/* Desktop Members Table */}
+                <div className="hidden lg:block bg-white shadow rounded-lg">
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Member Code
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Name
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Join Date
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Monthly Income
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Status
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Actions
                         </th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {groupMembers.map((member) => (
-                        <tr key={member.id}>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          <tr key={member.id} className="hover:bg-gray-50 transition-colors">
+                            <td className="px-4 py-4 text-sm font-medium text-gray-900">
                             {member.member_code}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <td className="px-4 py-4 text-sm text-gray-900">
                             {member.user?.full_name || 'N/A'}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td className="px-4 py-4 text-sm text-gray-500">
                             {formatDate(member.joined_date)}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td className="px-4 py-4 text-sm text-gray-500">
                             {member.monthly_income ? formatCurrency(member.monthly_income) : 'N/A'}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(member.status)}`}>
+                            <td className="px-4 py-4">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(member.status)}`}>
                               {member.status}
                             </span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <td className="px-4 py-4 text-sm font-medium">
                             <button
                               onClick={() => {
                                 setSelectedMember(member);
                                 setShowMemberDetailsModal(true);
                               }}
-                              className="text-blue-600 hover:text-blue-900 mr-3"
+                                className="text-blue-600 hover:text-blue-900 transition-colors"
                             >
                               <FaEye />
                             </button>
@@ -869,8 +853,59 @@ function TeamLeaderDashboard({ user, onLogout }) {
                       ))}
                     </tbody>
                   </table>
-                  {groupMembers.length === 0 && (
-                    <p className="text-center py-8 text-gray-500">No members found</p>
+                  </div>
+                </div>
+
+                {/* Mobile Members Cards */}
+                <div className="lg:hidden space-y-4">
+                  {groupMembers.length === 0 ? (
+                    <div className="text-center py-8">
+                      <div className="text-gray-400 mb-4">
+                        <FaUsers className="w-12 h-12 mx-auto" />
+                      </div>
+                      <p className="text-lg font-medium text-gray-900 mb-1">No members found</p>
+                      <p className="text-sm text-gray-500">Members will appear here once they join your groups.</p>
+                    </div>
+                  ) : (
+                    groupMembers.map((member) => (
+                      <div key={member.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2 mb-1">
+                              <span className="text-sm font-medium text-gray-500">#{member.member_code}</span>
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(member.status)}`}>
+                                {member.status}
+                              </span>
+                            </div>
+                            <h3 className="text-lg font-semibold text-gray-900">
+                              {member.user?.full_name || 'N/A'}
+                            </h3>
+                          </div>
+                          <button
+                            onClick={() => {
+                              setSelectedMember(member);
+                              setShowMemberDetailsModal(true);
+                            }}
+                            className="text-blue-600 hover:text-blue-900 p-1"
+                          >
+                            <FaEye className="w-4 h-4" />
+                          </button>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <span className="text-gray-500">Join Date:</span>
+                            <p className="font-medium text-gray-900">{formatDate(member.joined_date)}</p>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">Monthly Income:</span>
+                            <p className="font-medium text-gray-900">
+                              {member.monthly_income ? formatCurrency(member.monthly_income) : 'N/A'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))
                   )}
                 </div>
               </div>
@@ -889,59 +924,112 @@ function TeamLeaderDashboard({ user, onLogout }) {
                   </button>
                 </div>
 
+                {/* Desktop Loans Table */}
+                <div className="hidden lg:block bg-white shadow rounded-lg">
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Member
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Amount
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Purpose
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Term
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Status
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Due Date
                         </th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {groupLoans.map((loan) => (
-                        <tr key={loan.id}>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          <tr key={loan.id} className="hover:bg-gray-50 transition-colors">
+                            <td className="px-4 py-4 text-sm font-medium text-gray-900">
                             {loan.member?.user?.full_name || 'N/A'}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <td className="px-4 py-4 text-sm text-gray-900">
                             {formatCurrency(loan.loan_amount)}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {loan.purpose}
+                            <td className="px-4 py-4 text-sm text-gray-500">
+                              {loan.purpose || 'N/A'}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td className="px-4 py-4 text-sm text-gray-500">
                             {loan.term_months} months
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(loan.status)}`}>
+                            <td className="px-4 py-4">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(loan.status)}`}>
                               {loan.status}
                             </span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td className="px-4 py-4 text-sm text-gray-500">
                             {loan.due_date ? formatDate(loan.due_date) : 'N/A'}
                           </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
-                  {groupLoans.length === 0 && (
-                    <p className="text-center py-8 text-gray-500">No loans found</p>
+                  </div>
+                </div>
+
+                {/* Mobile Loans Cards */}
+                <div className="lg:hidden space-y-4">
+                  {groupLoans.length === 0 ? (
+                    <div className="text-center py-8">
+                      <div className="text-gray-400 mb-4">
+                        <FaHandHoldingUsd className="w-12 h-12 mx-auto" />
+                      </div>
+                      <p className="text-lg font-medium text-gray-900 mb-1">No loans found</p>
+                      <p className="text-sm text-gray-500">Loans will appear here once they are created.</p>
+                    </div>
+                  ) : (
+                    groupLoans.map((loan) => (
+                      <div key={loan.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2 mb-1">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(loan.status)}`}>
+                                {loan.status}
+                              </span>
+                              <span className="text-sm text-gray-500">
+                                {loan.term_months} months
+                              </span>
+                            </div>
+                            <h3 className="text-lg font-semibold text-gray-900">
+                              {loan.member?.user?.full_name || 'N/A'}
+                            </h3>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-lg font-bold text-gray-900">
+                              {formatCurrency(loan.loan_amount)}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 gap-2 text-sm">
+                          <div>
+                            <span className="text-gray-500">Purpose:</span>
+                            <p className="font-medium text-gray-900">
+                              {loan.purpose || 'N/A'}
+                            </p>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">Due Date:</span>
+                            <p className="font-medium text-gray-900">
+                              {loan.due_date ? formatDate(loan.due_date) : 'N/A'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))
                   )}
                 </div>
               </div>
@@ -951,59 +1039,112 @@ function TeamLeaderDashboard({ user, onLogout }) {
             {activeTab === 'requests' && (
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-6">Loan Requests</h3>
+                {/* Desktop Loan Requests Table */}
+                <div className="hidden lg:block bg-white shadow rounded-lg">
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Member
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Amount
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Purpose
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Term
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Status
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Requested Date
                         </th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {loanRequests.map((request) => (
-                        <tr key={request.id}>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          <tr key={request.id} className="hover:bg-gray-50 transition-colors">
+                            <td className="px-4 py-4 text-sm font-medium text-gray-900">
                             {request.member?.user?.full_name || 'N/A'}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {formatCurrency(request.requested_amount)}
+                            <td className="px-4 py-4 text-sm text-gray-900">
+                            {formatCurrency(request.loan_amount)}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {request.purpose}
+                            <td className="px-4 py-4 text-sm text-gray-500">
+                              {request.purpose || 'N/A'}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td className="px-4 py-4 text-sm text-gray-500">
                             {request.term_months} months
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(request.status)}`}>
+                            <td className="px-4 py-4">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
                               {request.status}
                             </span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td className="px-4 py-4 text-sm text-gray-500">
                             {formatDate(request.requested_at)}
                           </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
-                  {loanRequests.length === 0 && (
-                    <p className="text-center py-8 text-gray-500">No loan requests found</p>
+                  </div>
+                </div>
+
+                {/* Mobile Loan Requests Cards */}
+                <div className="lg:hidden space-y-4">
+                  {loanRequests.length === 0 ? (
+                    <div className="text-center py-8">
+                      <div className="text-gray-400 mb-4">
+                        <FaClock className="w-12 h-12 mx-auto" />
+                      </div>
+                      <p className="text-lg font-medium text-gray-900 mb-1">No loan requests found</p>
+                      <p className="text-sm text-gray-500">Loan requests will appear here once they are submitted.</p>
+                    </div>
+                  ) : (
+                    loanRequests.map((request) => (
+                      <div key={request.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2 mb-1">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
+                                {request.status}
+                              </span>
+                              <span className="text-sm text-gray-500">
+                                {request.term_months} months
+                              </span>
+                            </div>
+                            <h3 className="text-lg font-semibold text-gray-900">
+                              {request.member?.user?.full_name || 'N/A'}
+                            </h3>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-lg font-bold text-gray-900">
+                              {formatCurrency(request.loan_amount)}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 gap-2 text-sm">
+                          <div>
+                            <span className="text-gray-500">Purpose:</span>
+                            <p className="font-medium text-gray-900">
+                              {request.purpose || 'N/A'}
+                            </p>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">Requested Date:</span>
+                            <p className="font-medium text-gray-900">
+                              {formatDate(request.requested_at)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))
                   )}
                 </div>
               </div>
@@ -1078,9 +1219,9 @@ function TeamLeaderDashboard({ user, onLogout }) {
                 <div>
                   <h4 className="text-lg font-medium text-gray-700 mb-4 flex items-center">
                     <FaHandHoldingUsd className="mr-2" />
-                    Pending Loan Requests ({loanRequests.filter(r => r.status === 'PENDING').length})
+                    Pending Loan Requests ({loanRequests.filter(r => r.status === 'REQUEST' || r.status === 'PENDING').length})
                   </h4>
-                  {loanRequests.filter(r => r.status === 'PENDING').length > 0 ? (
+                  {loanRequests.filter(r => r.status === 'REQUEST' || r.status === 'PENDING').length > 0 ? (
                     <div className="bg-white shadow rounded-lg overflow-hidden">
                       <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
@@ -1103,13 +1244,13 @@ function TeamLeaderDashboard({ user, onLogout }) {
                           </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                          {loanRequests.filter(r => r.status === 'PENDING').map((request) => (
+                          {loanRequests.filter(r => r.status === 'REQUEST' || r.status === 'PENDING').map((request) => (
                             <tr key={request.id}>
                               <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900">
                                 {request.member?.user?.full_name || 'N/A'}
                               </td>
                               <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900">
-                                {formatCurrency(request.requested_amount)}
+                                {formatCurrency(request.loan_amount)}
                               </td>
                               <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
                                 {request.purpose}
@@ -1131,6 +1272,7 @@ function TeamLeaderDashboard({ user, onLogout }) {
                     </div>
                   )}
                 </div>
+
               </div>
             )}
 
@@ -1138,45 +1280,49 @@ function TeamLeaderDashboard({ user, onLogout }) {
             {activeTab === 'transactions' && (
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-6">Transaction History</h3>
+                {/* Desktop Transaction History Table */}
+                <div className="hidden lg:block bg-white shadow rounded-lg">
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Date
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Type
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Group
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Description
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Amount
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Status
                         </th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {transactionHistory.map((transaction) => (
-                        <tr key={transaction.id}>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <tr key={transaction.id} className="hover:bg-gray-50 transition-colors">
+                            <td className="px-4 py-4 text-sm text-gray-900">
                             {formatDate(transaction.date)}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            <span className={`px-2 py-1 text-xs rounded-full ${
+                            <td className="px-4 py-4">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                               transaction.type === 'member_creation' 
                                 ? 'bg-blue-100 text-blue-800' 
                                 : transaction.type === 'loan_request'
                                   ? 'bg-yellow-100 text-yellow-800'
                                   : transaction.type === 'loan_approved'
                                     ? 'bg-green-100 text-green-800'
-                                    : 'bg-gray-100 text-gray-800'
+                                    : transaction.type === 'loan_rejected'
+                                      ? 'bg-red-100 text-red-800'
+                                      : 'bg-gray-100 text-gray-800'
                             }`}>
                               {transaction.type === 'member_creation' 
                                 ? 'Member Creation' 
@@ -1184,29 +1330,33 @@ function TeamLeaderDashboard({ user, onLogout }) {
                                   ? 'Loan Request'
                                   : transaction.type === 'loan_approved'
                                     ? 'Loan Approved'
-                                    : 'Collection'
+                                    : transaction.type === 'loan_rejected'
+                                      ? 'Loan Rejected'
+                                      : 'Collection'
                               }
                             </span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <td className="px-4 py-4 text-sm text-gray-900">
                             {transaction.group_name}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <td className="px-4 py-4 text-sm text-gray-900">
                             {truncateDescription(transaction.description)}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <td className="px-4 py-4 text-sm font-medium text-gray-900">
                             {transaction.amount > 0 ? formatCurrency(transaction.amount) : '-'}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 py-1 text-xs rounded-full ${
+                            <td className="px-4 py-4">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                               transaction.type === 'member_creation' 
                                 ? 'bg-green-100 text-green-800'
                                 : transaction.type === 'loan_request'
-                                  ? transaction.status === 'PENDING' 
+                                  ? transaction.status === 'REQUEST' || transaction.status === 'PENDING' || transaction.status === 'LoanStatus.REQUEST' || transaction.status === 'LoanStatus.PENDING'
                                     ? 'bg-yellow-100 text-yellow-800'
-                                    : transaction.status === 'APPROVED'
+                                    : transaction.status === 'APPROVED' || transaction.status === 'LoanStatus.APPROVED'
                                       ? 'bg-green-100 text-green-800'
-                                      : 'bg-red-100 text-red-800'
+                                      : transaction.status === 'REJECTED' || transaction.status === 'LoanStatus.REJECTED'
+                                        ? 'bg-red-100 text-red-800'
+                                        : 'bg-gray-100 text-gray-800'
                                   : transaction.type === 'loan_approved'
                                     ? 'bg-green-100 text-green-800'
                                     : transaction.status === 'verified' 
@@ -1216,16 +1366,20 @@ function TeamLeaderDashboard({ user, onLogout }) {
                               {transaction.type === 'member_creation' 
                                 ? 'Completed' 
                                 : transaction.type === 'loan_request'
-                                  ? transaction.status === 'PENDING'
+                                  ? transaction.status === 'REQUEST' || transaction.status === 'PENDING' || transaction.status === 'LoanStatus.REQUEST' || transaction.status === 'LoanStatus.PENDING'
                                     ? 'Pending'
-                                    : transaction.status === 'APPROVED'
+                                    : transaction.status === 'APPROVED' || transaction.status === 'LoanStatus.APPROVED'
                                       ? 'Approved'
-                                      : 'Rejected'
+                                      : transaction.status === 'REJECTED' || transaction.status === 'LoanStatus.REJECTED'
+                                        ? 'Rejected'
+                                        : transaction.status
                                   : transaction.type === 'loan_approved'
                                     ? 'Approved'
-                                    : transaction.status === 'verified' 
-                                      ? 'Verified' 
-                                      : 'Pending'
+                                    : transaction.type === 'loan_rejected'
+                                      ? 'Rejected'
+                                      : transaction.status === 'verified' 
+                                        ? 'Verified' 
+                                        : 'Pending'
                               }
                             </span>
                           </td>
@@ -1233,8 +1387,102 @@ function TeamLeaderDashboard({ user, onLogout }) {
                       ))}
                     </tbody>
                   </table>
-                  {transactionHistory.length === 0 && (
-                    <p className="text-center py-8 text-gray-500">No transactions found</p>
+                  </div>
+                </div>
+
+                {/* Mobile Transaction History Cards */}
+                <div className="lg:hidden space-y-4">
+                  {transactionHistory.length === 0 ? (
+                    <div className="text-center py-8">
+                      <div className="text-gray-400 mb-4">
+                        <FaChartPie className="w-12 h-12 mx-auto" />
+                      </div>
+                      <p className="text-lg font-medium text-gray-900 mb-1">No transactions found</p>
+                      <p className="text-sm text-gray-500">Transaction history will appear here once activities are recorded.</p>
+                    </div>
+                  ) : (
+                    transactionHistory.map((transaction) => (
+                      <div key={transaction.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2 mb-1">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                transaction.type === 'member_creation' 
+                                  ? 'bg-blue-100 text-blue-800' 
+                                  : transaction.type === 'loan_request'
+                                    ? 'bg-yellow-100 text-yellow-800'
+                                    : transaction.type === 'loan_approved'
+                                      ? 'bg-green-100 text-green-800'
+                                      : transaction.type === 'loan_rejected'
+                                        ? 'bg-red-100 text-red-800'
+                                        : 'bg-gray-100 text-gray-800'
+                              }`}>
+                                {transaction.type === 'member_creation' 
+                                  ? 'Member Creation' 
+                                  : transaction.type === 'loan_request'
+                                    ? 'Loan Request'
+                                    : transaction.type === 'loan_approved'
+                                      ? 'Loan Approved'
+                                      : transaction.type === 'loan_rejected'
+                                        ? 'Loan Rejected'
+                                        : 'Collection'
+                                }
+                              </span>
+                              <span className="text-sm text-gray-500">
+                                {formatDate(transaction.date)}
+                              </span>
+                            </div>
+                            <h3 className="text-lg font-semibold text-gray-900">
+                              {transaction.group_name}
+                            </h3>
+                            <p className="text-sm text-gray-600 mt-1">
+                              {truncateDescription(transaction.description)}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-lg font-bold text-gray-900">
+                              {transaction.amount > 0 ? formatCurrency(transaction.amount) : '-'}
+                            </div>
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              transaction.type === 'member_creation' 
+                                ? 'bg-green-100 text-green-800'
+                                : transaction.type === 'loan_request'
+                                  ? transaction.status === 'REQUEST' || transaction.status === 'PENDING' || transaction.status === 'LoanStatus.REQUEST' || transaction.status === 'LoanStatus.PENDING'
+                                    ? 'bg-yellow-100 text-yellow-800'
+                                    : transaction.status === 'APPROVED' || transaction.status === 'LoanStatus.APPROVED'
+                                      ? 'bg-green-100 text-green-800'
+                                      : transaction.status === 'REJECTED' || transaction.status === 'LoanStatus.REJECTED'
+                                        ? 'bg-red-100 text-red-800'
+                                        : 'bg-gray-100 text-gray-800'
+                                  : transaction.type === 'loan_approved'
+                                    ? 'bg-green-100 text-green-800'
+                                    : transaction.status === 'verified' 
+                                      ? 'bg-green-100 text-green-800' 
+                                      : 'bg-yellow-100 text-yellow-800'
+                            }`}>
+                              {transaction.type === 'member_creation' 
+                                ? 'Completed' 
+                                : transaction.type === 'loan_request'
+                                  ? transaction.status === 'REQUEST' || transaction.status === 'PENDING' || transaction.status === 'LoanStatus.REQUEST' || transaction.status === 'LoanStatus.PENDING'
+                                    ? 'Pending'
+                                    : transaction.status === 'APPROVED' || transaction.status === 'LoanStatus.APPROVED'
+                                      ? 'Approved'
+                                      : transaction.status === 'REJECTED' || transaction.status === 'LoanStatus.REJECTED'
+                                        ? 'Rejected'
+                                        : transaction.status
+                                  : transaction.type === 'loan_approved'
+                                    ? 'Approved'
+                                    : transaction.type === 'loan_rejected'
+                                      ? 'Rejected'
+                                      : transaction.status === 'verified' 
+                                        ? 'Verified' 
+                                        : 'Pending'
+                              }
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))
                   )}
                 </div>
               </div>
@@ -1736,7 +1984,7 @@ function TeamLeaderDashboard({ user, onLogout }) {
                     value={newLoanRequest.purpose}
                     onChange={(e) => setNewLoanRequest({...newLoanRequest, purpose: e.target.value})}
                     className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                    required
+                    placeholder="Purpose of the loan (optional)"
                   />
                 </div>
                 <div>

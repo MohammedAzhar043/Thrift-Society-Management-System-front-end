@@ -19,18 +19,14 @@ function App() {
     const savedUser = localStorage.getItem('user');
     const savedToken = localStorage.getItem('token');
     
-    console.log('App loading - savedUser:', savedUser); // Debug log
-    console.log('App loading - savedToken:', savedToken); // Debug log
     
     if (savedUser && savedToken) {
       try {
         const parsedUser = JSON.parse(savedUser);
-        console.log('App loading - parsed user:', parsedUser); // Debug log
         setUser(parsedUser);
         // Make sure the API service has the token
         apiService.setToken(savedToken);
       } catch (error) {
-        console.error('Error parsing saved user:', error);
         // Clear corrupted data
         localStorage.removeItem('user');
         localStorage.removeItem('token');
@@ -44,10 +40,8 @@ function App() {
   }, []);
 
   const handleLogin = (userData) => {
-    console.log('App handleLogin called with:', userData); // Debug log
     setUser(userData);
     localStorage.setItem('user', JSON.stringify(userData));
-    console.log('User saved to localStorage'); // Debug log
   };
 
   const handleLogout = () => {
@@ -66,7 +60,6 @@ function App() {
 
   // Helper function to get the correct route based on user role
   const getRouteForRole = (role) => {
-    console.log('User role:', role); // Debug log
     const route = (() => {
       switch (role?.toLowerCase()) {
         case 'admin':
@@ -84,11 +77,9 @@ function App() {
         case 'individual_member':
           return '/member';
         default:
-          console.warn('Unknown role:', role, '- redirecting to login');
           return '/login'; // Default to login if role is unknown
       }
     })();
-    console.log('Redirecting to route:', route); // Debug log
     return route;
   };
 

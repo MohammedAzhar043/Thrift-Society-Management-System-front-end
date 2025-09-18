@@ -75,7 +75,6 @@ function AdminClerkDashboard({ user, onLogout }) {
       const stats = await apiService.getClerkDashboardStats();
       setDashboardStats(stats);
     } catch (err) {
-      console.error('Error getting dashboard stats:', err);
       // Set fallback data
       setDashboardStats({
         total_groups: 0,
@@ -95,7 +94,6 @@ function AdminClerkDashboard({ user, onLogout }) {
       const approvals = await apiService.getClerkPendingApprovals();
       setPendingApprovals(approvals);
     } catch (err) {
-      console.error('Error getting pending approvals:', err);
       setPendingApprovals([]);
     }
 
@@ -103,25 +101,20 @@ function AdminClerkDashboard({ user, onLogout }) {
       const pending = await apiService.getPendingVerificationCollections();
       setPendingCollections(pending);
     } catch (err) {
-      console.error('Error getting pending collections:', err);
       setPendingCollections([]);
     }
 
     try {
       const history = await apiService.getTransactionHistory();
-      console.log('Transaction history data:', history);
       setTransactionHistory(history);
     } catch (err) {
-      console.error('Error getting transaction history:', err);
       setTransactionHistory([]);
     }
 
     try {
       const monitoring = await apiService.getCollectionMonitoringData(30);
-      console.log('Collection monitoring data:', monitoring);
       setCollectionMonitoring(monitoring.daily_data || []);
     } catch (err) {
-      console.error('Error getting collection monitoring data:', err);
       setCollectionMonitoring([]);
     }
 
@@ -150,7 +143,7 @@ function AdminClerkDashboard({ user, onLogout }) {
             id: `collection_${index}`,
             action: 'Collection pending verification',
             group: collection.group?.name || 'N/A',
-            amount: formatCurrency(collection.total_collected || 0),
+            amount: formatCurrency(collection.grand_total || 0),
             time: new Date(collection.collection_date).toLocaleDateString(),
             type: 'collection' // Add type information for styling
           });
@@ -185,7 +178,6 @@ function AdminClerkDashboard({ user, onLogout }) {
       
       setRecentActivities(activities);
     } catch (err) {
-      console.error('Error populating recent activities:', err);
       setRecentActivities([]);
     }
 
@@ -197,7 +189,6 @@ function AdminClerkDashboard({ user, onLogout }) {
       await apiService.logout();
       onLogout();
     } catch (error) {
-      console.error('Logout error:', error);
       onLogout(); // Still logout even if API call fails
     }
   };
@@ -208,7 +199,6 @@ function AdminClerkDashboard({ user, onLogout }) {
       toast.success('Collection record verified successfully!');
       await loadDashboardData(); // Refresh data
     } catch (err) {
-      console.error('Error verifying collection:', err);
       toast.error(`Failed to verify collection: ${err.message}`);
     }
   };
@@ -240,7 +230,6 @@ function AdminClerkDashboard({ user, onLogout }) {
         case "daily":
           // Daily report
           reportData = await apiService.getDailyCollectionReport(reportDate);
-          console.log('Daily report data:', reportData);
           reportTitle = "Daily Collection Report";
           // Format collections data for Excel
           if (reportData && reportData.collections && reportData.collections.length > 0) {
@@ -250,7 +239,7 @@ function AdminClerkDashboard({ user, onLogout }) {
                 new Date(collection.collection_date).toLocaleDateString(),
                 collection.group?.name || 'N/A',
                 collection.collector?.username || 'N/A',
-                parseFloat(collection.total_collected || 0).toFixed(2),
+                parseFloat(collection.grand_total || 0).toFixed(2),
                 collection.is_verified ? 'Verified' : 'Pending',
                 collection.notes || ''
               ])
@@ -265,7 +254,6 @@ function AdminClerkDashboard({ user, onLogout }) {
         case "weekly":
           // Weekly report
           reportData = await apiService.getWeeklyCollectionReport(reportStartDate, reportEndDate);
-          console.log('Weekly report data:', reportData);
           reportTitle = "Weekly Collection Report";
           // Format collections data for Excel
           if (reportData && reportData.collections && reportData.collections.length > 0) {
@@ -275,7 +263,7 @@ function AdminClerkDashboard({ user, onLogout }) {
                 new Date(collection.collection_date).toLocaleDateString(),
                 collection.group?.name || 'N/A',
                 collection.collector?.username || 'N/A',
-                parseFloat(collection.total_collected || 0).toFixed(2),
+                parseFloat(collection.grand_total || 0).toFixed(2),
                 collection.is_verified ? 'Verified' : 'Pending',
                 collection.notes || ''
               ])
@@ -293,7 +281,6 @@ function AdminClerkDashboard({ user, onLogout }) {
           const year = dateObj.getFullYear();
           const month = dateObj.getMonth() + 1; // getMonth() returns 0-11, we need 1-12
           reportData = await apiService.getMonthlyCollectionReport(year, month);
-          console.log('Monthly report data:', reportData);
           reportTitle = "Monthly Collection Report";
           // Format collections data for Excel
           if (reportData && reportData.collections && reportData.collections.length > 0) {
@@ -303,7 +290,7 @@ function AdminClerkDashboard({ user, onLogout }) {
                 new Date(collection.collection_date).toLocaleDateString(),
                 collection.group?.name || 'N/A',
                 collection.collector?.username || 'N/A',
-                parseFloat(collection.total_collected || 0).toFixed(2),
+                parseFloat(collection.grand_total || 0).toFixed(2),
                 collection.is_verified ? 'Verified' : 'Pending',
                 collection.notes || ''
               ])
@@ -425,10 +412,6 @@ function AdminClerkDashboard({ user, onLogout }) {
       toast.success(`${reportTitle} generated and downloaded successfully as Excel file!`);
       setShowReportsModal(false);
     } catch (err) {
-      console.error('Error generating report:', err);
-      console.error('Report type:', reportType);
-      console.error('Report data:', reportData);
-      console.error('Worksheet data:', worksheetData);
       
       let errorMessage = 'Failed to generate report';
       if (err.message) {
@@ -451,7 +434,6 @@ function AdminClerkDashboard({ user, onLogout }) {
       await loadDashboardData();
       toast.success('Data refreshed successfully!');
     } catch (err) {
-      console.error('Error refreshing data:', err);
       toast.error('Failed to refresh data');
     } finally {
       setIsRefreshingData(false);
@@ -523,31 +505,43 @@ function AdminClerkDashboard({ user, onLogout }) {
       />
       
       {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <div>
-            <h1 className="text-xl font-semibold text-gray-900">Admin Clerk Dashboard</h1>
-            <p className="text-sm text-gray-600">Welcome, {user.name}</p>
+      <header className="bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between py-4 gap-4">
+            {/* Left side - Title and User info */}
+            <div className="flex-1 min-w-0 overflow-hidden">
+              <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 truncate">
+                Admin Clerk Dashboard
+              </h1>
+              <p className="text-sm text-gray-600 mt-1 truncate">
+                Welcome, {user.name}
+              </p>
           </div>
-          <div className="flex items-center space-x-4">
+            
+            {/* Right side - Action buttons */}
+            <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
             <button
               onClick={refreshData}
               disabled={isRefreshingData}
-              className={`flex items-center px-3 py-2 rounded-md text-sm font-medium ${
+                className={`inline-flex items-center px-1.5 sm:px-2 py-1.5 sm:py-2 rounded text-xs sm:text-sm font-medium transition-colors duration-200 ${
                 isRefreshingData 
                   ? 'bg-gray-400 cursor-not-allowed text-white' 
-                  : 'bg-blue-600 hover:bg-blue-700 text-white'
+                    : 'bg-blue-600 hover:bg-blue-700 text-white focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-blue-500'
               }`}
             >
-              <FaSync className={`mr-2 ${isRefreshingData ? 'animate-spin' : ''}`} />
+                <FaSync className={`w-3 h-3 sm:w-4 sm:h-4 sm:mr-1 ${isRefreshingData ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">
               {isRefreshingData ? 'Refreshing...' : 'Refresh'}
+                </span>
             </button>
             <button
               onClick={handleLogout}
-              className="flex items-center text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md hover:bg-gray-100"
+                className="inline-flex items-center px-1.5 sm:px-2 py-1.5 sm:py-2 border border-transparent text-xs sm:text-sm font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-red-500 transition-colors duration-200"
             >
-              <FaSignOutAlt className="mr-1" /> Logout
+                <FaSignOutAlt className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+                <span className="hidden sm:inline">Logout</span>
             </button>
+            </div>
           </div>
         </div>
       </header>
@@ -946,28 +940,44 @@ function AdminClerkDashboard({ user, onLogout }) {
                             </td>
                             <td className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500">
                               {collection.collection_items && collection.collection_items.length > 0 ? (
-                                <div className="space-y-1">
-                                  {collection.collection_items.slice(0, 1).map((item, index) => (
-                                    <div key={index}>
-                                      <span className="inline-flex items-center px-1 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 truncate max-w-[120px] sm:max-w-none">
-                                        <span className="truncate">
-                                        {item.member?.user?.full_name || item.member?.user?.username || `Member ${item.member_id}`}
+                                <div className="space-y-1 max-h-20 overflow-y-auto">
+                                  {(() => {
+                                    // Group collection items by member to avoid duplicates
+                                    const memberMap = new Map();
+                                    collection.collection_items.forEach((item) => {
+                                      const memberId = item.member_id;
+                                      if (!memberMap.has(memberId)) {
+                                        memberMap.set(memberId, {
+                                          member: item.member,
+                                          totalAmount: 0,
+                                          paymentTypes: []
+                                        });
+                                      }
+                                      const memberData = memberMap.get(memberId);
+                                      memberData.totalAmount += parseFloat(item.amount || 0);
+                                      memberData.paymentTypes.push(item.payment_type);
+                                    });
+                                    
+                                    return Array.from(memberMap.values()).map((memberData, index) => (
+                                      <div key={index}>
+                                        <span className="inline-flex items-center px-1 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 truncate max-w-[120px] sm:max-w-none">
+                                          <span className="truncate">
+                                            {memberData.member?.user?.full_name || memberData.member?.user?.username || `Member ${memberData.member?.id || 'Unknown'}`}
+                                          </span>
                                         </span>
-                                      </span>
-                                    </div>
-                                  ))}
-                                  {collection.collection_items.length > 1 && (
-                                    <div className="text-xs text-gray-400">
-                                      +{collection.collection_items.length - 1} more
-                                    </div>
-                                  )}
+                                        <div className="text-xs text-gray-400 mt-1">
+                                          ₹{memberData.totalAmount.toLocaleString('en-IN', {minimumFractionDigits: 2})} ({memberData.paymentTypes.join(', ')})
+                                        </div>
+                                      </div>
+                                    ));
+                                  })()}
                                 </div>
                               ) : (
                                 <span className="text-gray-400">No members</span>
                               )}
                             </td>
                             <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900">
-                              {formatCurrency(collection.total_collected)}
+                              {formatCurrency(collection.grand_total)}
                             </td>
                             <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
                               {collection.collector?.username || 'N/A'}
@@ -1146,7 +1156,7 @@ function AdminClerkDashboard({ user, onLogout }) {
                           <div className="ml-4">
                             <p className="text-sm font-medium text-green-600">Total Amount</p>
                             <p className="text-2xl font-bold text-green-900">
-                              {formatCurrency(collectionMonitoring.reduce((sum, day) => sum + day.total_collected, 0))}
+                              {formatCurrency(collectionMonitoring.reduce((sum, day) => sum + day.grand_total, 0))}
                             </p>
                           </div>
                         </div>
@@ -1184,11 +1194,11 @@ function AdminClerkDashboard({ user, onLogout }) {
                               </div>
                               <div className="text-right">
                                 <p className="text-lg font-semibold text-gray-900">
-                                  {formatCurrency(day.total_collected)}
+                                  {formatCurrency(day.grand_total)}
                                 </p>
                                 <p className="text-xs text-gray-500">
                                   {day.collection_count > 0 ? 
-                                    `Avg: ${formatCurrency(day.total_collected / day.collection_count)}` : 
+                                    `Avg: ${formatCurrency(day.grand_total / day.collection_count)}` : 
                                     'No collections'
                                   }
                                 </p>
@@ -1272,29 +1282,33 @@ function AdminClerkDashboard({ user, onLogout }) {
                       </div>
                     </div>
 
-                    {/* Transaction Table */}
-                    <div className="bg-white shadow rounded-lg">
+                    {/* Desktop Transaction Table */}
+                    <div className="hidden lg:block bg-white shadow rounded-lg">
                       <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200 table-fixed" style={{minWidth: '600px'}}>
+                        <table className="min-w-full divide-y divide-gray-200">
                           <thead className="bg-gray-50">
                             <tr>
-                              <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32 min-w-24 whitespace-nowrap">Date</th>
-                              <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24 min-w-20 whitespace-nowrap">Type</th>
-                              <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48 min-w-32 whitespace-nowrap">Description</th>
-                              <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24 min-w-20 whitespace-nowrap">Amount</th>
-                              <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32 min-w-24 whitespace-nowrap">Reference</th>
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Date
+                              </th>
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Type
+                              </th>
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Description
+                              </th>
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Amount
+                              </th>
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Reference
+                              </th>
                             </tr>
                           </thead>
                           <tbody className="bg-white divide-y divide-gray-200">
                             {transactionHistory.map((transaction) => (
-                              <tr key={transaction.id} className="hover:bg-gray-50">
-                                <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900 truncate" title={new Date(transaction.created_at).toLocaleDateString('en-US', {
-                                  year: 'numeric',
-                                  month: 'short',
-                                  day: 'numeric',
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                })}>
+                              <tr key={transaction.id} className="hover:bg-gray-50 transition-colors">
+                                <td className="px-4 py-4 text-sm text-gray-900">
                                   {new Date(transaction.created_at).toLocaleDateString('en-US', {
                                     year: 'numeric',
                                     month: 'short',
@@ -1303,8 +1317,8 @@ function AdminClerkDashboard({ user, onLogout }) {
                                     minute: '2-digit'
                                   })}
                                 </td>
-                                <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap">
-                                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                <td className="px-4 py-4">
+                                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                                     transaction.transaction_type === 'collection' 
                                       ? 'bg-green-100 text-green-800' 
                                       : 'bg-blue-100 text-blue-800'
@@ -1312,13 +1326,15 @@ function AdminClerkDashboard({ user, onLogout }) {
                                     {transaction.transaction_type}
                                   </span>
                                 </td>
-                                <td className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 truncate" title={transaction.description}>
+                                <td className="px-4 py-4 text-sm text-gray-900">
+                                  <div className="font-medium">
                                   {transaction.description}
+                                  </div>
                                 </td>
-                                <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900">
+                                <td className="px-4 py-4 text-sm font-medium text-gray-900">
                                   {formatCurrency(transaction.amount)}
                                 </td>
-                                <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500 truncate" title={transaction.reference}>
+                                <td className="px-4 py-4 text-sm text-gray-500">
                                   {transaction.reference || '-'}
                                 </td>
                               </tr>
@@ -1326,6 +1342,60 @@ function AdminClerkDashboard({ user, onLogout }) {
                           </tbody>
                         </table>
                       </div>
+                    </div>
+
+                    {/* Mobile Transaction Cards */}
+                    <div className="lg:hidden space-y-4">
+                      {transactionHistory.map((transaction) => (
+                        <div key={transaction.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-2 mb-1">
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                  transaction.transaction_type === 'collection' 
+                                    ? 'bg-green-100 text-green-800' 
+                                    : 'bg-blue-100 text-blue-800'
+                                }`}>
+                                  {transaction.transaction_type}
+                                </span>
+                                <span className="text-sm text-gray-500">
+                                  {new Date(transaction.created_at).toLocaleDateString('en-US', {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric'
+                                  })}
+                                </span>
+                              </div>
+                              <h3 className="text-lg font-semibold text-gray-900">
+                                {transaction.description}
+                              </h3>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-lg font-bold text-gray-900">
+                                {formatCurrency(transaction.amount)}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 gap-2 text-sm">
+                            <div>
+                              <span className="text-gray-500">Reference:</span>
+                              <p className="font-medium text-gray-900">
+                                {transaction.reference || 'N/A'}
+                              </p>
+                            </div>
+                            <div>
+                              <span className="text-gray-500">Time:</span>
+                              <p className="font-medium text-gray-900">
+                                {new Date(transaction.created_at).toLocaleTimeString('en-US', {
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 ) : (
@@ -1365,7 +1435,7 @@ function AdminClerkDashboard({ user, onLogout }) {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-500">Total Amount</p>
-                    <p className="text-sm font-semibold text-green-600">{formatCurrency(selectedCollection.total_collected)}</p>
+                    <p className="text-sm font-semibold text-green-600">{formatCurrency(selectedCollection.grand_total)}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-500">Collector</p>
@@ -1562,7 +1632,7 @@ function AdminClerkDashboard({ user, onLogout }) {
                         </div>
                         <div className="text-right">
                           <p className="text-sm font-medium text-gray-900">
-                            {formatCurrency(collection.total_collected)}
+                            {formatCurrency(collection.grand_total)}
                           </p>
                           <button
                             onClick={() => {

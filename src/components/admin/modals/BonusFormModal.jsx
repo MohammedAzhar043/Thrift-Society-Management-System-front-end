@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import Modal from '../components/Modal';
 import apiService from '../../../services/api';
 
-const BonusFormModal = ({ isOpen, onClose, onSuccess, bonus = null, members = [] }) => {
+const BonusFormModal = ({ isOpen, onClose, onSuccess, payable = null, members = [] }) => {
   const [formData, setFormData] = useState({
     member_id: '',
-    bonus_type: 'PERFORMANCE',
+    payable_type: 'PERFORMANCE',
     amount: '',
     reason: '',
     notes: ''
@@ -13,35 +13,36 @@ const BonusFormModal = ({ isOpen, onClose, onSuccess, bonus = null, members = []
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const bonusTypes = [
-    { value: 'PERFORMANCE', label: 'Performance Bonus' },
-    { value: 'LOYALTY', label: 'Loyalty Bonus' },
-    { value: 'REFERRAL', label: 'Referral Bonus' },
-    { value: 'SPECIAL', label: 'Special Bonus' },
-    { value: 'HOLIDAY', label: 'Holiday Bonus' },
-    { value: 'ACHIEVEMENT', label: 'Achievement Bonus' }
+  const payableTypes = [
+    { value: 'PERFORMANCE', label: 'Performance Payable' },
+    { value: 'LOYALTY', label: 'Loyalty Payable' },
+    { value: 'REFERRAL', label: 'Referral Payable' },
+    { value: 'SPECIAL', label: 'Special Payable' },
+    { value: 'HOLIDAY', label: 'Holiday Payable' },
+    { value: 'ACHIEVEMENT', label: 'Achievement Payable' },
+    { value: 'AMOUNT_RETURN', label: 'Amount Return' }
   ];
 
   useEffect(() => {
-    if (bonus) {
+    if (payable) {
       setFormData({
-        member_id: bonus.member_id || '',
-        bonus_type: bonus.bonus_type || 'PERFORMANCE',
-        amount: bonus.amount || '',
-        reason: bonus.reason || '',
-        notes: bonus.notes || ''
+        member_id: payable.member_id || '',
+        payable_type: payable.payable_type || 'PERFORMANCE',
+        amount: payable.amount || '',
+        reason: payable.reason || '',
+        notes: payable.notes || ''
       });
     } else {
       setFormData({
         member_id: '',
-        bonus_type: 'PERFORMANCE',
+        payable_type: 'PERFORMANCE',
         amount: '',
         reason: '',
         notes: ''
       });
     }
     setError('');
-  }, [bonus, isOpen]);
+  }, [payable, isOpen]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -57,15 +58,15 @@ const BonusFormModal = ({ isOpen, onClose, onSuccess, bonus = null, members = []
     setError('');
 
     try {
-      const bonusData = {
+      const payableData = {
         ...formData,
         amount: parseFloat(formData.amount)
       };
 
-      if (bonus) {
-        await apiService.updateMemberBonus(bonus.id, bonusData);
+      if (payable) {
+        await apiService.updateMemberBonus(payable.id, payableData);
       } else {
-        await apiService.createMemberBonus(bonusData);
+        await apiService.createMemberBonus(payableData);
       }
 
       onSuccess();
@@ -80,7 +81,7 @@ const BonusFormModal = ({ isOpen, onClose, onSuccess, bonus = null, members = []
   const selectedMember = members.find(m => m.id === parseInt(formData.member_id));
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={bonus ? 'Edit Bonus' : 'Create New Bonus'}>
+    <Modal isOpen={isOpen} onClose={onClose} title={payable ? 'Edit Bonus' : 'Create New Bonus'}>
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
@@ -118,13 +119,13 @@ const BonusFormModal = ({ isOpen, onClose, onSuccess, bonus = null, members = []
             Bonus Type *
           </label>
           <select
-            name="bonus_type"
-            value={formData.bonus_type}
+            name="payable_type"
+            value={formData.payable_type}
             onChange={handleChange}
             required
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            {bonusTypes.map(type => (
+            {payableTypes.map(type => (
               <option key={type.value} value={type.value}>
                 {type.label}
               </option>
@@ -145,7 +146,7 @@ const BonusFormModal = ({ isOpen, onClose, onSuccess, bonus = null, members = []
             min="0"
             step="0.01"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter bonus amount"
+            placeholder="Enter payable amount"
           />
         </div>
 
@@ -160,7 +161,7 @@ const BonusFormModal = ({ isOpen, onClose, onSuccess, bonus = null, members = []
             required
             rows={3}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter reason for the bonus"
+            placeholder="Enter reason for the payable"
           />
         </div>
 
@@ -191,7 +192,7 @@ const BonusFormModal = ({ isOpen, onClose, onSuccess, bonus = null, members = []
             disabled={loading}
             className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
           >
-            {loading ? 'Saving...' : (bonus ? 'Update Bonus' : 'Create Bonus')}
+            {loading ? 'Saving...' : (payable ? 'Update Bonus' : 'Create Bonus')}
           </button>
         </div>
       </form>

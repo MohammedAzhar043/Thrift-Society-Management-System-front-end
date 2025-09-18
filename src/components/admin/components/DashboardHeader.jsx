@@ -8,26 +8,34 @@ const DashboardHeader = ({
   className = "" 
 }) => {
   return (
-    <header className={`bg-white shadow-sm ${className}`}>
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-3 sm:py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-3 sm:space-y-0">
-        <div>
-          <h1 className="text-lg sm:text-xl font-semibold text-gray-900">
-            {title}
-          </h1>
-          {userName && (
-            <p className="text-sm text-gray-600">Welcome, {userName}</p>
+    <header className={`bg-white shadow-sm border-b border-gray-200 ${className}`}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between py-4 gap-4">
+          {/* Left side - Title and User info */}
+          <div className="flex-1 min-w-0 overflow-hidden">
+            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 truncate">
+              {title}
+            </h1>
+            {userName && (
+              <p className="text-sm text-gray-600 mt-1 truncate">
+                Welcome, {userName}
+              </p>
+            )}
+          </div>
+          
+          {/* Right side - Logout button */}
+          {onLogout && (
+            <div className="flex-shrink-0">
+              <button
+                onClick={onLogout}
+                className="inline-flex items-center px-2 sm:px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
+              >
+                <FaSignOutAlt className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Logout</span>
+              </button>
+            </div>
           )}
         </div>
-        {onLogout && (
-          <div className="flex items-center space-x-4 w-full sm:w-auto">
-            <button
-              onClick={onLogout}
-              className="w-full sm:w-auto flex items-center justify-center text-gray-700 hover:text-gray-900 transition-colors px-3 py-2 rounded-md hover:bg-gray-100"
-            >
-              <FaSignOutAlt className="mr-1" /> Logout
-            </button>
-          </div>
-        )}
       </div>
     </header>
   );

@@ -9,7 +9,7 @@ import BonusFormModal from './modals/BonusFormModal';
 import apiService from '../../services/api';
 
 const BonusManagement = () => {
-  const [bonuses, setBonuses] = useState([]);
+  const [payablees, setBonuses] = useState([]);
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -17,10 +17,10 @@ const BonusManagement = () => {
   const [editingBonus, setEditingBonus] = useState(null);
   const [filters, setFilters] = useState({
     status: null,
-    bonus_type: null,
+    payable_type: null,
     member_id: null
   });
-  const [bonusSummary, setBonusSummary] = useState(null);
+  const [payableSummary, setBonusSummary] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -33,13 +33,13 @@ const BonusManagement = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [bonusesData, membersData, summaryData] = await Promise.all([
+      const [payableesData, membersData, summaryData] = await Promise.all([
         apiService.getMemberBonuses(),
         apiService.getMembers(),
         apiService.getBonusSummary()
       ]);
       
-      setBonuses(bonusesData);
+      setBonuses(payableesData);
       setMembers(membersData);
       setBonusSummary(summaryData);
     } catch (err) {
@@ -52,11 +52,11 @@ const BonusManagement = () => {
 
   const loadBonuses = async () => {
     try {
-      const bonusesData = await apiService.getMemberBonuses(filters);
-      setBonuses(bonusesData);
+      const payableesData = await apiService.getMemberBonuses(filters);
+      setBonuses(payableesData);
     } catch (err) {
-      toast.error(err.message || 'Failed to load bonuses');
-      setError(err.message || 'Failed to load bonuses');
+      toast.error(err.message || 'Failed to load payablees');
+      setError(err.message || 'Failed to load payablees');
     }
   };
 
@@ -65,8 +65,8 @@ const BonusManagement = () => {
     setShowFormModal(true);
   };
 
-  const handleEditBonus = (bonus) => {
-    setEditingBonus(bonus);
+  const handleEditBonus = (payable) => {
+    setEditingBonus(payable);
     setShowFormModal(true);
   };
 
@@ -75,21 +75,21 @@ const BonusManagement = () => {
     loadData(); // Reload summary
   };
 
-  const handleApprove = async (bonusId) => {
+  const handleApprove = async (payableId) => {
     toast((t) => (
       <div className="flex items-center space-x-4">
-        <span>Are you sure you want to approve this bonus?</span>
+        <span>Are you sure you want to approve this payable?</span>
         <div className="flex space-x-2">
           <button
             onClick={async () => {
               toast.dismiss(t.id);
               try {
-                await apiService.approveMemberBonus(bonusId);
+                await apiService.approveMemberBonus(payableId);
                 toast.success('Bonus approved successfully!');
                 loadBonuses();
                 loadData(); // Reload summary
               } catch (err) {
-                toast.error(err.message || 'Failed to approve bonus');
+                toast.error(err.message || 'Failed to approve payable');
               }
             }}
             className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
@@ -110,21 +110,21 @@ const BonusManagement = () => {
     });
   };
 
-  const handleMarkPaid = async (bonusId) => {
+  const handleMarkPaid = async (payableId) => {
     toast((t) => (
       <div className="flex items-center space-x-4">
-        <span>Are you sure you want to mark this bonus as paid?</span>
+        <span>Are you sure you want to mark this payable as paid?</span>
         <div className="flex space-x-2">
           <button
             onClick={async () => {
               toast.dismiss(t.id);
               try {
-                await apiService.markBonusPaid(bonusId);
+                await apiService.markBonusPaid(payableId);
                 toast.success('Bonus marked as paid successfully!');
                 loadBonuses();
                 loadData(); // Reload summary
               } catch (err) {
-                toast.error(err.message || 'Failed to mark bonus as paid');
+                toast.error(err.message || 'Failed to mark payable as paid');
               }
             }}
             className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
@@ -145,21 +145,21 @@ const BonusManagement = () => {
     });
   };
 
-  const handleCancel = async (bonusId) => {
+  const handleCancel = async (payableId) => {
     toast((t) => (
       <div className="flex items-center space-x-4">
-        <span>Are you sure you want to cancel this bonus?</span>
+        <span>Are you sure you want to cancel this payable?</span>
         <div className="flex space-x-2">
           <button
             onClick={async () => {
               toast.dismiss(t.id);
               try {
-                await apiService.cancelMemberBonus(bonusId);
+                await apiService.cancelMemberBonus(payableId);
                 toast.success('Bonus cancelled successfully!');
                 loadBonuses();
                 loadData(); // Reload summary
               } catch (err) {
-                toast.error(err.message || 'Failed to cancel bonus');
+                toast.error(err.message || 'Failed to cancel payable');
               }
             }}
             className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
@@ -190,7 +190,7 @@ const BonusManagement = () => {
   const clearFilters = () => {
     setFilters({
       status: null,
-      bonus_type: null,
+      payable_type: null,
       member_id: null
     });
   };
@@ -208,31 +208,31 @@ const BonusManagement = () => {
       )}
 
       {/* Summary Cards */}
-      {bonusSummary && (
+      {payableSummary && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
             <div className="p-4">
-              <div className="text-2xl font-bold text-blue-600">{bonusSummary.total_bonuses}</div>
+              <div className="text-2xl font-bold text-blue-600">{payableSummary.total_payables}</div>
               <div className="text-sm text-gray-600">Total Bonuses</div>
             </div>
           </Card>
           <Card>
             <div className="p-4">
               <div className="text-2xl font-bold text-green-600">
-                ₹{bonusSummary.total_amount?.toLocaleString('en-IN') || '0'}
+                ₹{payableSummary.total_amount?.toLocaleString('en-IN') || '0'}
               </div>
               <div className="text-sm text-gray-600">Total Amount</div>
             </div>
           </Card>
           <Card>
             <div className="p-4">
-              <div className="text-2xl font-bold text-yellow-600">{bonusSummary.pending_bonuses}</div>
+              <div className="text-2xl font-bold text-yellow-600">{payableSummary.pending_payables}</div>
               <div className="text-sm text-gray-600">Pending</div>
             </div>
           </Card>
           <Card>
             <div className="p-4">
-              <div className="text-2xl font-bold text-green-600">{bonusSummary.paid_bonuses}</div>
+              <div className="text-2xl font-bold text-green-600">{payableSummary.paid_payables}</div>
               <div className="text-sm text-gray-600">Paid</div>
             </div>
           </Card>
@@ -257,8 +257,8 @@ const BonusManagement = () => {
               </select>
 
               <select
-                value={filters.bonus_type || ''}
-                onChange={(e) => handleFilterChange('bonus_type', e.target.value || null)}
+                value={filters.payable_type || ''}
+                onChange={(e) => handleFilterChange('payable_type', e.target.value || null)}
                 className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">All Types</option>
@@ -268,6 +268,7 @@ const BonusManagement = () => {
                 <option value="SPECIAL">Special</option>
                 <option value="HOLIDAY">Holiday</option>
                 <option value="ACHIEVEMENT">Achievement</option>
+                <option value="AMOUNT_RETURN">Amount Return</option>
               </select>
 
               <select
@@ -305,7 +306,7 @@ const BonusManagement = () => {
       <Card>
         <SectionContent>
           <BonusTable
-            bonuses={bonuses}
+            payablees={payablees}
             onApprove={handleApprove}
             onMarkPaid={handleMarkPaid}
             onCancel={handleCancel}
@@ -320,7 +321,7 @@ const BonusManagement = () => {
         isOpen={showFormModal}
         onClose={() => setShowFormModal(false)}
         onSuccess={handleFormSuccess}
-        bonus={editingBonus}
+        payable={editingBonus}
         members={members}
       />
     </div>

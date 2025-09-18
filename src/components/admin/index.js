@@ -17,7 +17,7 @@ export { default as CreateGroupModal } from './modals/CreateGroupModal';
 export { default as UserManagementModal } from './modals/UserManagementModal';
 
 // Management Components
-export { default as BonusManagement } from './BonusManagement';
+export { default as PayableManagement } from './PayableManagement';
 
 // Utility Functions
 export * from './utils/csvUtils';

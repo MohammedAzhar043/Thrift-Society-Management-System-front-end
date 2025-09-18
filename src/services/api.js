@@ -25,8 +25,12 @@ class ApiService {
       'Content-Type': 'application/json',
     };
     
-    if (this.token) {
-      headers['Authorization'] = `Bearer ${this.token}`;
+    // Always get the latest token from localStorage
+    const currentToken = localStorage.getItem('token');
+    if (currentToken) {
+      headers['Authorization'] = `Bearer ${currentToken}`;
+      // Update the instance token as well
+      this.token = currentToken;
     }
     
     return headers;
@@ -39,8 +43,15 @@ class ApiService {
       ...options,
     };
 
+    console.log('API Request - URL:', url);
+    console.log('API Request - Config:', config);
+
     try {
+      console.log('Making fetch request...');
       const response = await fetch(url, config);
+      console.log('API Response - Status:', response.status);
+      console.log('API Response - OK:', response.ok);
+      console.log('API Response - Headers:', Object.fromEntries(response.headers.entries()));
       
       if (response.status === 401) {
         // Token expired or invalid
@@ -66,13 +77,27 @@ class ApiService {
 
       return await response.json();
     } catch (error) {
-      console.error('API request failed:', error);
+      console.error('API Request Error:', error);
+      console.error('Error type:', error.constructor.name);
+      console.error('Error message:', error.message);
+      
+      // Handle specific error types
+      if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+        console.error('Network error detected - possible causes:');
+        console.error('1. Backend server not running');
+        console.error('2. CORS issues');
+        console.error('3. Network connectivity problems');
+        console.error('4. Wrong API URL');
+        throw new Error('Network error: Unable to connect to server. Please check if the backend is running.');
+      }
+      
       throw error;
     }
   }
 
   // Authentication
   async login(credentials) {
+    try {
     const response = await this.request('/login', {
       method: 'POST',
       body: JSON.stringify(credentials),
@@ -83,13 +108,16 @@ class ApiService {
     }
     
     return response;
+    } catch (error) {
+      console.error('API login error:', error);
+      throw error;
+    }
   }
 
   async logout() {
     try {
       await this.request('/logout', { method: 'POST' });
     } catch (error) {
-      console.error('Logout error:', error);
     } finally {
       this.clearToken();
     }
@@ -149,7 +177,7 @@ class ApiService {
   }
 
   async getMemberLoanRequests(memberId) {
-    return await this.request(`/admin/loan-requests?member_id=${memberId}`);
+    return await this.request(`/admin/loans?member_id=${memberId}&status=REQUEST`);
   }
 
   async createMember(memberData) {
@@ -180,7 +208,7 @@ class ApiService {
     if (groupId) params.push(`group_id=${groupId}`);
     
     const queryString = params.length > 0 ? `?${params.join('&')}` : '';
-    return await this.request(`/admin/loan-requests${queryString}`);
+    return await this.request(`/admin/loans${queryString}`);
   }
 
   // Admin Clerk APIs
@@ -307,10 +335,21 @@ class ApiService {
   }
 
   async createCollectionRecord(collectionData) {
-    return await this.request('/collector/collections', {
-      method: 'POST',
-      body: JSON.stringify(collectionData),
-    });
+    console.log('API Service - Creating collection record:', collectionData);
+    console.log('API Service - Token:', this.token ? 'Present' : 'Missing');
+    console.log('API Service - Base URL:', this.baseURL);
+    
+    try {
+      const result = await this.request('/collector/collections', {
+        method: 'POST',
+        body: JSON.stringify(collectionData),
+      });
+      console.log('API Service - Collection created successfully:', result);
+      return result;
+    } catch (error) {
+      console.error('API Service - Collection creation failed:', error);
+      throw error;
+    }
   }
 
   async getCollectionRecords(groupId = null, startDate = null, endDate = null) {
@@ -325,6 +364,19 @@ class ApiService {
 
   async getCollectionRecord(recordId) {
     return await this.request(`/collector/collections/${recordId}`);
+  }
+
+  // Savings Management
+  async getGroupSavingsSummary(groupId) {
+    return await this.request(`/collector/groups/${groupId}/savings/summary`);
+  }
+
+  async getMemberSavingsBalance(memberId) {
+    return await this.request(`/collector/members/${memberId}/savings/balance`);
+  }
+
+  async getMemberSavingsHistory(memberId, skip = 0, limit = 100) {
+    return await this.request(`/collector/members/${memberId}/savings/history?skip=${skip}&limit=${limit}`);
   }
 
   async getLoanPayments(loanId) {
@@ -409,7 +461,6 @@ class ApiService {
   // User Management APIs
   async getUsers(skip = 0, limit = 100) {
     const data = await this.request(`/users?skip=${skip}&limit=${limit}`);
-    console.log("API getUsers response:", data);
     return data;
   }
 
@@ -445,14 +496,12 @@ class ApiService {
   }
 
   async activateUser(userId) {
-    console.log("API: Activating user", userId);
     return await this.request(`/users/${userId}/activate`, {
       method: 'POST'
     });
   }
 
   async deactivateUser(userId) {
-    console.log("API: Deactivating user", userId);
     return await this.request(`/users/${userId}/deactivate`, {
       method: 'POST'
     });
@@ -493,7 +542,6 @@ class ApiService {
         try {
           await this.removeRoleFromUser(userId, role.id);
         } catch (error) {
-          console.error(`Failed to remove role ${role.id} from user ${userId}:`, error);
         }
       }
     }
@@ -576,10 +624,10 @@ class ApiService {
   }
 
   // Bonus Management APIs
-  async createMemberBonus(bonusData) {
-    return await this.request('/admin/bonuses', {
+  async createMemberBonus(payableData) {
+    return await this.request('/admin/payablees', {
       method: 'POST',
-      body: JSON.stringify(bonusData),
+      body: JSON.stringify(payableData),
     });
   }
 
@@ -587,46 +635,46 @@ class ApiService {
     const params = new URLSearchParams();
     if (filters.member_id && filters.member_id !== '') params.append('member_id', filters.member_id);
     if (filters.status && filters.status !== '') params.append('status', filters.status);
-    if (filters.bonus_type && filters.bonus_type !== '') params.append('bonus_type', filters.bonus_type);
+    if (filters.payable_type && filters.payable_type !== '') params.append('payable_type', filters.payable_type);
     if (filters.skip !== undefined) params.append('skip', filters.skip);
     if (filters.limit !== undefined) params.append('limit', filters.limit);
     
     const queryString = params.toString();
-    return await this.request(`/admin/bonuses${queryString ? `?${queryString}` : ''}`);
+    return await this.request(`/admin/payablees${queryString ? `?${queryString}` : ''}`);
   }
 
-  async getMemberBonus(bonusId) {
-    return await this.request(`/admin/bonuses/${bonusId}`);
+  async getMemberBonus(payableId) {
+    return await this.request(`/admin/payablees/${payableId}`);
   }
 
-  async updateMemberBonus(bonusId, bonusData) {
-    return await this.request(`/admin/bonuses/${bonusId}`, {
+  async updateMemberBonus(payableId, payableData) {
+    return await this.request(`/admin/payablees/${payableId}`, {
       method: 'PUT',
-      body: JSON.stringify(bonusData),
+      body: JSON.stringify(payableData),
     });
   }
 
-  async approveMemberBonus(bonusId) {
-    return await this.request(`/admin/bonuses/${bonusId}/approve`, {
+  async approveMemberBonus(payableId) {
+    return await this.request(`/admin/payablees/${payableId}/approve`, {
       method: 'POST',
     });
   }
 
-  async markBonusPaid(bonusId) {
-    return await this.request(`/admin/bonuses/${bonusId}/mark-paid`, {
+  async markBonusPaid(payableId) {
+    return await this.request(`/admin/payablees/${payableId}/mark-paid`, {
       method: 'POST',
     });
   }
 
-  async cancelMemberBonus(bonusId) {
-    return await this.request(`/admin/bonuses/${bonusId}/cancel`, {
+  async cancelMemberBonus(payableId) {
+    return await this.request(`/admin/payablees/${payableId}/cancel`, {
       method: 'POST',
     });
   }
 
   async getBonusSummary(memberId = null) {
     const params = memberId ? `?member_id=${memberId}` : '';
-    return await this.request(`/admin/bonuses/summary${params}`);
+    return await this.request(`/admin/payablees/summary${params}`);
   }
 
 

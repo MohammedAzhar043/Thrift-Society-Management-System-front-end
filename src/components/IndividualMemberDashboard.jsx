@@ -78,7 +78,7 @@ function IndividualMemberDashboard({ user, onLogout }) {
       const loans = await apiService.getCurrentLoans();
       setCurrentLoans(loans || []);
       
-      // Load loan requests
+      // Load loan requests (including all pending loans)
       const requests = await apiService.getMemberLoanRequests();
       setLoanRequests(requests || []);
       
@@ -129,7 +129,6 @@ function IndividualMemberDashboard({ user, onLogout }) {
       setPaymentHistory(payments);
       
     } catch (err) {
-      console.error('Error loading dashboard data:', err);
       setError('Failed to load dashboard data. Please try again.');
       // Set default values to prevent NaN
       setDashboardStats({
@@ -154,8 +153,8 @@ function IndividualMemberDashboard({ user, onLogout }) {
   const handleLoanApplication = async (e) => {
     e.preventDefault();
     
-    if (!loanApplication.requested_amount || !loanApplication.purpose) {
-      toast.error('Please fill in all required fields');
+    if (!loanApplication.requested_amount) {
+      toast.error('Please enter the requested amount');
       return;
     }
     
@@ -176,8 +175,8 @@ function IndividualMemberDashboard({ user, onLogout }) {
       const loanData = {
         member_id: memberProfile.id,
         group_id: memberProfile.group_id || 1, // Default to group 1 if not specified
-        requested_amount: amount,
-        purpose: loanApplication.purpose.trim(),
+        loan_amount: amount,
+        purpose: loanApplication.purpose?.trim() || null,
         term_months: parseInt(loanApplication.term_months) || 12
       };
       
@@ -197,7 +196,6 @@ function IndividualMemberDashboard({ user, onLogout }) {
       toast.success('Loan application submitted successfully! It is now pending approval.');
     }, {
       onError: (err) => {
-        console.error('Error submitting loan application:', err);
         let errorMessage = 'Failed to submit loan application. Please try again.';
         
         // Use the detailed error message from API service
@@ -215,7 +213,6 @@ function IndividualMemberDashboard({ user, onLogout }) {
       await apiService.logout();
       onLogout();
     } catch (error) {
-      console.error('Logout error:', error);
       onLogout(); // Still logout even if API call fails
     }
   };
@@ -357,24 +354,28 @@ function IndividualMemberDashboard({ user, onLogout }) {
       
       {/* Header */}
       <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <div>
-            <h1 className="text-xl font-semibold text-gray-900">Member Dashboard</h1>
-            <p className="text-sm text-gray-600">Welcome, {user?.full_name || user?.username}</p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between py-4 gap-4">
+            <div className="flex-1 min-w-0 overflow-hidden">
+              <h1 className="text-lg sm:text-xl font-semibold text-gray-900 truncate">Member Dashboard</h1>
+              <p className="text-sm text-gray-600 truncate">Welcome, {user?.full_name || user?.username}</p>
           </div>
-          <div className="flex items-center space-x-4">
+            <div className="flex-shrink-0 flex items-center space-x-1 sm:space-x-2">
             <button
               onClick={() => setShowProfileModal(true)}
-              className="flex items-center text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md hover:bg-gray-100"
+                className="inline-flex items-center px-2 sm:px-3 py-1.5 sm:py-2 border border-transparent text-xs sm:text-sm font-medium rounded text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-blue-500 transition-colors duration-200"
             >
-              <FaUser className="mr-2" /> Profile
+                <FaUser className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+                <span className="hidden sm:inline">Profile</span>
             </button>
           <button
               onClick={handleLogout}
-              className="flex items-center text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md hover:bg-gray-100"
+                className="inline-flex items-center px-2 sm:px-3 py-1.5 sm:py-2 border border-transparent text-xs sm:text-sm font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-red-500 transition-colors duration-200"
           >
-              <FaSignOutAlt className="mr-2" /> Logout
+                <FaSignOutAlt className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
+                <span className="hidden sm:inline">Logout</span>
           </button>
+            </div>
           </div>
         </div>
       </header>
@@ -518,7 +519,7 @@ function IndividualMemberDashboard({ user, onLogout }) {
                       <div className="flex justify-between">
                         <span className="text-gray-600">Pending Requests:</span>
                         <span className="font-medium">
-                          {loanRequests.filter(r => r.status === 'PENDING').length}
+                          {loanRequests.filter(r => r.status === 'REQUEST' || r.status === 'PENDING').length}
                         </span>
                       </div>
                     </div>
@@ -568,57 +569,59 @@ function IndividualMemberDashboard({ user, onLogout }) {
                   </button>
                 </div>
 
+                {/* Desktop Loans Table */}
+                <div className="hidden lg:block bg-white shadow rounded-lg">
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Loan ID
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Amount
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Purpose
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Term
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Status
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Actions
                         </th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {currentLoans.map((loan) => (
-                        <tr key={loan.id}>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          <tr key={loan.id} className="hover:bg-gray-50 transition-colors">
+                            <td className="px-4 py-4 text-sm font-medium text-gray-900">
                             #{loan.id}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <td className="px-4 py-4 text-sm text-gray-900">
                             {formatCurrency(loan.loan_amount)}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td className="px-4 py-4 text-sm text-gray-500">
                             {getDisplayValue(loan.purpose, 'N/A')}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td className="px-4 py-4 text-sm text-gray-500">
                             {loan.term_months || 0} months
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(loan.status)}`}>
+                            <td className="px-4 py-4">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(loan.status)}`}>
                               {getDisplayValue(loan.status, 'N/A')}
                             </span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <td className="px-4 py-4 text-sm font-medium">
                             <button
                               onClick={() => {
                                 setSelectedLoan(loan);
                                 setShowLoanDetailsModal(true);
                               }}
-                              className="text-blue-600 hover:text-blue-900"
+                                className="text-blue-600 hover:text-blue-900 transition-colors"
                             >
                               <FaEye />
                             </button>
@@ -627,8 +630,58 @@ function IndividualMemberDashboard({ user, onLogout }) {
                       ))}
                     </tbody>
                   </table>
-                  {currentLoans.length === 0 && (
-                    <p className="text-center py-8 text-gray-500">No active loans found</p>
+                  </div>
+                </div>
+
+                {/* Mobile Loans Cards */}
+                <div className="lg:hidden space-y-4">
+                  {currentLoans.length === 0 ? (
+                    <div className="text-center py-8">
+                      <div className="text-gray-400 mb-4">
+                        <FaMoneyBillWave className="w-12 h-12 mx-auto" />
+                      </div>
+                      <p className="text-lg font-medium text-gray-900 mb-1">No active loans found</p>
+                      <p className="text-sm text-gray-500">Apply for a new loan to get started.</p>
+                    </div>
+                  ) : (
+                    currentLoans.map((loan) => (
+                      <div key={loan.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2 mb-1">
+                              <span className="text-sm font-medium text-gray-500">#{loan.id}</span>
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(loan.status)}`}>
+                                {getDisplayValue(loan.status, 'N/A')}
+                              </span>
+                            </div>
+                            <h3 className="text-lg font-semibold text-gray-900">
+                              {formatCurrency(loan.loan_amount)}
+                            </h3>
+                            <p className="text-sm text-gray-600 mt-1">
+                              {getDisplayValue(loan.purpose, 'No purpose specified')}
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => {
+                              setSelectedLoan(loan);
+                              setShowLoanDetailsModal(true);
+                            }}
+                            className="text-blue-600 hover:text-blue-900 p-1"
+                          >
+                            <FaEye className="w-4 h-4" />
+                          </button>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 gap-2 text-sm">
+                          <div>
+                            <span className="text-gray-500">Term:</span>
+                            <p className="font-medium text-gray-900">
+                              {loan.term_months || 0} months
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))
                   )}
                 </div>
               </div>
@@ -647,59 +700,108 @@ function IndividualMemberDashboard({ user, onLogout }) {
                   </button>
                 </div>
 
+                {/* Desktop Loan Requests Table */}
+                <div className="hidden lg:block bg-white shadow rounded-lg">
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Request ID
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Amount
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Purpose
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Term
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Status
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Requested Date
                         </th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {loanRequests.map((request) => (
-                        <tr key={request.id}>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          <tr key={request.id} className="hover:bg-gray-50 transition-colors">
+                            <td className="px-4 py-4 text-sm font-medium text-gray-900">
                             #{request.id}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {formatCurrency(request.requested_amount)}
+                            <td className="px-4 py-4 text-sm text-gray-900">
+                            {formatCurrency(request.loan_amount)}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td className="px-4 py-4 text-sm text-gray-500">
                             {getDisplayValue(request.purpose, 'N/A')}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td className="px-4 py-4 text-sm text-gray-500">
                             {request.term_months || 0} months
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(request.status)}`}>
+                            <td className="px-4 py-4">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
                               {getDisplayValue(request.status, 'N/A')}
                             </span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td className="px-4 py-4 text-sm text-gray-500">
                             {formatDate(request.requested_at || request.created_at)}
                           </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
-                  {loanRequests.length === 0 && (
-                    <p className="text-center py-8 text-gray-500">No loan requests found</p>
+                  </div>
+                </div>
+
+                {/* Mobile Loan Requests Cards */}
+                <div className="lg:hidden space-y-4">
+                  {loanRequests.length === 0 ? (
+                    <div className="text-center py-8">
+                      <div className="text-gray-400 mb-4">
+                        <FaClock className="w-12 h-12 mx-auto" />
+                      </div>
+                      <p className="text-lg font-medium text-gray-900 mb-1">No loan requests found</p>
+                      <p className="text-sm text-gray-500">Submit a new loan request to get started.</p>
+                    </div>
+                  ) : (
+                    loanRequests.map((request) => (
+                      <div key={request.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2 mb-1">
+                              <span className="text-sm font-medium text-gray-500">#{request.id}</span>
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
+                                {getDisplayValue(request.status, 'N/A')}
+                              </span>
+                            </div>
+                            <h3 className="text-lg font-semibold text-gray-900">
+                              {formatCurrency(request.loan_amount)}
+                            </h3>
+                            <p className="text-sm text-gray-600 mt-1">
+                              {getDisplayValue(request.purpose, 'No purpose specified')}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <span className="text-gray-500">Term:</span>
+                            <p className="font-medium text-gray-900">
+                              {request.term_months || 0} months
+                            </p>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">Requested:</span>
+                            <p className="font-medium text-gray-900">
+                              {formatDate(request.requested_at || request.created_at)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))
                   )}
                 </div>
             </div>
@@ -709,44 +811,46 @@ function IndividualMemberDashboard({ user, onLogout }) {
             {activeTab === 'payments' && (
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-6">Payment History</h3>
+                {/* Desktop Payment History Table */}
+                <div className="hidden lg:block bg-white shadow rounded-lg">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Date
                     </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Amount
                     </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Type
                     </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Purpose
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Status
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {paymentHistory.map((payment) => (
-                    <tr key={payment.id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <tr key={payment.id} className="hover:bg-gray-50 transition-colors">
+                            <td className="px-4 py-4 text-sm text-gray-900">
                             {formatDate(payment.transaction_date)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <td className="px-4 py-4 text-sm font-medium text-gray-900">
                             {formatCurrency(payment.amount)}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td className="px-4 py-4 text-sm text-gray-500">
                             {getDisplayValue(payment.payment_type || payment.type, 'Payment')}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {getDisplayValue(payment.purpose, 'N/A')}
+                            <td className="px-4 py-4 text-sm text-gray-500">
+                        {payment.purpose || payment.description || 'N/A'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(payment.status)}`}>
+                            <td className="px-4 py-4">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(payment.status)}`}>
                           {getDisplayValue(payment.status, 'N/A')}
                         </span>
                       </td>
@@ -754,8 +858,51 @@ function IndividualMemberDashboard({ user, onLogout }) {
                   ))}
                 </tbody>
               </table>
-                  {paymentHistory.length === 0 && (
-                    <p className="text-center py-8 text-gray-500">No payment history found</p>
+                  </div>
+                </div>
+
+                {/* Mobile Payment History Cards */}
+                <div className="lg:hidden space-y-4">
+                  {paymentHistory.length === 0 ? (
+                    <div className="text-center py-8">
+                      <div className="text-gray-400 mb-4">
+                        <FaCreditCard className="w-12 h-12 mx-auto" />
+                      </div>
+                      <p className="text-lg font-medium text-gray-900 mb-1">No payment history found</p>
+                      <p className="text-sm text-gray-500">Payment history will appear here once payments are made.</p>
+                    </div>
+                  ) : (
+                    paymentHistory.map((payment) => (
+                      <div key={payment.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2 mb-1">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(payment.status)}`}>
+                                {getDisplayValue(payment.status, 'N/A')}
+                              </span>
+                              <span className="text-sm text-gray-500">
+                                {formatDate(payment.transaction_date)}
+                              </span>
+                            </div>
+                            <h3 className="text-lg font-semibold text-gray-900">
+                              {formatCurrency(payment.amount)}
+                            </h3>
+                            <p className="text-sm text-gray-600 mt-1">
+                              {getDisplayValue(payment.payment_type || payment.type, 'Payment')}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 gap-2 text-sm">
+                          <div>
+                            <span className="text-gray-500">Purpose:</span>
+                            <p className="font-medium text-gray-900">
+                              {payment.purpose || payment.description || 'N/A'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))
                   )}
                 </div>
               </div>
@@ -765,44 +912,46 @@ function IndividualMemberDashboard({ user, onLogout }) {
             {activeTab === 'transactions' && (
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-6">Transaction History</h3>
+                {/* Desktop Transaction History Table */}
+                <div className="hidden lg:block bg-white shadow rounded-lg">
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Date
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Description
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Type
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Amount
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Status
                         </th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {transactionHistory.map((transaction) => (
-                        <tr key={transaction.id}>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <tr key={transaction.id} className="hover:bg-gray-50 transition-colors">
+                            <td className="px-4 py-4 text-sm text-gray-900">
                             {formatDate(transaction.transaction_date)}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <td className="px-4 py-4 text-sm text-gray-900">
                             {getDisplayValue(transaction.description, 'Transaction')}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td className="px-4 py-4 text-sm text-gray-500">
                             {getDisplayValue(transaction.type, 'N/A')}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <td className="px-4 py-4 text-sm font-medium text-gray-900">
                             {formatCurrency(transaction.amount)}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(transaction.status)}`}>
+                            <td className="px-4 py-4">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(transaction.status)}`}>
                               {getDisplayValue(transaction.status, 'N/A')}
                             </span>
                           </td>
@@ -810,8 +959,47 @@ function IndividualMemberDashboard({ user, onLogout }) {
                       ))}
                     </tbody>
                   </table>
-                  {transactionHistory.length === 0 && (
-                    <p className="text-center py-8 text-gray-500">No transactions found</p>
+                  </div>
+                </div>
+
+                {/* Mobile Transaction History Cards */}
+                <div className="lg:hidden space-y-4">
+                  {transactionHistory.length === 0 ? (
+                    <div className="text-center py-8">
+                      <div className="text-gray-400 mb-4">
+                        <FaHistory className="w-12 h-12 mx-auto" />
+                      </div>
+                      <p className="text-lg font-medium text-gray-900 mb-1">No transactions found</p>
+                      <p className="text-sm text-gray-500">Transaction history will appear here once activities are recorded.</p>
+                    </div>
+                  ) : (
+                    transactionHistory.map((transaction) => (
+                      <div key={transaction.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2 mb-1">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(transaction.status)}`}>
+                                {getDisplayValue(transaction.status, 'N/A')}
+                              </span>
+                              <span className="text-sm text-gray-500">
+                                {formatDate(transaction.transaction_date)}
+                              </span>
+                            </div>
+                            <h3 className="text-lg font-semibold text-gray-900">
+                              {getDisplayValue(transaction.description, 'Transaction')}
+                            </h3>
+                            <p className="text-sm text-gray-600 mt-1">
+                              {getDisplayValue(transaction.type, 'N/A')}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-lg font-bold text-gray-900">
+                              {formatCurrency(transaction.amount)}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))
                   )}
                 </div>
               </div>
@@ -841,14 +1029,13 @@ function IndividualMemberDashboard({ user, onLogout }) {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Purpose *</label>
+                  <label className="block text-sm font-medium text-gray-700">Purpose</label>
                   <textarea
                     value={loanApplication.purpose}
                     onChange={(e) => setLoanApplication({...loanApplication, purpose: e.target.value})}
                     rows={3}
                     className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Describe the purpose of the loan"
-                    required
+                    placeholder="Describe the purpose of the loan (optional)"
                   />
                 </div>
                 <div>

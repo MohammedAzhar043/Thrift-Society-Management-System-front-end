@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
-const BonusTable = ({ bonuses, onApprove, onMarkPaid, onCancel, onEdit, loading = false }) => {
+
+const BonusTable = ({ payablees, onApprove, onMarkPaid, onCancel, onEdit, loading = false }) => {
   const [sortField, setSortField] = useState('created_at');
   const [sortDirection, setSortDirection] = useState('desc');
 
@@ -27,7 +28,8 @@ const BonusTable = ({ bonuses, onApprove, onMarkPaid, onCancel, onEdit, loading 
       REFERRAL: { bg: 'bg-green-100', text: 'text-green-800' },
       SPECIAL: { bg: 'bg-pink-100', text: 'text-pink-800' },
       HOLIDAY: { bg: 'bg-orange-100', text: 'text-orange-800' },
-      ACHIEVEMENT: { bg: 'bg-cyan-100', text: 'text-cyan-800' }
+      ACHIEVEMENT: { bg: 'bg-cyan-100', text: 'text-cyan-800' },
+      AMOUNT_RETURN: { bg: 'bg-gray-100', text: 'text-gray-800' }
     };
 
     const config = typeConfig[type] || typeConfig.PERFORMANCE;
@@ -62,7 +64,7 @@ const BonusTable = ({ bonuses, onApprove, onMarkPaid, onCancel, onEdit, loading 
     }
   };
 
-  const sortedBonuses = [...bonuses].sort((a, b) => {
+  const sortedBonuses = [...payablees].sort((a, b) => {
     let aValue = a[sortField];
     let bValue = b[sortField];
 
@@ -86,10 +88,10 @@ const BonusTable = ({ bonuses, onApprove, onMarkPaid, onCancel, onEdit, loading 
     );
   }
 
-  if (bonuses.length === 0) {
+  if (payablees.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
-        No bonuses found
+        No payablees found
       </div>
     );
   }
@@ -107,7 +109,7 @@ const BonusTable = ({ bonuses, onApprove, onMarkPaid, onCancel, onEdit, loading 
             </th>
             <th
               className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSort('bonus_type')}
+              onClick={() => handleSort('payable_type')}
             >
               Type
             </th>
@@ -135,43 +137,43 @@ const BonusTable = ({ bonuses, onApprove, onMarkPaid, onCancel, onEdit, loading 
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {sortedBonuses.map((bonus) => (
-            <tr key={bonus.id} className="hover:bg-gray-50">
+          {sortedBonuses.map((payable) => (
+            <tr key={payable.id} className="hover:bg-gray-50">
               <td className="px-6 py-4 whitespace-nowrap">
                 <div>
                   <div className="text-sm font-medium text-gray-900">
-                    {bonus.member?.user?.full_name || bonus.member?.user?.username || 'Unknown'}
+                    {payable.member?.user?.full_name || payable.member?.user?.username || 'Unknown'}
                   </div>
                   <div className="text-sm text-gray-500">
-                    {bonus.member?.member_code} - {bonus.member?.group?.name}
+                    {payable.member?.member_code} - {payable.member?.group?.name}
                   </div>
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                {getBonusTypeBadge(bonus.bonus_type)}
+                {getBonusTypeBadge(payable.payable_type)}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                {formatCurrency(bonus.amount)}
+                {formatCurrency(payable.amount)}
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                {getStatusBadge(bonus.status)}
+                {getStatusBadge(payable.status)}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {formatDate(bonus.created_at)}
+                {formatDate(payable.created_at)}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <div className="flex space-x-2">
-                  {bonus.status === 'PENDING' && (
+                  {payable.status === 'PENDING' && (
                     <>
                       <button
-                        onClick={() => onApprove(bonus.id)}
+                        onClick={() => onApprove(payable.id)}
                         className="text-green-600 hover:text-green-900"
                         title="Approve"
                       >
                         ✓
                       </button>
                       <button
-                        onClick={() => onCancel(bonus.id)}
+                        onClick={() => onCancel(payable.id)}
                         className="text-red-600 hover:text-red-900"
                         title="Cancel"
                       >
@@ -179,9 +181,9 @@ const BonusTable = ({ bonuses, onApprove, onMarkPaid, onCancel, onEdit, loading 
                       </button>
                     </>
                   )}
-                  {bonus.status === 'APPROVED' && (
+                  {payable.status === 'APPROVED' && (
                     <button
-                      onClick={() => onMarkPaid(bonus.id)}
+                      onClick={() => onMarkPaid(payable.id)}
                       className="text-blue-600 hover:text-blue-900"
                       title="Mark as Paid"
                     >
@@ -189,7 +191,7 @@ const BonusTable = ({ bonuses, onApprove, onMarkPaid, onCancel, onEdit, loading 
                     </button>
                   )}
                   <button
-                    onClick={() => onEdit(bonus)}
+                    onClick={() => onEdit(payable)}
                     className="text-gray-600 hover:text-gray-900"
                     title="Edit"
                   >

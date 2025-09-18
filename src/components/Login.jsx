@@ -29,10 +29,11 @@ function Login({ onLogin }) {
       return;
     }
     
-    if (!isCaptchaValid) {
-      setError('Please complete the security verification correctly');
-      return;
-    }
+    // Temporarily disable reCAPTCHA for testing
+    // if (!isCaptchaValid) {
+    //   setError('Please complete the security verification correctly');
+    //   return;
+    // }
     
     setIsLoading(true);
     setError('');
@@ -51,9 +52,6 @@ function Login({ onLogin }) {
       // Determine primary role (use the first role for now)
       const primaryRole = userInfo.roles[0]?.name || 'member';
       
-      console.log('User info from API:', userInfo); // Debug log
-      console.log('User roles:', userInfo.roles); // Debug log
-      console.log('Primary role determined:', primaryRole); // Debug log
       
       const userData = {
         username: userInfo.username,
@@ -63,7 +61,6 @@ function Login({ onLogin }) {
         email: userInfo.email
       };
       
-      console.log('User data being set:', userData); // Debug log
       
       onLogin(userData);
       
@@ -164,9 +161,9 @@ function Login({ onLogin }) {
             <div>
               <button
                 type="submit"
-                disabled={isLoading || !isCaptchaValid}
+                disabled={isLoading}
                 className={`w-full flex justify-center py-2 sm:py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
-                  isLoading || !isCaptchaValid
+                  isLoading
                     ? 'bg-blue-400 cursor-not-allowed' 
                     : 'bg-blue-600 hover:bg-blue-700'
                 }`}

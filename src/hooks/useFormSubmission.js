@@ -19,7 +19,6 @@ export const useFormSubmission = () => {
    */
   const submitForm = useCallback(async (submitFunction, options = {}) => {
     if (isSubmitting) {
-      console.warn('Form is already being submitted, ignoring duplicate submission');
       return;
     }
 

@@ -26,7 +26,7 @@ import {
   downloadCSV,
   generateFilename
 } from "./admin";
-import BonusManagement from "./admin/BonusManagement";
+import PayableManagement from "./admin/PayableManagement";
 
 function AdminDashboard({ user, onLogout }) {
   const [pendingApprovals, setPendingApprovals] = useState([]);
@@ -52,10 +52,11 @@ function AdminDashboard({ user, onLogout }) {
   const [showReportsModal, setShowReportsModal] = useState(false);
   const [showMembersModal, setShowMembersModal] = useState(false);
   const [showUserManagementModal, setShowUserManagementModal] = useState(false);
-  const [showBonusManagement, setShowBonusManagement] = useState(false);
+  const [showPayableManagement, setShowPayableManagement] = useState(false);
   const [selectedLoanForApproval, setSelectedLoanForApproval] = useState(null);
   const [interestRate, setInterestRate] = useState("");
   const [showInterestRateModal, setShowInterestRateModal] = useState(false);
+  const [showPrintConfirmation, setShowPrintConfirmation] = useState(false);
   
   
   // Form states
@@ -148,7 +149,6 @@ function AdminDashboard({ user, onLogout }) {
       setLoans(loansData);
       
     } catch (error) {
-      console.error("Error loading additional data:", error);
       setError("Failed to load additional data. Please try again.");
     }
   };
@@ -174,7 +174,6 @@ function AdminDashboard({ user, onLogout }) {
       // Fallback: if no users with specific roles found, show all active users
       // This helps with debugging and development
       if (teamLeadersList.length === 0) {
-        console.warn("No team leaders found with role 'teamleader'. Showing all active users for debugging.");
         const activeUsers = users.filter(user => user.is_active);
         setTeamLeaders(activeUsers);
       } else {
@@ -182,26 +181,14 @@ function AdminDashboard({ user, onLogout }) {
       }
       
       if (billCollectorsList.length === 0) {
-        console.warn("No bill collectors found with role 'billcollector'. Showing all active users for debugging.");
         const activeUsers = users.filter(user => user.is_active);
         setBillCollectors(activeUsers);
       } else {
         setBillCollectors(billCollectorsList);
       }
       
-      // Debug logging
-      console.log("All users loaded:", users.length);
-      console.log("Users with roles:", users.map(u => ({ 
-        id: u.id, 
-        name: u.full_name || u.username, 
-        roles: u.roles?.map(r => r.name) || [],
-        is_active: u.is_active 
-      })));
-      console.log("Team leaders found:", teamLeadersList.length, teamLeadersList.map(u => ({ id: u.id, name: u.full_name || u.username, roles: u.roles?.map(r => r.name) })));
-      console.log("Bill collectors found:", billCollectorsList.length, billCollectorsList.map(u => ({ id: u.id, name: u.full_name || u.username, roles: u.roles?.map(r => r.name) })));
       
     } catch (error) {
-      console.error("Error loading users:", error);
       // Don't set error state here as it's not critical for main functionality
     }
   };
@@ -295,7 +282,6 @@ function AdminDashboard({ user, onLogout }) {
       toast.success(`Loan approved with ${rateMessage} interest rate!`);
       
     } catch (error) {
-      console.error("Error processing loan approval:", error);
       toast.error(`Failed to approve loan: ${error.message}`);
     }
   };
@@ -319,7 +305,6 @@ function AdminDashboard({ user, onLogout }) {
       toast.success(`${action === 'approve' ? 'Approved' : 'Rejected'} successfully!`);
       
     } catch (error) {
-      console.error("Error processing approval:", error);
       toast.error(`Failed to ${action}: ${error.message}`);
     }
   };
@@ -329,7 +314,6 @@ function AdminDashboard({ user, onLogout }) {
       await apiService.logout();
       onLogout();
     } catch (error) {
-      console.error("Logout error:", error);
       onLogout(); // Still logout even if API call fails
     }
   };
@@ -367,13 +351,9 @@ function AdminDashboard({ user, onLogout }) {
         }
       }
       
-      console.log("Creating group with data:", groupData);
-      console.log("API Service:", apiService);
-      console.log("API Base URL:", apiService.baseURL);
       
       // Test the API call
       const response = await apiService.createGroup(groupData);
-      console.log("API Response:", response);
       
       toast.success("Group created successfully!");
       setShowCreateGroupModal(false);
@@ -382,12 +362,6 @@ function AdminDashboard({ user, onLogout }) {
       refreshDashboard();
     }, {
       onError: (error) => {
-        console.error("Error creating group:", error);
-        console.error("Error details:", {
-          message: error.message,
-          stack: error.stack,
-          name: error.name
-        });
         const errorMessage = error.message || "Failed to create group. Please try again.";
         toast.error(errorMessage);
       }
@@ -473,7 +447,6 @@ function AdminDashboard({ user, onLogout }) {
           }
         }
       } catch (e) {
-        console.error('Updating team leader roles failed:', e);
         toast.error('Group updated but role assignment failed');
       }
       
@@ -493,7 +466,6 @@ function AdminDashboard({ user, onLogout }) {
       toast.success("Group updated successfully!");
     }, {
       onError: (error) => {
-        console.error("Error updating group:", error);
         toast.error(error.message || "Failed to update group");
       }
     });
@@ -538,7 +510,6 @@ function AdminDashboard({ user, onLogout }) {
       await loadAdditionalData();
       refreshDashboard();
     } catch (error) {
-      console.error("Error deleting group:", error);
       const errorMessage = error.message || "Failed to delete group. Please try again.";
       toast.error(errorMessage, {
         duration: 5000,
@@ -555,8 +526,8 @@ function AdminDashboard({ user, onLogout }) {
     setShowMembersModal(true);
   };
 
-  const handleManageBonuses = () => {
-    setShowBonusManagement(true);
+  const handleManagePayables = () => {
+    setShowPayableManagement(true);
   };
 
 
@@ -569,7 +540,6 @@ function AdminDashboard({ user, onLogout }) {
       refreshDashboard();
       toast.success("Reports data refreshed successfully!");
     } catch (error) {
-      console.error("Error refreshing reports data:", error);
       toast.error("Failed to refresh reports data. Please try again.");
     } finally {
       setIsRefreshingReports(false);
@@ -609,13 +579,202 @@ function AdminDashboard({ user, onLogout }) {
       toast.success(`${reportTitle} generated and downloaded successfully!`);
     }, {
       onError: (error) => {
-        console.error("Error generating report:", error);
         toast.error("Failed to generate report. Please try again.");
       }
     });
   };
 
+  // Print functionality for Members Management
+  const handlePrintMembers = () => {
+    setShowPrintConfirmation(true);
+  };
 
+  const confirmPrint = () => {
+    setShowPrintConfirmation(false);
+    
+    // Get the current filtered members data
+    const printData = filteredMembers;
+    
+    if (printData.length === 0) {
+      toast.error("No members to print");
+      return;
+    }
+
+    // Create a new window for printing
+    const printWindow = window.open('', '_blank');
+    
+    // Get current date for the report
+    const currentDate = new Date().toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+
+    // Get selected group name if filtered
+    const selectedGroup = groups.find(g => g.id === parseInt(groupFilter));
+    const groupName = selectedGroup ? selectedGroup.name : 'All Groups';
+
+    // Create the print content
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Members Report - ${groupName}</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            color: #333;
+          }
+          .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 20px;
+          }
+          .header h1 {
+            margin: 0;
+            color: #1f2937;
+            font-size: 24px;
+          }
+          .header p {
+            margin: 5px 0 0 0;
+            color: #6b7280;
+            font-size: 14px;
+          }
+          .filters {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f9fafb;
+            border-radius: 8px;
+            font-size: 14px;
+          }
+          .filters h3 {
+            margin: 0 0 10px 0;
+            color: #374151;
+            font-size: 16px;
+          }
+          .filters p {
+            margin: 5px 0;
+            color: #6b7280;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 12px;
+          }
+          th, td {
+            border: 1px solid #d1d5db;
+            padding: 8px;
+            text-align: left;
+          }
+          th {
+            background-color: #f3f4f6;
+            font-weight: 600;
+            color: #374151;
+          }
+          tr:nth-child(even) {
+            background-color: #f9fafb;
+          }
+          .status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+          }
+          .status-active { background-color: #dcfce7; color: #166534; }
+          .status-pending { background-color: #fef3c7; color: #92400e; }
+          .status-inactive { background-color: #f3f4f6; color: #6b7280; }
+          .status-suspended { background-color: #fed7d7; color: #c53030; }
+          .status-rejected { background-color: #fecaca; color: #dc2626; }
+          .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #6b7280;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 20px;
+          }
+          @media print {
+            body { margin: 0; }
+            .no-print { display: none; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Members Management Report</h1>
+          <p>Generated on ${currentDate}</p>
+        </div>
+        
+        <div class="filters">
+          <h3>Report Filters</h3>
+          <p><strong>Group:</strong> ${groupName}</p>
+          <p><strong>Status:</strong> ${statusFilter || 'All Status'}</p>
+          <p><strong>Location:</strong> ${locationFilter || 'All Locations'}</p>
+          <p><strong>Search:</strong> ${memberFilter || 'No search filter'}</p>
+          <p><strong>Total Members:</strong> ${printData.length}</p>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Code</th>
+              <th>Name</th>
+              <th>Group</th>
+              <th>Location</th>
+              <th>Status</th>
+              <th>Loans</th>
+              <th>Joined</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${printData.map((member, index) => `
+              <tr>
+                <td>${index + 1}</td>
+                <td>${member.member_code || 'N/A'}</td>
+                <td>${member.user?.full_name || member.user?.username || 'N/A'}</td>
+                <td>${member.group?.name || 'N/A'}</td>
+                <td>${member.group?.location || 'N/A'}</td>
+                <td>
+                  <span class="status status-${(member.status || '').toLowerCase()}">
+                    ${member.status || 'N/A'}
+                  </span>
+                </td>
+                <td>${loans.filter(loan => loan.member_id === member.id && (loan.status === 'ACTIVE' || loan.status === 'DISBURSED' || loan.status === 'APPROVED')).length}</td>
+                <td>${member.joined_date ? new Date(member.joined_date).toLocaleDateString() : 'N/A'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+
+        <div class="footer">
+          <p>This report was generated from the Microfinance Management System</p>
+          <p>Report contains ${printData.length} member(s) as of ${currentDate}</p>
+        </div>
+      </body>
+      </html>
+    `;
+
+    // Write content to the new window
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    
+    // Wait for content to load, then print
+    printWindow.onload = () => {
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+    };
+
+    toast.success("Print dialog opened successfully!");
+  };
+
+  const cancelPrint = () => {
+    setShowPrintConfirmation(false);
+  };
 
   // Split members and loans
   const memberApprovals = pendingApprovals.filter(
@@ -861,7 +1020,7 @@ function AdminDashboard({ user, onLogout }) {
           onViewReports={handleViewReports}
           onViewMembers={handleViewMembers}
           onManageUsers={() => setShowUserManagementModal(true)}
-          onManageBonuses={handleManageBonuses}
+          onManagePayables={handleManagePayables}
         />
 
 
@@ -1162,40 +1321,51 @@ function AdminDashboard({ user, onLogout }) {
 
       {/* Members Management Modal */}
        {showMembersModal && (
-           <>
          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-           <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-6xl shadow-lg rounded-md bg-white">
+          <div className="relative top-4 sm:top-20 mx-auto p-3 sm:p-5 border w-11/12 max-w-7xl shadow-lg rounded-md bg-white">
              <div className="mt-3">
-               <div className="flex justify-between items-center mb-4">
-                 <h3 className="text-lg font-medium text-gray-900">Members Management</h3>
+              <div className="flex justify-between items-center mb-4 sm:mb-6">
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Members Management</h3>
+                <div className="flex items-center space-x-3">
+                  <button
+                    onClick={handlePrintMembers}
+                    className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                    </svg>
+                    Print
+                  </button>
                  <button
                    onClick={() => setShowMembersModal(false)}
-                   className="text-gray-400 hover:text-gray-600"
+                    className="text-gray-400 hover:text-gray-600 transition-colors p-1"
                  >
-                   <FaTimes className="h-6 w-6" />
+                    <FaTimes className="h-5 w-5 sm:h-6 sm:w-6" />
                  </button>
                </div>
+              </div>
+              
                 <div className="mb-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     {/* Search Filter */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
+                  <div className="sm:col-span-2 lg:col-span-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Search Members</label>
                       <input
                         type="text"
                         value={memberFilter}
                         onChange={(e) => setMemberFilter(e.target.value)}
                         placeholder="Search by name, email, code..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                       />
                     </div>
 
                     {/* Group Filter */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Group</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Group</label>
                       <select
                         value={groupFilter}
                         onChange={(e) => setGroupFilter(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                       >
                         <option value="">All Groups</option>
                         {groups.map(group => (
@@ -1208,11 +1378,11 @@ function AdminDashboard({ user, onLogout }) {
 
                     {/* Status Filter */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Status</label>
                       <select
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                       >
                         <option value="">All Status</option>
                         <option value="ACTIVE">Active</option>
@@ -1225,11 +1395,11 @@ function AdminDashboard({ user, onLogout }) {
 
                     {/* Location Filter */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Location</label>
                       <select
                         value={locationFilter}
                         onChange={(e) => setLocationFilter(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                       >
                         <option value="">All Locations</option>
                         {[...new Set(groups.map(group => group.location).filter(Boolean))].map(location => (
@@ -1242,7 +1412,7 @@ function AdminDashboard({ user, onLogout }) {
                   </div>
 
                   {/* Clear Filters Button */}
-                  <div className="mt-4 flex justify-between items-center">
+                <div className="mt-4 flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-2 sm:space-y-0">
                     <button
                       onClick={() => {
                         setMemberFilter("");
@@ -1250,7 +1420,7 @@ function AdminDashboard({ user, onLogout }) {
                         setStatusFilter("");
                         setLocationFilter("");
                       }}
-                      className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-md hover:bg-gray-50"
+                    className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
                     >
                       Clear All Filters
                     </button>
@@ -1259,32 +1429,33 @@ function AdminDashboard({ user, onLogout }) {
                     </p>
                   </div>
                 </div>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 table-fixed" style={{minWidth: '800px'}}>
+              {/* Desktop Table View */}
+              <div className="hidden lg:block overflow-x-auto shadow-sm border border-gray-200 rounded-lg">
+                <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">
-                        ID
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        #
                       </th>
-                      <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24 min-w-20 whitespace-nowrap">
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Code
                       </th>
-                      <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32 min-w-24 whitespace-nowrap">
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Name
                       </th>
-                      <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28 min-w-20 whitespace-nowrap">
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Group
                       </th>
-                      <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32 min-w-24 whitespace-nowrap">
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Location
                       </th>
-                      <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20 min-w-16 whitespace-nowrap">
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Status
                       </th>
-                      <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20 min-w-16 whitespace-nowrap">
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Loans
                       </th>
-                      <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24 min-w-20 whitespace-nowrap">
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Joined
                       </th>
                     </tr>
@@ -1292,38 +1463,51 @@ function AdminDashboard({ user, onLogout }) {
                   <tbody className="bg-white divide-y divide-gray-200">
                                          {filteredMembers.length === 0 ? (
                        <tr>
-                         <td colSpan="8" className="px-2 sm:px-4 lg:px-6 py-4 text-center text-xs sm:text-sm text-gray-500">
+                        <td colSpan="8" className="px-4 py-8 text-center text-sm text-gray-500">
+                          <div className="flex flex-col items-center">
+                            <div className="text-gray-400 mb-2">
+                              <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                              </svg>
+                            </div>
+                            <p className="text-lg font-medium text-gray-900 mb-1">
                            {memberFilter.trim() === "" ? "No members found" : "No members match your search"}
+                            </p>
+                            <p className="text-sm text-gray-500">
+                              {memberFilter.trim() === "" ? "Try adjusting your filters or add new members." : "Try adjusting your search criteria."}
+                            </p>
+                          </div>
                          </td>
                        </tr>
                      ) : (
                        filteredMembers.map((member, index) => (
-                        <tr key={member.id}>
-                          <td className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-900 whitespace-nowrap w-12">
+                        <tr key={member.id} className="hover:bg-gray-50 transition-colors">
+                          <td className="px-4 py-4 text-sm text-gray-900">
                             {index + 1}
                           </td>
-                          <td className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm font-medium text-gray-900 whitespace-nowrap w-24 min-w-20">
-                            <div className="truncate" title={member.member_code || "N/A"}>
+                          <td className="px-4 py-4 text-sm font-medium text-gray-900">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                               {member.member_code || "N/A"}
-                            </div>
+                            </span>
                           </td>
-                          <td className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-900 whitespace-nowrap w-32 min-w-24">
-                            <div className="truncate" title={member.user?.full_name || member.user?.username || "N/A"}>
+                          <td className="px-4 py-4 text-sm text-gray-900">
+                            <div className="font-medium">
                               {member.user?.full_name || member.user?.username || "N/A"}
                             </div>
+                            {member.user?.email && (
+                              <div className="text-xs text-gray-500">
+                                {member.user.email}
+                              </div>
+                            )}
                           </td>
-                          <td className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap w-28 min-w-20">
-                            <div className="truncate" title={member.group?.name || "N/A"}>
+                          <td className="px-4 py-4 text-sm text-gray-500">
                               {member.group?.name || "N/A"}
-                            </div>
                           </td>
-                          <td className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap w-32 min-w-24">
-                            <div className="truncate" title={member.group?.location || "N/A"}>
+                          <td className="px-4 py-4 text-sm text-gray-500">
                               {member.group?.location || "N/A"}
-                            </div>
                           </td>
-                          <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap w-20 min-w-16">
-                            <span className={`px-1 py-1 text-xs font-semibold rounded-full ${
+                          <td className="px-4 py-4">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                               member.status?.toLowerCase() === 'active' 
                                 ? "bg-green-100 text-green-800" 
                                 : member.status?.toLowerCase() === 'pending'
@@ -1337,13 +1521,13 @@ function AdminDashboard({ user, onLogout }) {
                               {member.status}
                             </span>
                           </td>
-                          <td className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap w-20 min-w-16 text-center">
+                          <td className="px-4 py-4 text-center">
+                            <span className="inline-flex items-center justify-center w-6 h-6 text-xs font-medium text-gray-600 bg-gray-100 rounded-full">
                             {loans.filter(loan => loan.member_id === member.id && (loan.status === 'ACTIVE' || loan.status === 'DISBURSED' || loan.status === 'APPROVED')).length}
+                            </span>
                           </td>
-                          <td className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap w-24 min-w-20">
-                            <div className="truncate" title={member.joined_date ? new Date(member.joined_date).toLocaleDateString() : "N/A"}>
+                          <td className="px-4 py-4 text-sm text-gray-500">
                               {member.joined_date ? new Date(member.joined_date).toLocaleDateString() : "N/A"}
-                            </div>
                           </td>
                         </tr>
                       ))
@@ -1351,10 +1535,85 @@ function AdminDashboard({ user, onLogout }) {
                   </tbody>
                 </table>
               </div>
+
+              {/* Mobile Card View */}
+              <div className="lg:hidden space-y-4">
+                {filteredMembers.length === 0 ? (
+                  <div className="text-center py-8">
+                    <div className="text-gray-400 mb-4">
+                      <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+              </div>
+                    <p className="text-lg font-medium text-gray-900 mb-1">
+                      {memberFilter.trim() === "" ? "No members found" : "No members match your search"}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {memberFilter.trim() === "" ? "Try adjusting your filters or add new members." : "Try adjusting your search criteria."}
+                    </p>
+            </div>
+                ) : (
+                  filteredMembers.map((member, index) => (
+                    <div key={member.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <span className="text-sm font-medium text-gray-500">#{index + 1}</span>
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              {member.member_code || "N/A"}
+                            </span>
+          </div>
+                          <h3 className="text-lg font-semibold text-gray-900">
+                            {member.user?.full_name || member.user?.username || "N/A"}
+                          </h3>
+                          {member.user?.email && (
+                            <p className="text-sm text-gray-500">{member.user.email}</p>
+                          )}
+                        </div>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          member.status?.toLowerCase() === 'active' 
+                            ? "bg-green-100 text-green-800" 
+                            : member.status?.toLowerCase() === 'pending'
+                            ? "bg-yellow-100 text-yellow-800"
+                            : member.status?.toLowerCase() === 'suspended'
+                            ? "bg-orange-100 text-orange-800"
+                            : member.status?.toLowerCase() === 'rejected'
+                            ? "bg-red-100 text-red-800"
+                            : "bg-gray-100 text-gray-800"
+                        }`}>
+                          {member.status}
+                        </span>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <span className="text-gray-500">Group:</span>
+                          <p className="font-medium text-gray-900">{member.group?.name || "N/A"}</p>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Location:</span>
+                          <p className="font-medium text-gray-900">{member.group?.location || "N/A"}</p>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Active Loans:</span>
+                          <p className="font-medium text-gray-900">
+                            {loans.filter(loan => loan.member_id === member.id && (loan.status === 'ACTIVE' || loan.status === 'DISBURSED' || loan.status === 'APPROVED')).length}
+                          </p>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Joined:</span>
+                          <p className="font-medium text-gray-900">
+                            {member.joined_date ? new Date(member.joined_date).toLocaleDateString() : "N/A"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
               </div>
             </div>
           </div>
-          </>
         )}
 
       </main>
@@ -1368,21 +1627,21 @@ function AdminDashboard({ user, onLogout }) {
         }}
       />
 
-      {/* Bonus Management Modal */}
-      {showBonusManagement && (
+      {/* Payable Management Modal */}
+      {showPayableManagement && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
           <div className="relative top-4 mx-auto p-5 border w-11/12 max-w-7xl shadow-lg rounded-md bg-white">
             <div className="mt-3">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Bonus Management</h3>
+                <h3 className="text-lg font-medium text-gray-900">Payable Management</h3>
                 <button
-                  onClick={() => setShowBonusManagement(false)}
+                  onClick={() => setShowPayableManagement(false)}
                   className="text-gray-400 hover:text-gray-600"
                 >
                   <FaTimes className="h-6 w-6" />
                 </button>
               </div>
-              <BonusManagement />
+              <PayableManagement />
             </div>
           </div>
         </div>
@@ -1455,6 +1714,41 @@ function AdminDashboard({ user, onLogout }) {
                 >
                   {interestRate ? `Approve with ${interestRate}% Rate` : 'Approve with Default Rate'}
                 </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Print Confirmation Modal */}
+      {showPrintConfirmation && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-md shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-blue-100 rounded-full">
+                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+              </div>
+              <div className="text-center">
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Print Members Report</h3>
+                <p className="text-sm text-gray-500 mb-6">
+                  Do you want to print the current member data? This will include all {filteredMembers.length} member(s) currently displayed in the table.
+                </p>
+                <div className="flex justify-center space-x-3">
+                  <button
+                    onClick={cancelPrint}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={confirmPrint}
+                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                  >
+                    Yes, Print
+                  </button>
+                </div>
               </div>
             </div>
           </div>

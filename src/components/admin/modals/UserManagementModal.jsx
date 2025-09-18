@@ -76,11 +76,8 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
     try {
       setIsLoading(true);
       const data = await apiService.getUsers();
-      console.log("Loaded users data:", data);
-      console.log("User 55 data:", data.find(user => user.id === 55));
       setUsers(data);
     } catch (error) {
-      console.error("Error loading users:", error);
       toast.error("Failed to load users");
     } finally {
       setIsLoading(false);
@@ -92,7 +89,6 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
       const data = await apiService.getRoles();
       setRoles(data);
     } catch (error) {
-      console.error("Error loading roles:", error);
       toast.error("Failed to load roles");
     }
   };
@@ -102,7 +98,6 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
       const data = await apiService.getGroups();
       setGroups(data);
     } catch (error) {
-      console.error("Error loading groups:", error);
       toast.error("Failed to load groups");
     }
   };
@@ -246,7 +241,6 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
         group_id: userForm.group_id ? parseInt(userForm.group_id) : null
       };
 
-      console.log("Sending user data:", userData);
 
       if (editingUser) {
         await apiService.updateUser(editingUser.id, userData);
@@ -261,7 +255,6 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
             await apiService.uploadUserDocument(editingUser.id, userForm.aadhar_document_file);
             documentsUploaded++;
           } catch (error) {
-            console.error("Failed to upload Aadhar document:", error);
             toast.error("Aadhar document upload failed. Please upload manually.");
           }
         }
@@ -272,7 +265,6 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
             await apiService.uploadBankPassbook(editingUser.id, userForm.bank_passbook_file);
             documentsUploaded++;
           } catch (error) {
-            console.error("Failed to upload bank passbook:", error);
             toast.error("Bank passbook upload failed. Please upload manually.");
           }
         }
@@ -290,7 +282,6 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
               };
               await apiService.updateMember(editingUser.member.id, memberData);
             } catch (error) {
-              console.error("Failed to update member record:", error);
               toast.error("User updated but member record update failed");
             }
           }
@@ -314,7 +305,6 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
             await apiService.uploadUserDocument(newUser.id, userForm.aadhar_document_file);
             documentsUploaded++;
           } catch (error) {
-            console.error("Failed to upload Aadhar document:", error);
             toast.error("Aadhar document upload failed. Please upload manually.");
           }
         } else {
@@ -328,7 +318,6 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
             await apiService.uploadBankPassbook(newUser.id, userForm.bank_passbook_file);
             documentsUploaded++;
           } catch (error) {
-            console.error("Failed to upload bank passbook:", error);
             toast.error("Bank passbook upload failed. Please upload manually.");
           }
         }
@@ -338,7 +327,6 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
           try {
             await apiService.assignRoleToUser(newUser.id, parseInt(userForm.role_id));
           } catch (error) {
-            console.error("Failed to assign role to user:", error);
             toast.error("User created but role assignment failed");
           }
         }
@@ -404,7 +392,6 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
       }
     }, {
       onError: (error) => {
-        console.error("Error saving user:", error);
         
         // Handle specific field errors from backend
         if (error.message.includes("Username already registered")) {
@@ -491,7 +478,6 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
       toast.success("User deleted successfully!");
       await loadUsers();
     } catch (error) {
-      console.error("Error deleting user:", error);
       
       // Handle specific error messages from backend with dismiss functionality
       if (error.message && error.message.includes("active loans")) {
@@ -605,22 +591,17 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
 
   const handleToggleUserStatus = async (user) => {
     try {
-      console.log("Toggling user status for user:", user.id, "Current status:", user.is_active);
       
       if (user.is_active) {
-        console.log("Deactivating user:", user.id);
         await apiService.deactivateUser(user.id);
         toast.success("User deactivated successfully!");
       } else {
-        console.log("Activating user:", user.id);
         await apiService.activateUser(user.id);
         toast.success("User activated successfully!");
       }
       
-      console.log("Reloading users...");
       await loadUsers();
     } catch (error) {
-      console.error("Error toggling user status:", error);
       toast.error(error.message || "Failed to update user status");
     }
   };

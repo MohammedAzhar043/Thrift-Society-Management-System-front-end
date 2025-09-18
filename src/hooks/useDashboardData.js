@@ -51,7 +51,6 @@ export const useDashboardData = (dashboardType, options = {}) => {
     } catch (err) {
       const errorMessage = `Failed to load ${dashboardType} dashboard data: ${err.message}`;
       setError(errorMessage);
-      console.error(errorMessage, err);
       
       if (onError) {
         onError(err);
@@ -134,7 +133,6 @@ export const useListData = (fetchFunction, options = {}) => {
       if (newPagination) setPagination(currentPagination);
     } catch (err) {
       setError(`Failed to load data: ${err.message}`);
-      console.error('Error loading list data:', err);
     } finally {
       setLoading(false);
     }

@@ -96,7 +96,6 @@ export const formatDate = (dateString, format = 'short') => {
         });
     }
   } catch (error) {
-    console.error('Error formatting date:', error);
     return 'N/A';
   }
 };

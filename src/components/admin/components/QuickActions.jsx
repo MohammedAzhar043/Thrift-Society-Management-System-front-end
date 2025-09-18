@@ -7,7 +7,7 @@ const QuickActions = ({
   onViewReports, 
   onViewMembers,
   onManageUsers,
-  onManageBonuses,
+  onManagePayables,
   className = "" 
 }) => {
   const actions = [
@@ -31,8 +31,8 @@ const QuickActions = ({
     },
     {
       icon: FaGift,
-      label: "Manage Bonuses",
-      onClick: onManageBonuses,
+      label: "Manage Payables",
+      onClick: onManagePayables,
       variant: "secondary"
     },
     {
