@@ -84,7 +84,7 @@ function App() {
   };
 
   return (
-          <Router>
+        <Router>
         <div className="min-h-screen bg-gray-100">
           <Routes>
           <Route 
