@@ -555,7 +555,7 @@ class ApiService {
     const formData = new FormData();
     formData.append('file', file);
     
-    const response = await fetch(`${this.baseURL}/users/${userId}/upload-document`, {
+    const response = await fetch(`${this.baseURL}/users/${userId}/upload-document?document_type=aadhar`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${this.token}`
