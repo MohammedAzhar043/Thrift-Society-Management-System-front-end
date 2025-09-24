@@ -1393,7 +1393,7 @@ function BillCollectorDashboard({ user, onLogout }) {
                     }}
                     className="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
-                    <FaMoneyBillWave className="mr-2" /> Collect Daily Money
+                    <FaMoneyBillWave className="mr-2" /> Collect Money
                   </button>
                   <button 
                     onClick={() => {
@@ -1533,9 +1533,11 @@ function BillCollectorDashboard({ user, onLogout }) {
                     <button
                       type="button"
                       onClick={addCollectionItem}
-                      className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                      className="w-full sm:w-auto inline-flex items-center justify-center px-3 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm sm:text-base font-semibold rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl"
                     >
-                      <FaPlus className="mr-2" /> Add Collection Item
+                      <FaPlus className="mr-1 sm:mr-2 w-4 h-4" /> 
+                      <span className="hidden sm:inline">Add Collection Item</span>
+                      <span className="sm:hidden">Add Item</span>
                     </button>
                   </div>
                   
@@ -2001,35 +2003,37 @@ function BillCollectorDashboard({ user, onLogout }) {
                       </div>
                     ) : groupMembers.length > 0 ? (
                       <div className="bg-white shadow rounded-lg overflow-hidden">
-                        <table className="min-w-full divide-y divide-gray-200">
-                          <thead className="bg-gray-50">
-                            <tr>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Name
-                              </th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Code
-                              </th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                EMI Breakdown
-                              </th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Paid
-                              </th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Remaining
-                              </th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Savings
-                              </th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Payment Status
-                              </th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Action
-                              </th>
-                            </tr>
-                          </thead>
+                        {/* Desktop Table */}
+                        <div className="hidden lg:block overflow-x-auto">
+                          <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                              <tr>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  Name
+                                </th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  Code
+                                </th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  EMI Breakdown
+                                </th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  Paid
+                                </th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  Remaining
+                                </th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  Savings
+                                </th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  Payment Status
+                                </th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  Action
+                                </th>
+                              </tr>
+                            </thead>
                           <tbody className="bg-white divide-y divide-gray-200">
                             {groupMembers.map(member => {
                               const hasActiveLoan = member.loan_info && (member.loan_info.status === 'ACTIVE' || member.loan_info.status === 'DISBURSED' || member.loan_info.status === 'APPROVED');
@@ -2143,7 +2147,100 @@ function BillCollectorDashboard({ user, onLogout }) {
                               );
                             })}
                           </tbody>
-                        </table>
+                          </table>
+                        </div>
+                        
+                        {/* Mobile Cards */}
+                        <div className="lg:hidden space-y-4 p-4">
+                          {groupMembers.map(member => {
+                            const hasActiveLoan = member.loan_info && (member.loan_info.status === 'ACTIVE' || member.loan_info.status === 'DISBURSED' || member.loan_info.status === 'APPROVED');
+                            const remainingAmount = member.remaining_loan_amount || 0;
+                            const paidAmount = member.payments_made || 0;
+                            const savingsAmount = member.savings_balance || 0;
+                            const emiDue = member.current_emi_due || 0;
+                            const emiBreakdown = calculateEMIBreakdown(member, member.loan_info);
+                            const principalAmount = emiBreakdown.principal || 0;
+                            const interestAmount = emiBreakdown.interest || 0;
+                            const totalEMI = emiDue || 0;
+                            
+                            const hasPaidThisMonth = hasMemberPaidThisMonth(member);
+                            const canPay = hasActiveLoan ? !hasPaidThisMonth : true;
+                            
+                            return (
+                              <div key={member.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                                <div className="flex items-start justify-between mb-3">
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-2">
+                                      <span className="text-xs sm:text-sm font-medium text-gray-500">{member.member_code}</span>
+                                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium w-fit ${
+                                        canPay ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                      }`}>
+                                        {canPay ? 'Can Pay' : 'Already Paid'}
+                                      </span>
+                                    </div>
+                                    <h3 className="text-sm sm:text-base font-semibold text-gray-900 break-words">
+                                      {member.user?.full_name || 'N/A'}
+                                    </h3>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => addMemberToCollection(member.id)}
+                                    disabled={!canPay}
+                                    className={`p-2 rounded-full transition-colors ${
+                                      canPay 
+                                        ? 'text-blue-600 hover:bg-blue-50' 
+                                        : 'text-gray-400 cursor-not-allowed'
+                                    }`}
+                                  >
+                                    <FaPlus className="w-4 h-4" />
+                                  </button>
+                                </div>
+                                
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm">
+                                  {hasActiveLoan ? (
+                                    <>
+                                      <div>
+                                        <span className="text-gray-500">EMI Total:</span>
+                                        <p className="font-medium text-gray-900">{formatIndianCurrency(totalEMI)}</p>
+                                      </div>
+                                      <div>
+                                        <span className="text-gray-500">Principal:</span>
+                                        <p className="font-medium text-gray-900">{formatIndianCurrency(principalAmount)}</p>
+                                      </div>
+                                      <div>
+                                        <span className="text-gray-500">Interest:</span>
+                                        <p className="font-medium text-gray-900">{formatIndianCurrency(interestAmount)}</p>
+                                      </div>
+                                      <div>
+                                        <span className="text-gray-500">Paid:</span>
+                                        <p className="font-medium text-gray-900">{formatIndianCurrency(paidAmount)}</p>
+                                      </div>
+                                      <div>
+                                        <span className="text-gray-500">Remaining:</span>
+                                        <p className="font-medium text-gray-900">{formatIndianCurrency(remainingAmount)}</p>
+                                      </div>
+                                      <div>
+                                        <span className="text-gray-500">Savings:</span>
+                                        <p className="font-medium text-gray-900">{formatIndianCurrency(savingsAmount)}</p>
+                                      </div>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <div>
+                                        <span className="text-gray-500">Savings Balance:</span>
+                                        <p className="font-medium text-gray-900">{formatIndianCurrency(savingsAmount)}</p>
+                                      </div>
+                                      <div>
+                                        <span className="text-gray-500">Status:</span>
+                                        <p className="font-medium text-gray-900">No Active Loan</p>
+                                      </div>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
                     ) : (
                       <div className="text-center text-gray-500 py-4">

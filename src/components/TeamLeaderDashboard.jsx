@@ -662,7 +662,7 @@ function TeamLeaderDashboard({ user, onLogout }) {
         {/* Navigation Tabs */}
         <div className="bg-white shadow rounded-lg mb-8">
           <div className="border-b border-gray-200">
-            <nav className="-mb-px flex space-x-4 sm:space-x-8 px-4 sm:px-6 overflow-x-auto">
+            <nav className="-mb-px flex space-x-1 sm:space-x-2 lg:space-x-4 px-2 sm:px-4 lg:px-6 overflow-x-auto">
               {[
                 { id: 'overview', name: 'Overview', icon: FaChartPie },
                 { id: 'members', name: 'Members', icon: FaUsers },
@@ -868,16 +868,16 @@ function TeamLeaderDashboard({ user, onLogout }) {
                     </div>
                   ) : (
                     groupMembers.map((member) => (
-                      <div key={member.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                      <div key={member.id} className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 shadow-sm">
                         <div className="flex items-start justify-between mb-3">
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-2 mb-1">
-                              <span className="text-sm font-medium text-gray-500">#{member.member_code}</span>
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(member.status)}`}>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-2">
+                              <span className="text-xs sm:text-sm font-medium text-gray-500">{member.member_code}</span>
+                              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium w-fit ${getStatusColor(member.status)}`}>
                                 {member.status}
                               </span>
                             </div>
-                            <h3 className="text-lg font-semibold text-gray-900">
+                            <h3 className="text-sm sm:text-base font-semibold text-gray-900 break-words">
                               {member.user?.full_name || 'N/A'}
                             </h3>
                           </div>
@@ -886,20 +886,20 @@ function TeamLeaderDashboard({ user, onLogout }) {
                               setSelectedMember(member);
                               setShowMemberDetailsModal(true);
                             }}
-                            className="text-blue-600 hover:text-blue-900 p-1"
+                            className="text-blue-600 hover:text-blue-900 p-1 flex-shrink-0"
                           >
                             <FaEye className="w-4 h-4" />
                           </button>
                         </div>
                         
-                        <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm">
                           <div>
                             <span className="text-gray-500">Join Date:</span>
-                            <p className="font-medium text-gray-900">{formatDate(member.joined_date)}</p>
+                            <p className="font-medium text-gray-900 break-words">{formatDate(member.joined_date)}</p>
                           </div>
                           <div>
                             <span className="text-gray-500">Monthly Income:</span>
-                            <p className="font-medium text-gray-900">
+                            <p className="font-medium text-gray-900 break-words">
                               {member.monthly_income ? formatCurrency(member.monthly_income) : 'N/A'}
                             </p>
                           </div>
@@ -992,38 +992,38 @@ function TeamLeaderDashboard({ user, onLogout }) {
                     </div>
                   ) : (
                     groupLoans.map((loan) => (
-                      <div key={loan.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                      <div key={loan.id} className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 shadow-sm">
                         <div className="flex items-start justify-between mb-3">
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-2 mb-1">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(loan.status)}`}>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-2">
+                              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium w-fit ${getStatusColor(loan.status)}`}>
                                 {loan.status}
                               </span>
-                              <span className="text-sm text-gray-500">
+                              <span className="text-xs sm:text-sm text-gray-500">
                                 {loan.term_months} months
                               </span>
                             </div>
-                            <h3 className="text-lg font-semibold text-gray-900">
+                            <h3 className="text-sm sm:text-base font-semibold text-gray-900 break-words">
                               {loan.member?.user?.full_name || 'N/A'}
                             </h3>
                           </div>
-                          <div className="text-right">
-                            <div className="text-lg font-bold text-gray-900">
+                          <div className="text-right ml-2">
+                            <div className="text-sm sm:text-base font-bold text-gray-900">
                               {formatCurrency(loan.loan_amount)}
                             </div>
                           </div>
                         </div>
                         
-                        <div className="grid grid-cols-1 gap-2 text-sm">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm">
                           <div>
                             <span className="text-gray-500">Purpose:</span>
-                            <p className="font-medium text-gray-900">
+                            <p className="font-medium text-gray-900 break-words">
                               {loan.purpose || 'N/A'}
                             </p>
                           </div>
                           <div>
                             <span className="text-gray-500">Due Date:</span>
-                            <p className="font-medium text-gray-900">
+                            <p className="font-medium text-gray-900 break-words">
                               {loan.due_date ? formatDate(loan.due_date) : 'N/A'}
                             </p>
                           </div>

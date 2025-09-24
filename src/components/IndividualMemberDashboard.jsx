@@ -380,7 +380,7 @@ function IndividualMemberDashboard({ user, onLogout }) {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
           {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-white overflow-hidden shadow rounded-lg">
@@ -467,7 +467,7 @@ function IndividualMemberDashboard({ user, onLogout }) {
         {/* Navigation Tabs */}
         <div className="bg-white shadow rounded-lg mb-8">
           <div className="border-b border-gray-200">
-            <nav className="-mb-px flex space-x-8 px-6">
+            <nav className="-mb-px flex space-x-2 sm:space-x-4 lg:space-x-8 px-2 sm:px-4 lg:px-6 overflow-x-auto">
               {[
                 { id: 'overview', name: 'Overview', icon: FaUser },
                 { id: 'loans', name: 'My Loans', icon: FaCreditCard },
@@ -480,7 +480,7 @@ function IndividualMemberDashboard({ user, onLogout }) {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center ${
+                    className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center whitespace-nowrap ${
                       activeTab === tab.id
                         ? 'border-blue-500 text-blue-600'
                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -532,9 +532,11 @@ function IndividualMemberDashboard({ user, onLogout }) {
                     <div className="space-y-3">
                       <button
                         onClick={() => setShowLoanApplicationModal(true)}
-                        className="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+                        className="w-full flex items-center justify-center px-3 sm:px-4 py-2 border border-transparent text-xs sm:text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
                       >
-                        <FaPlus className="mr-2" /> Apply for New Loan
+                        <FaPlus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> 
+                        <span className="hidden sm:inline">Apply for New Loan</span>
+                        <span className="sm:hidden">Apply Loan</span>
                       </button>
                       <button
                         onClick={() => setActiveTab('loans')}
@@ -563,9 +565,11 @@ function IndividualMemberDashboard({ user, onLogout }) {
                   <h3 className="text-lg font-medium text-gray-900">My Loans</h3>
                   <button
                     onClick={() => setShowLoanApplicationModal(true)}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+                    className="inline-flex items-center px-3 sm:px-4 py-2 border border-transparent text-xs sm:text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
                   >
-                    <FaPlus className="mr-2" /> Apply for New Loan
+                    <FaPlus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> 
+                    <span className="hidden sm:inline">Apply for New Loan</span>
+                    <span className="sm:hidden">Apply Loan</span>
                   </button>
                 </div>
 
@@ -599,7 +603,7 @@ function IndividualMemberDashboard({ user, onLogout }) {
                       {currentLoans.map((loan) => (
                           <tr key={loan.id} className="hover:bg-gray-50 transition-colors">
                             <td className="px-4 py-4 text-sm font-medium text-gray-900">
-                            #{loan.id}
+                            {loan.id}
                           </td>
                             <td className="px-4 py-4 text-sm text-gray-900">
                             {formatCurrency(loan.loan_amount)}
@@ -649,7 +653,7 @@ function IndividualMemberDashboard({ user, onLogout }) {
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex-1">
                             <div className="flex items-center space-x-2 mb-1">
-                              <span className="text-sm font-medium text-gray-500">#{loan.id}</span>
+                              <span className="text-sm font-medium text-gray-500">{loan.id}</span>
                               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(loan.status)}`}>
                                 {getDisplayValue(loan.status, 'N/A')}
                               </span>
@@ -694,9 +698,11 @@ function IndividualMemberDashboard({ user, onLogout }) {
                   <h3 className="text-lg font-medium text-gray-900">Loan Requests</h3>
                   <button
                     onClick={() => setShowLoanApplicationModal(true)}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+                    className="inline-flex items-center px-3 sm:px-4 py-2 border border-transparent text-xs sm:text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
                   >
-                    <FaPlus className="mr-2" /> New Request
+                    <FaPlus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> 
+                    <span className="hidden sm:inline">New Request</span>
+                    <span className="sm:hidden">New</span>
                   </button>
                 </div>
 
@@ -730,7 +736,7 @@ function IndividualMemberDashboard({ user, onLogout }) {
                       {loanRequests.map((request) => (
                           <tr key={request.id} className="hover:bg-gray-50 transition-colors">
                             <td className="px-4 py-4 text-sm font-medium text-gray-900">
-                            #{request.id}
+                            {request.id}
                           </td>
                             <td className="px-4 py-4 text-sm text-gray-900">
                             {formatCurrency(request.loan_amount)}
@@ -772,7 +778,7 @@ function IndividualMemberDashboard({ user, onLogout }) {
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex-1">
                             <div className="flex items-center space-x-2 mb-1">
-                              <span className="text-sm font-medium text-gray-500">#{request.id}</span>
+                              <span className="text-sm font-medium text-gray-500">{request.id}</span>
                               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
                                 {getDisplayValue(request.status, 'N/A')}
                               </span>
@@ -873,30 +879,30 @@ function IndividualMemberDashboard({ user, onLogout }) {
                     </div>
                   ) : (
                     paymentHistory.map((payment) => (
-                      <div key={payment.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                      <div key={payment.id} className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 shadow-sm">
                         <div className="flex items-start justify-between mb-3">
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-2 mb-1">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(payment.status)}`}>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-2">
+                              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium w-fit ${getStatusColor(payment.status)}`}>
                                 {getDisplayValue(payment.status, 'N/A')}
                               </span>
-                              <span className="text-sm text-gray-500">
+                              <span className="text-xs sm:text-sm text-gray-500">
                                 {formatDate(payment.transaction_date)}
                               </span>
                             </div>
-                            <h3 className="text-lg font-semibold text-gray-900">
+                            <h3 className="text-sm sm:text-base font-semibold text-gray-900">
                               {formatCurrency(payment.amount)}
                             </h3>
-                            <p className="text-sm text-gray-600 mt-1">
+                            <p className="text-xs sm:text-sm text-gray-600 mt-1 break-words">
                               {getDisplayValue(payment.payment_type || payment.type, 'Payment')}
                             </p>
                           </div>
                         </div>
                         
-                        <div className="grid grid-cols-1 gap-2 text-sm">
+                        <div className="grid grid-cols-1 gap-2 text-xs sm:text-sm">
                           <div>
                             <span className="text-gray-500">Purpose:</span>
-                            <p className="font-medium text-gray-900">
+                            <p className="font-medium text-gray-900 break-words">
                               {payment.purpose || payment.description || 'N/A'}
                             </p>
                           </div>
@@ -974,26 +980,26 @@ function IndividualMemberDashboard({ user, onLogout }) {
                     </div>
                   ) : (
                     transactionHistory.map((transaction) => (
-                      <div key={transaction.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                      <div key={transaction.id} className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 shadow-sm">
                         <div className="flex items-start justify-between mb-3">
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-2 mb-1">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(transaction.status)}`}>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-2">
+                              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium w-fit ${getStatusColor(transaction.status)}`}>
                                 {getDisplayValue(transaction.status, 'N/A')}
                               </span>
-                              <span className="text-sm text-gray-500">
+                              <span className="text-xs sm:text-sm text-gray-500">
                                 {formatDate(transaction.transaction_date)}
                               </span>
                             </div>
-                            <h3 className="text-lg font-semibold text-gray-900">
+                            <h3 className="text-sm sm:text-base font-semibold text-gray-900 break-words">
                               {getDisplayValue(transaction.description, 'Transaction')}
                             </h3>
-                            <p className="text-sm text-gray-600 mt-1">
+                            <p className="text-xs sm:text-sm text-gray-600 mt-1 break-words">
                               {getDisplayValue(transaction.type, 'N/A')}
                             </p>
                           </div>
-                          <div className="text-right">
-                            <div className="text-lg font-bold text-gray-900">
+                          <div className="text-right ml-2">
+                            <div className="text-sm sm:text-base font-bold text-gray-900">
                               {formatCurrency(transaction.amount)}
                             </div>
                           </div>
@@ -1139,7 +1145,7 @@ function IndividualMemberDashboard({ user, onLogout }) {
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Loan ID:</span>
-                  <span className="font-medium">#{selectedLoan.id}</span>
+                  <span className="font-medium">{selectedLoan.id}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Amount:</span>

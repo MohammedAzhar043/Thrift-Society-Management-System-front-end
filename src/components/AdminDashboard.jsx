@@ -766,10 +766,17 @@ function AdminDashboard({ user, onLogout }) {
     printWindow.onload = () => {
       printWindow.focus();
       printWindow.print();
-      printWindow.close();
+      // Close the window after a short delay to allow printing to complete
+      setTimeout(() => {
+        printWindow.close();
+      }, 1000);
     };
 
-    toast.success("Print dialog opened successfully!");
+    // Show success message with auto-dismiss
+    toast.success("Print dialog opened successfully!", {
+      duration: 2000,
+      position: "top-center"
+    });
   };
 
   const cancelPrint = () => {
@@ -915,26 +922,20 @@ function AdminDashboard({ user, onLogout }) {
                       </Table.Cell>
                       <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm font-medium">
                         <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
-                          <Button
+                          <button
                             onClick={() => handleApproval("member", item.id, "approve")}
-                            variant="primary"
-                            size="sm"
-                            icon={FaCheck}
-                            className="w-full sm:w-auto text-xs px-2 py-1"
+                            className="w-full sm:w-auto text-xs px-2 py-1 bg-green-600 hover:bg-green-700 text-white rounded flex items-center justify-center gap-1"
                           >
+                            <FaCheck className="w-3 h-3" />
                             <span className="hidden sm:inline">Approve</span>
-                            <span className="sm:hidden">✓</span>
-                          </Button>
-                          <Button
+                          </button>
+                          <button
                             onClick={() => handleApproval("member", item.id, "reject")}
-                            variant="danger"
-                            size="sm"
-                            icon={FaTimes}
-                            className="w-full sm:w-auto text-xs px-2 py-1"
+                            className="w-full sm:w-auto text-xs px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded flex items-center justify-center gap-1"
                           >
+                            <FaTimes className="w-3 h-3" />
                             <span className="hidden sm:inline">Reject</span>
-                            <span className="sm:hidden">✗</span>
-                          </Button>
+                          </button>
                         </div>
                       </Table.Cell>
                     </Table.Row>
@@ -984,26 +985,20 @@ function AdminDashboard({ user, onLogout }) {
                       </Table.Cell>
                       <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm font-medium">
                         <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
-                          <Button
+                          <button
                             onClick={() => handleApproval("loan", loan.id, "approve")}
-                            variant="primary"
-                            size="sm"
-                            icon={FaCheck}
-                            className="w-full sm:w-auto text-xs px-2 py-1"
+                            className="w-full sm:w-auto text-xs px-2 py-1 bg-green-600 hover:bg-green-700 text-white rounded flex items-center justify-center gap-1"
                           >
+                            <FaCheck className="w-3 h-3" />
                             <span className="hidden sm:inline">Approve</span>
-                            <span className="sm:hidden">✓</span>
-                          </Button>
-                          <Button
+                          </button>
+                          <button
                             onClick={() => handleApproval("loan", loan.id, "reject")}
-                            variant="danger"
-                            size="sm"
-                            icon={FaTimes}
-                            className="w-full sm:w-auto text-xs px-2 py-1"
+                            className="w-full sm:w-auto text-xs px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded flex items-center justify-center gap-1"
                           >
+                            <FaTimes className="w-3 h-3" />
                             <span className="hidden sm:inline">Reject</span>
-                            <span className="sm:hidden">✗</span>
-                          </Button>
+                          </button>
                         </div>
                       </Table.Cell>
                     </Table.Row>
@@ -1062,26 +1057,20 @@ function AdminDashboard({ user, onLogout }) {
                     </Table.Cell>
                     <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm font-medium">
                       <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
-                        <Button
+                        <button
                           onClick={() => handleEditGroup(group)}
-                          variant="primary"
-                          size="sm"
-                          icon={FaEdit}
-                          className="w-full sm:w-auto text-xs px-2 py-1"
+                          className="w-full sm:w-auto text-xs px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded flex items-center justify-center gap-1"
                         >
+                          <FaEdit className="w-3 h-3" />
                           <span className="hidden sm:inline">Edit</span>
-                          <span className="sm:hidden">✏</span>
-                        </Button>
-                        <Button
+                        </button>
+                        <button
                           onClick={() => handleDeleteGroup(group.id)}
-                          variant="danger"
-                          size="sm"
-                          icon={FaTrash}
-                          className="w-full sm:w-auto text-xs px-2 py-1"
+                          className="w-full sm:w-auto text-xs px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded flex items-center justify-center gap-1"
                         >
+                          <FaTrash className="w-3 h-3" />
                           <span className="hidden sm:inline">Delete</span>
-                          <span className="sm:hidden">🗑</span>
-                        </Button>
+                        </button>
                       </div>
                     </Table.Cell>
                   </Table.Row>
@@ -1558,7 +1547,7 @@ function AdminDashboard({ user, onLogout }) {
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
                           <div className="flex items-center space-x-2 mb-1">
-                            <span className="text-sm font-medium text-gray-500">#{index + 1}</span>
+                            <span className="text-sm font-medium text-gray-500">{index + 1}</span>
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                               {member.member_code || "N/A"}
                             </span>
