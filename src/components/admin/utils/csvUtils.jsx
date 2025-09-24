@@ -18,9 +18,9 @@ export const generateCSV = (data, type) => {
         member.user?.full_name || member.user?.username || "N/A",
         member.group?.name || "N/A",
         member.group?.location || "N/A",
-        member.status,
-        member.user?.emergency_phone || member.emergency_phone || "N/A",
-        member.created_at ? new Date(member.created_at).toLocaleDateString() : "N/A"
+        member.status, // This is the member status, not group location
+        member.user?.nominee_phone || member.nominee_phone || "N/A", // Use nominee_phone instead of emergency_phone
+        member.joined_date ? new Date(member.joined_date).toLocaleDateString() : "N/A" // Use joined_date instead of created_at
       ]);
       break;
       
@@ -30,7 +30,7 @@ export const generateCSV = (data, type) => {
         loan.id,
         loan.member?.user?.full_name || loan.member?.user?.username || "N/A",
         loan.group?.name || "N/A",
-        loan.amount,
+        loan.loan_amount || "N/A", // Use loan_amount instead of amount
         loan.status,
         loan.created_at ? new Date(loan.created_at).toLocaleDateString() : "N/A",
         loan.due_date ? new Date(loan.due_date).toLocaleDateString() : "N/A"
@@ -44,7 +44,7 @@ export const generateCSV = (data, type) => {
         group.name,
         group.location,
         group.member_count || 0,
-        group.team_leader?.full_name || group.team_leader?.username || "Not assigned",
+        group.team_leader?.full_name || group.team_leader?.username || "Not assigned", // Remove ID prefix
         group.bill_collector?.full_name || group.bill_collector?.username || "Not assigned",
         group.status
       ]);

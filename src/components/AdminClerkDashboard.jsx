@@ -221,6 +221,8 @@ function AdminClerkDashboard({ user, onLogout }) {
     }
 
     setIsGeneratingReport(true);
+    console.log('Starting report generation:', { reportType, reportDate, reportStartDate, reportEndDate });
+    
     try {
       let reportData;
       let reportTitle = "";
@@ -229,7 +231,9 @@ function AdminClerkDashboard({ user, onLogout }) {
       switch (reportType) {
         case "daily":
           // Daily report
+          console.log('Fetching daily report for date:', reportDate);
           reportData = await apiService.getDailyCollectionReport(reportDate);
+          console.log('Daily report data received:', reportData);
           reportTitle = "Daily Collection Report";
           // Format collections data for Excel
           if (reportData && reportData.collections && reportData.collections.length > 0) {
@@ -253,7 +257,9 @@ function AdminClerkDashboard({ user, onLogout }) {
           break;
         case "weekly":
           // Weekly report
+          console.log('Fetching weekly report for dates:', reportStartDate, 'to', reportEndDate);
           reportData = await apiService.getWeeklyCollectionReport(reportStartDate, reportEndDate);
+          console.log('Weekly report data received:', reportData);
           reportTitle = "Weekly Collection Report";
           // Format collections data for Excel
           if (reportData && reportData.collections && reportData.collections.length > 0) {
@@ -277,10 +283,11 @@ function AdminClerkDashboard({ user, onLogout }) {
           break;
         case "monthly":
           // Monthly report
-          const dateObj = new Date(reportDate);
-          const year = dateObj.getFullYear();
-          const month = dateObj.getMonth() + 1; // getMonth() returns 0-11, we need 1-12
+          // reportDate is in format "YYYY-MM" from month input
+          const [year, month] = reportDate.split('-').map(Number);
+          console.log('Fetching monthly report for year:', year, 'month:', month);
           reportData = await apiService.getMonthlyCollectionReport(year, month);
+          console.log('Monthly report data received:', reportData);
           reportTitle = "Monthly Collection Report";
           // Format collections data for Excel
           if (reportData && reportData.collections && reportData.collections.length > 0) {
@@ -353,6 +360,32 @@ function AdminClerkDashboard({ user, onLogout }) {
             ['Monthly Collection', formatCurrency(dashboardStats.monthly_collection), 'This month\'s total collections']
           ];
           break;
+        case "collections":
+          // Collections report - use today's data
+          console.log('Fetching collections report for today:', reportDate);
+          reportData = await apiService.getDailyCollectionReport(reportDate);
+          console.log('Collections report data received:', reportData);
+          reportTitle = "Collections Report";
+          // Format collections data for Excel
+          if (reportData && reportData.collections && reportData.collections.length > 0) {
+            worksheetData = [
+              ['Date', 'Group', 'Collector', 'Amount', 'Status', 'Notes'],
+              ...reportData.collections.map(collection => [
+                new Date(collection.collection_date).toLocaleDateString(),
+                collection.group?.name || 'N/A',
+                collection.collector?.username || 'N/A',
+                parseFloat(collection.grand_total || 0).toFixed(2),
+                collection.is_verified ? 'Verified' : 'Pending',
+                collection.notes || ''
+              ])
+            ];
+          } else {
+            worksheetData = [
+              ['Date', 'Group', 'Collector', 'Amount', 'Status', 'Notes'],
+              ['No collections found for the selected date']
+            ];
+          }
+          break;
         default:
           reportData = [];
           reportTitle = "Report";
@@ -391,9 +424,8 @@ function AdminClerkDashboard({ user, onLogout }) {
       } else if (reportType === 'weekly') {
         filename = `${reportType}_report_${reportStartDate}_to_${reportEndDate}.xlsx`;
       } else if (reportType === 'monthly') {
-        const dateObj = new Date(reportDate);
-        const year = dateObj.getFullYear();
-        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+        // reportDate is in format "YYYY-MM"
+        const [year, month] = reportDate.split('-');
         filename = `${reportType}_report_${year}_${month}.xlsx`;
       } else {
         filename = `${reportType}_report_${new Date().toISOString().split('T')[0]}.xlsx`;
@@ -412,6 +444,7 @@ function AdminClerkDashboard({ user, onLogout }) {
       toast.success(`${reportTitle} generated and downloaded successfully as Excel file!`);
       setShowReportsModal(false);
     } catch (err) {
+      console.error('Report generation error:', err);
       
       let errorMessage = 'Failed to generate report';
       if (err.message) {
@@ -420,6 +453,13 @@ function AdminClerkDashboard({ user, onLogout }) {
         errorMessage += `: ${err.response.data.detail}`;
       } else if (err.response?.status) {
         errorMessage += `: HTTP ${err.response.status}`;
+      }
+      
+      // Check for specific error types
+      if (err.message && err.message.includes('Network error')) {
+        errorMessage = 'Network error: Unable to connect to server. Please check if the backend is running.';
+      } else if (err.message && err.message.includes('Failed to fetch')) {
+        errorMessage = 'Connection error: Please check your internet connection and try again.';
       }
       
       toast.error(errorMessage);
