@@ -308,7 +308,23 @@ function AdminDashboard({ user, onLogout }) {
       const rateMessage = rate ? `${interestRate}%` : "default";
       toast.success(`Loan approved with ${rateMessage} interest rate!`);
     } catch (error) {
-      toast.error(`Failed to approve loan: ${error.message}`);
+      let errorMessage = 'Failed to approve loan. Please try again.';
+      
+      if (error.message) {
+        if (error.message.includes('Loan not found')) {
+          errorMessage = 'The loan request was not found. Please refresh and try again.';
+        } else if (error.message.includes('Already approved')) {
+          errorMessage = 'This loan has already been approved.';
+        } else if (error.message.includes('Permission denied')) {
+          errorMessage = 'You do not have permission to approve this loan.';
+        } else if (error.message.includes('Member status')) {
+          errorMessage = 'Cannot approve loan: The member\'s account status does not allow loan approval.';
+        } else {
+          errorMessage = 'Unable to approve loan at this time. Please try again later or contact support if the issue persists.';
+        }
+      }
+      
+      toast.error(errorMessage);
     }
   };
 
@@ -337,7 +353,23 @@ function AdminDashboard({ user, onLogout }) {
         `${action === "approve" ? "Approved" : "Rejected"} successfully!`
       );
     } catch (error) {
-      toast.error(`Failed to ${action}: ${error.message}`);
+      let errorMessage = `Failed to ${action}. Please try again.`;
+      
+      if (error.message) {
+        if (error.message.includes('not found')) {
+          errorMessage = `The ${action === 'approve' ? 'loan' : 'record'} was not found. Please refresh and try again.`;
+        } else if (error.message.includes('Already')) {
+          errorMessage = `This ${action === 'approve' ? 'loan' : 'record'} has already been ${action}d.`;
+        } else if (error.message.includes('Permission denied')) {
+          errorMessage = `You do not have permission to ${action} this ${action === 'approve' ? 'loan' : 'record'}.`;
+        } else if (error.message.includes('Member status')) {
+          errorMessage = `Cannot ${action}: The member's account status does not allow this action.`;
+        } else {
+          errorMessage = `Unable to ${action} at this time. Please try again later or contact support if the issue persists.`;
+        }
+      }
+      
+      toast.error(errorMessage);
     }
   };
 

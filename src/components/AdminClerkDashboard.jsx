@@ -199,9 +199,28 @@ function AdminClerkDashboard({ user, onLogout }) {
       toast.success('Collection record verified successfully!');
       await loadDashboardData(); // Refresh data
     } catch (err) {
+      // Translate technical error messages to user-friendly messages
+      let errorMessage = 'Failed to verify collection. Please try again.';
+      
+      if (err.message) {
+        if (err.message.includes('Collection not found')) {
+          errorMessage = 'The collection record was not found. Please refresh and try again.';
+        } else if (err.message.includes('Already verified')) {
+          errorMessage = 'This collection has already been verified.';
+        } else if (err.message.includes('Permission denied')) {
+          errorMessage = 'You do not have permission to verify this collection.';
+        } else if (err.message.includes('Network error')) {
+          errorMessage = 'Network error: Unable to connect to server. Please check your connection and try again.';
+        } else if (err.message.includes('Failed to fetch')) {
+          errorMessage = 'Connection error: Please check your internet connection and try again.';
+        } else {
+          errorMessage = 'Unable to verify collection at this time. Please try again later or contact support if the issue persists.';
+        }
+      }
+      
       toast((t) => (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-          <span>Failed to verify collection: {err.message}</span>
+          <span>{errorMessage}</span>
           <button
             onClick={() => {
               toast.dismiss(t.id);

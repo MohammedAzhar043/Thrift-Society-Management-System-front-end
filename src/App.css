@@ -517,13 +517,87 @@
   }
 }
 
+/* Member Dashboard Components */
+.member-summary-card {
+  @apply bg-gradient-to-br rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 border;
+}
+
+.member-info-card {
+  @apply bg-white rounded-xl p-6 shadow-lg border border-gray-100;
+}
+
+.member-actions-card {
+  @apply bg-white rounded-xl p-6 shadow-lg border border-gray-100;
+}
+
+.member-loan-card {
+  @apply bg-white rounded-xl p-4 sm:p-5 shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100;
+}
+
+.member-payment-card {
+  @apply bg-white rounded-xl p-4 sm:p-5 shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100;
+}
+
+.member-transaction-card {
+  @apply bg-white rounded-xl p-4 sm:p-5 shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100;
+}
+
+.member-request-card {
+  @apply bg-white rounded-xl p-4 sm:p-5 shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100;
+}
+
+/* Mobile-specific optimizations for member dashboard */
+@media (max-width: 640px) {
+  .member-summary-card {
+    @apply p-3;
+  }
+  
+  .member-info-card,
+  .member-actions-card {
+    @apply p-4;
+  }
+  
+  .member-loan-card,
+  .member-payment-card,
+  .member-transaction-card,
+  .member-request-card {
+    @apply p-3;
+  }
+}
+
+/* Tablet optimizations for member dashboard */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .member-summary-card {
+    @apply p-5;
+  }
+  
+  .member-info-card,
+  .member-actions-card {
+    @apply p-5;
+  }
+  
+  .member-loan-card,
+  .member-payment-card,
+  .member-transaction-card,
+  .member-request-card {
+    @apply p-4;
+  }
+}
+
 /* Print styles */
 @media print {
   .member-card,
   .activity-card,
   .approval-card,
   .collection-card,
-  .stats-card {
+  .stats-card,
+  .member-summary-card,
+  .member-info-card,
+  .member-actions-card,
+  .member-loan-card,
+  .member-payment-card,
+  .member-transaction-card,
+  .member-request-card {
     @apply shadow-none border border-gray-300;
   }
   

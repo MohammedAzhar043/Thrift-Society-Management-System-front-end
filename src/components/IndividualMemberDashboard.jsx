@@ -258,9 +258,24 @@ function IndividualMemberDashboard({ user, onLogout }) {
       onError: (err) => {
         let errorMessage = 'Failed to submit loan application. Please try again.';
         
-        // Use the detailed error message from API service
+        // Translate technical error messages to user-friendly messages
         if (err.message) {
-          errorMessage = err.message;
+          if (err.message.includes('Member status is MemberStatus.PENDING')) {
+            errorMessage = 'Your account is still being reviewed. Please wait for your account to be approved before applying for a loan.';
+          } else if (err.message.includes('Not eligible for loan')) {
+            errorMessage = 'You are not currently eligible for a loan. Please contact support for more information.';
+          } else if (err.message.includes('MemberStatus.INACTIVE')) {
+            errorMessage = 'Your account is inactive. Please contact support to reactivate your account.';
+          } else if (err.message.includes('MemberStatus.SUSPENDED')) {
+            errorMessage = 'Your account has been suspended. Please contact support for assistance.';
+          } else if (err.message.includes('insufficient balance')) {
+            errorMessage = 'Insufficient account balance. Please ensure you have enough funds in your account.';
+          } else if (err.message.includes('loan limit exceeded')) {
+            errorMessage = 'You have reached your maximum loan limit. Please contact support for more information.';
+          } else {
+            // For other technical errors, use a generic user-friendly message
+            errorMessage = 'Unable to process your loan application at this time. Please try again later or contact support if the issue persists.';
+          }
         }
         
         toast((t) => (
@@ -618,63 +633,70 @@ function IndividualMemberDashboard({ user, onLogout }) {
             {/* Overview Tab */}
             {activeTab === 'overview' && (
               <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="bg-gray-50 rounded-lg p-6">
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">Account Summary</h3>
-                    <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Account Status:</span>
-                        <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(dashboardStats.account_status)}`}>
+                {/* Enhanced Account Summary and Quick Actions */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="member-info-card bg-white rounded-xl p-6 shadow-lg border border-gray-100">
+                    <div className="flex items-center mb-6">
+                      <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center mr-3">
+                        <FaUser className="h-5 w-5 text-indigo-600" />
+                      </div>
+                      <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Account Summary</h3>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center py-2">
+                        <span className="text-sm font-medium text-gray-600">Account Status:</span>
+                        <span className={`px-3 py-1.5 text-xs font-bold rounded-full ${getStatusColor(dashboardStats.account_status)}`}>
+                          <FaCheckCircle className="inline w-3 h-3 mr-1" />
                           {getDisplayValue(dashboardStats.account_status, 'Active')}
                         </span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Interest Rate:</span>
-                        <span className="font-medium">{dashboardStats.interest_rate || 0}% per annum</span>
+                      <div className="flex justify-between items-center py-2">
+                        <span className="text-sm font-medium text-gray-600">Interest Rate:</span>
+                        <span className="text-sm font-bold text-gray-900">{dashboardStats.interest_rate || 0}% per annum</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Active Loans:</span>
-                        <span className="font-medium">{currentLoans.length}</span>
+                      <div className="flex justify-between items-center py-2">
+                        <span className="text-sm font-medium text-gray-600">Active Loans:</span>
+                        <span className="text-sm font-bold text-gray-900">{currentLoans.length}</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Pending Requests:</span>
-                        <span className="font-medium">
+                      <div className="flex justify-between items-center py-2">
+                        <span className="text-sm font-medium text-gray-600">Pending Requests:</span>
+                        <span className="text-sm font-bold text-gray-900">
                           {loanRequests.filter(r => r.status === 'REQUEST' || r.status === 'PENDING').length}
                         </span>
                       </div>
                     </div>
-                    
-
                   </div>
 
-                  <div className="bg-gray-50 rounded-lg p-6">
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
-                    <div className="space-y-3">
+                  <div className="member-actions-card bg-white rounded-xl p-6 shadow-lg border border-gray-100">
+                    <div className="flex items-center mb-6">
+                      <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                        <FaFileAlt className="h-5 w-5 text-purple-600" />
+                      </div>
+                      <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Quick Actions</h3>
+                    </div>
+                    <div className="space-y-4">
                       <button
                         onClick={() => setShowLoanApplicationModal(true)}
-                        className="w-full flex items-center justify-center px-3 sm:px-4 py-2 border border-transparent text-xs sm:text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+                        className="w-full flex items-center justify-center px-4 py-3 border border-transparent text-sm font-semibold rounded-xl shadow-md text-white bg-blue-600 hover:bg-blue-700 hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02]"
                       >
-                        <FaPlus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> 
-                        <span className="hidden sm:inline">Apply for New Loan</span>
-                        <span className="sm:hidden">Apply Loan</span>
+                        <FaPlus className="w-4 h-4 mr-2" /> 
+                        Apply for New Loan
                       </button>
                       <button
                         onClick={() => setActiveTab('loans')}
-                        className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50"
+                        className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 text-sm font-semibold rounded-xl shadow-sm text-gray-700 bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200"
                       >
-                        <FaEye className="mr-2" /> View Loan Details
+                        <FaEye className="w-4 h-4 mr-2" /> View Loan Details
                       </button>
                       <button
                         onClick={() => setActiveTab('payments')}
-                        className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50"
+                        className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 text-sm font-semibold rounded-xl shadow-sm text-gray-700 bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200"
                       >
-                        <FaHistory className="mr-2" /> Payment History
+                        <FaHistory className="w-4 h-4 mr-2" /> Payment History
                       </button>
                     </div>
                   </div>
                 </div>
-
-
               </div>
             )}
 
@@ -682,106 +704,118 @@ function IndividualMemberDashboard({ user, onLogout }) {
             {activeTab === 'loans' && (
               <div>
                 <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-lg font-medium text-gray-900">My Loans</h3>
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900">My Loans</h3>
                   <button
                     onClick={() => setShowLoanApplicationModal(true)}
-                    className="inline-flex items-center px-3 sm:px-4 py-2 border border-transparent text-xs sm:text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-semibold rounded-xl shadow-md text-white bg-blue-600 hover:bg-blue-700 hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02]"
                   >
-                    <FaPlus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> 
-                    <span className="hidden sm:inline">Apply for New Loan</span>
-                    <span className="sm:hidden">Apply Loan</span>
+                    <FaPlus className="w-4 h-4 mr-2" /> 
+                    Apply for New Loan
                   </button>
                 </div>
 
-                {/* Desktop Loans Table */}
-                <div className="hidden lg:block bg-white shadow rounded-lg">
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Loan ID
-                        </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Amount
-                        </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Purpose
-                        </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Term
-                        </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Status
-                        </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {currentLoans.map((loan) => (
-                          <tr key={loan.id} className="hover:bg-gray-50 transition-colors">
-                            <td className="px-4 py-4 text-sm font-medium text-gray-900">
-                            {loan.id}
-                          </td>
-                            <td className="px-4 py-4 text-sm text-gray-900">
-                            {formatCurrency(loan.loan_amount)}
-                          </td>
-                            <td className="px-4 py-4 text-sm text-gray-500">
-                            {getDisplayValue(loan.purpose, 'N/A')}
-                          </td>
-                            <td className="px-4 py-4 text-sm text-gray-500">
-                            {loan.term_months || 0} months
-                          </td>
-                            <td className="px-4 py-4">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(loan.status)}`}>
-                              {getDisplayValue(loan.status, 'N/A')}
-                            </span>
-                          </td>
-                            <td className="px-4 py-4 text-sm font-medium">
-                            <button
-                              onClick={() => {
-                                setSelectedLoan(loan);
-                                setShowLoanDetailsModal(true);
-                              }}
-                                className="text-blue-600 hover:text-blue-900 transition-colors"
-                            >
-                              <FaEye />
-                            </button>
-                          </td>
+                {/* Enhanced Desktop Loans Table */}
+                <div className="hidden lg:block bg-white shadow-xl rounded-xl overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gradient-to-r from-gray-50 to-blue-50">
+                        <tr>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            <div className="flex items-center">
+                              <FaFileAlt className="w-4 h-4 mr-2" />
+                              Loan ID
+                            </div>
+                          </th>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            <div className="flex items-center">
+                              <FaMoneyBillWave className="w-4 h-4 mr-2" />
+                              Amount
+                            </div>
+                          </th>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Purpose</th>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            <div className="flex items-center">
+                              <FaClock className="w-4 h-4 mr-2" />
+                              Term
+                            </div>
+                          </th>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {currentLoans.map((loan, index) => (
+                          <tr key={loan.id} className={`hover:bg-gray-50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                            <td className="px-6 py-4 text-sm font-semibold text-gray-900">
+                              {loan.id}
+                            </td>
+                            <td className="px-6 py-4 text-sm font-bold text-green-600 text-lg">
+                              {formatCurrency(loan.loan_amount)}
+                            </td>
+                            <td className="px-6 py-4 text-sm font-semibold text-gray-900">
+                              {getDisplayValue(loan.purpose, 'N/A')}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-600">
+                              {loan.term_months || 0} months
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold ${getStatusColor(loan.status)}`}>
+                                <FaCheckCircle className="w-3 h-3 mr-1" />
+                                {getDisplayValue(loan.status, 'N/A')}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-sm font-medium">
+                              <button
+                                onClick={() => {
+                                  setSelectedLoan(loan);
+                                  setShowLoanDetailsModal(true);
+                                }}
+                                className="text-blue-600 hover:text-blue-900 p-2 rounded-lg hover:bg-blue-50 transition-colors duration-200"
+                                title="View Details"
+                              >
+                                <FaEye className="w-4 h-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
 
-                {/* Mobile Loans Cards */}
+                {/* Enhanced Mobile Loans Cards */}
                 <div className="lg:hidden space-y-4">
                   {currentLoans.length === 0 ? (
-                    <div className="text-center py-8">
-                      <div className="text-gray-400 mb-4">
-                        <FaMoneyBillWave className="w-12 h-12 mx-auto" />
+                    <div className="empty-state">
+                      <div className="empty-state-icon">
+                        <FaMoneyBillWave className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
                       </div>
-                      <p className="text-lg font-medium text-gray-900 mb-1">No active loans found</p>
-                      <p className="text-sm text-gray-500">Apply for a new loan to get started.</p>
+                      <h3 className="empty-state-title">No active loans found</h3>
+                      <p className="empty-state-description">Apply for a new loan to get started.</p>
+                      <button
+                        onClick={() => setShowLoanApplicationModal(true)}
+                        className="mt-6 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors duration-200 font-semibold shadow-lg hover:shadow-xl"
+                      >
+                        <FaPlus className="w-4 h-4 mr-2 inline" />
+                        Apply for New Loan
+                      </button>
                     </div>
                   ) : (
-                    currentLoans.map((loan) => (
-                      <div key={loan.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                        <div className="flex items-start justify-between mb-3">
+                    currentLoans.map((loan, index) => (
+                      <div key={loan.id} className="member-loan-card bg-white rounded-xl p-4 sm:p-5 shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100 animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
+                        <div className="flex items-start justify-between mb-4">
                           <div className="flex-1">
-                            <div className="flex items-center space-x-2 mb-1">
-                              <span className="text-sm font-medium text-gray-500">{loan.id}</span>
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(loan.status)}`}>
+                            <div className="flex items-center space-x-3 mb-3">
+                              <span className="text-sm font-semibold text-gray-600">#{loan.id}</span>
+                              <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold ${getStatusColor(loan.status)}`}>
+                                <FaCheckCircle className="w-3 h-3 mr-1" />
                                 {getDisplayValue(loan.status, 'N/A')}
                               </span>
                             </div>
-                            <h3 className="text-lg font-semibold text-gray-900">
+                            <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
                               {formatCurrency(loan.loan_amount)}
                             </h3>
-                            <p className="text-sm text-gray-600 mt-1">
+                            <p className="text-sm font-semibold text-gray-600 mb-3">
                               {getDisplayValue(loan.purpose, 'No purpose specified')}
                             </p>
                           </div>
@@ -790,18 +824,27 @@ function IndividualMemberDashboard({ user, onLogout }) {
                               setSelectedLoan(loan);
                               setShowLoanDetailsModal(true);
                             }}
-                            className="text-blue-600 hover:text-blue-900 p-1"
+                            className="text-blue-600 hover:text-blue-900 p-2 rounded-lg hover:bg-blue-50 transition-colors duration-200"
+                            title="View Details"
                           >
-                            <FaEye className="w-4 h-4" />
+                            <FaEye className="w-5 h-5" />
                           </button>
                         </div>
                         
-                        <div className="grid grid-cols-1 gap-2 text-sm">
-                          <div>
-                            <span className="text-gray-500">Term:</span>
-                            <p className="font-medium text-gray-900">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                          <div className="flex items-center">
+                            <FaClock className="w-4 h-4 text-gray-400 mr-2" />
+                            <span className="text-gray-500 mr-2">Term:</span>
+                            <span className="font-semibold text-gray-900">
                               {loan.term_months || 0} months
-                            </p>
+                            </span>
+                          </div>
+                          <div className="flex items-center">
+                            <FaMoneyBillWave className="w-4 h-4 text-gray-400 mr-2" />
+                            <span className="text-gray-500 mr-2">Amount:</span>
+                            <span className="font-bold text-green-600">
+                              {formatCurrency(loan.loan_amount)}
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -815,214 +858,226 @@ function IndividualMemberDashboard({ user, onLogout }) {
             {activeTab === 'requests' && (
               <div>
                 <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-lg font-medium text-gray-900">Loan Requests</h3>
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Loan Requests</h3>
                   <button
                     onClick={() => setShowLoanApplicationModal(true)}
-                    className="inline-flex items-center px-3 sm:px-4 py-2 border border-transparent text-xs sm:text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-semibold rounded-xl shadow-md text-white bg-blue-600 hover:bg-blue-700 hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02]"
                   >
-                    <FaPlus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> 
-                    <span className="hidden sm:inline">New Request</span>
-                    <span className="sm:hidden">New</span>
+                    <FaPlus className="w-4 h-4 mr-2" /> 
+                    New Request
                   </button>
                 </div>
 
-                {/* Desktop Loan Requests Table */}
-                <div className="hidden lg:block bg-white shadow rounded-lg">
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Request ID
-                        </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Amount
-                        </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Purpose
-                        </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Term
-                        </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Status
-                        </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Requested Date
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {loanRequests.map((request) => (
-                          <tr key={request.id} className="hover:bg-gray-50 transition-colors">
-                            <td className="px-4 py-4 text-sm font-medium text-gray-900">
-                            {request.id}
-                          </td>
-                            <td className="px-4 py-4 text-sm text-gray-900">
-                            {formatCurrency(request.loan_amount)}
-                          </td>
-                            <td className="px-4 py-4 text-sm text-gray-500">
-                            {getDisplayValue(request.purpose, 'N/A')}
-                          </td>
-                            <td className="px-4 py-4 text-sm text-gray-500">
-                            {request.term_months || 0} months
-                          </td>
-                            <td className="px-4 py-4">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
-                              {getDisplayValue(request.status, 'N/A')}
-                            </span>
-                          </td>
-                            <td className="px-4 py-4 text-sm text-gray-500">
-                            {formatDate(request.requested_at || request.created_at)}
-                          </td>
+                {/* Enhanced Desktop Loan Requests Table */}
+                <div className="hidden lg:block bg-white shadow-xl rounded-xl overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gradient-to-r from-gray-50 to-orange-50">
+                        <tr>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            <div className="flex items-center">
+                              <FaFileAlt className="w-4 h-4 mr-2" />
+                              Request ID
+                            </div>
+                          </th>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            <div className="flex items-center">
+                              <FaMoneyBillWave className="w-4 h-4 mr-2" />
+                              Amount
+                            </div>
+                          </th>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Purpose</th>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            <div className="flex items-center">
+                              <FaClock className="w-4 h-4 mr-2" />
+                              Term
+                            </div>
+                          </th>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            <div className="flex items-center">
+                              <FaClock className="w-4 h-4 mr-2" />
+                              Requested Date
+                            </div>
+                          </th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {loanRequests.map((request, index) => (
+                          <tr key={request.id} className={`hover:bg-gray-50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                            <td className="px-6 py-4 text-sm font-semibold text-gray-900">
+                              #{request.id}
+                            </td>
+                            <td className="px-6 py-4 text-sm font-bold text-green-600 text-lg">
+                              {formatCurrency(request.loan_amount)}
+                            </td>
+                            <td className="px-6 py-4 text-sm font-semibold text-gray-900">
+                              {getDisplayValue(request.purpose, 'N/A')}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-600">
+                              {request.term_months || 0} months
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold ${getStatusColor(request.status)}`}>
+                                <FaClock className="w-3 h-3 mr-1" />
+                                {getDisplayValue(request.status, 'N/A')}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-sm font-semibold text-gray-900">
+                              {formatDate(request.requested_at || request.created_at)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
 
-                {/* Mobile Loan Requests Cards */}
+                {/* Enhanced Mobile Loan Requests Cards */}
                 <div className="lg:hidden space-y-4">
                   {loanRequests.length === 0 ? (
-                    <div className="text-center py-8">
-                      <div className="text-gray-400 mb-4">
-                        <FaClock className="w-12 h-12 mx-auto" />
+                    <div className="empty-state">
+                      <div className="empty-state-icon">
+                        <FaClock className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
                       </div>
-                      <p className="text-lg font-medium text-gray-900 mb-1">No loan requests found</p>
-                      <p className="text-sm text-gray-500">Submit a new loan request to get started.</p>
+                      <h3 className="empty-state-title">No loan requests found</h3>
+                      <p className="empty-state-description">Use the "New Request" button above to submit a loan application.</p>
                     </div>
                   ) : (
-                    loanRequests.map((request) => (
-                      <div key={request.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                        <div className="flex items-start justify-between mb-3">
+                    loanRequests.map((request, index) => (
+                      <div key={request.id} className="member-request-card bg-white rounded-xl p-4 sm:p-5 shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100 animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
+                        <div className="flex items-start justify-between mb-4">
                           <div className="flex-1">
-                            <div className="flex items-center space-x-2 mb-1">
-                              <span className="text-sm font-medium text-gray-500">{request.id}</span>
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
+                            <div className="flex items-center space-x-3 mb-3">
+                              <span className="text-sm font-semibold text-gray-600">#{request.id}</span>
+                              <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold ${getStatusColor(request.status)}`}>
+                                <FaClock className="w-3 h-3 mr-1" />
                                 {getDisplayValue(request.status, 'N/A')}
                               </span>
                             </div>
-                            <h3 className="text-lg font-semibold text-gray-900">
+                            <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
                               {formatCurrency(request.loan_amount)}
                             </h3>
-                            <p className="text-sm text-gray-600 mt-1">
+                            <p className="text-sm font-semibold text-gray-600 mb-3">
                               {getDisplayValue(request.purpose, 'No purpose specified')}
                             </p>
                           </div>
                         </div>
                         
-                        <div className="grid grid-cols-2 gap-4 text-sm">
-                          <div>
-                            <span className="text-gray-500">Term:</span>
-                            <p className="font-medium text-gray-900">
+                        <div className="space-y-3 text-sm">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center">
+                              <FaClock className="w-4 h-4 text-gray-400 mr-2" />
+                              <span className="text-gray-500">Term:</span>
+                            </div>
+                            <span className="font-semibold text-gray-900">
                               {request.term_months || 0} months
-                            </p>
+                            </span>
                           </div>
-                          <div>
-                            <span className="text-gray-500">Requested:</span>
-                            <p className="font-medium text-gray-900">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center">
+                              <FaClock className="w-4 h-4 text-gray-400 mr-2" />
+                              <span className="text-gray-500">Requested:</span>
+                            </div>
+                            <span className="font-semibold text-gray-900">
                               {formatDate(request.requested_at || request.created_at)}
-                            </p>
+                            </span>
                           </div>
                         </div>
                       </div>
                     ))
                   )}
                 </div>
-            </div>
+              </div>
             )}
 
             {/* Payment History Tab */}
             {activeTab === 'payments' && (
               <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-6">Payment History</h3>
-                {/* Desktop Payment History Table */}
-                <div className="hidden lg:block bg-white shadow rounded-lg">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Date
-                    </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Amount
-                    </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Type
-                    </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Purpose
-                        </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {paymentHistory.map((payment) => (
-                          <tr key={payment.id} className="hover:bg-gray-50 transition-colors">
-                            <td className="px-4 py-4 text-sm text-gray-900">
-                            {formatDate(payment.transaction_date)}
-                      </td>
-                            <td className="px-4 py-4 text-sm font-medium text-gray-900">
-                            {formatCurrency(payment.amount)}
-                          </td>
-                            <td className="px-4 py-4 text-sm text-gray-500">
-                            {getDisplayValue(payment.payment_type || payment.type, 'Payment')}
-                      </td>
-                            <td className="px-4 py-4 text-sm text-gray-500">
-                        {payment.purpose || payment.description || 'N/A'}
-                      </td>
-                            <td className="px-4 py-4">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(payment.status)}`}>
-                          {getDisplayValue(payment.status, 'N/A')}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6">Payment History</h3>
+                
+                {/* Enhanced Desktop Payment History Table */}
+                <div className="hidden lg:block bg-white shadow-xl rounded-xl overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gradient-to-r from-gray-50 to-green-50">
+                        <tr>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            <div className="flex items-center">
+                              <FaClock className="w-4 h-4 mr-2" />
+                              Date
+                            </div>
+                          </th>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            <div className="flex items-center">
+                              <FaMoneyBillWave className="w-4 h-4 mr-2" />
+                              Amount
+                            </div>
+                          </th>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Type</th>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Purpose</th>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {paymentHistory.map((payment, index) => (
+                          <tr key={payment.id} className={`hover:bg-gray-50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                            <td className="px-6 py-4 text-sm font-semibold text-gray-900">
+                              {formatDate(payment.transaction_date)}
+                            </td>
+                            <td className="px-6 py-4 text-sm font-bold text-green-600 text-lg">
+                              {formatCurrency(payment.amount)}
+                            </td>
+                            <td className="px-6 py-4 text-sm font-semibold text-gray-900">
+                              {getDisplayValue(payment.payment_type || payment.type, 'Payment')}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-600">
+                              {payment.purpose || payment.description || 'N/A'}
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold ${getStatusColor(payment.status)}`}>
+                                <FaCheckCircle className="w-3 h-3 mr-1" />
+                                {getDisplayValue(payment.status, 'N/A')}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
 
-                {/* Mobile Payment History Cards */}
+                {/* Enhanced Mobile Payment History Cards */}
                 <div className="lg:hidden space-y-4">
                   {paymentHistory.length === 0 ? (
-                    <div className="text-center py-8">
-                      <div className="text-gray-400 mb-4">
-                        <FaCreditCard className="w-12 h-12 mx-auto" />
+                    <div className="empty-state">
+                      <div className="empty-state-icon">
+                        <FaCreditCard className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
                       </div>
-                      <p className="text-lg font-medium text-gray-900 mb-1">No payment history found</p>
-                      <p className="text-sm text-gray-500">Payment history will appear here once payments are made.</p>
+                      <h3 className="empty-state-title">No payment history found</h3>
+                      <p className="empty-state-description">Payment history will appear here once payments are made.</p>
                     </div>
                   ) : (
-                    paymentHistory.map((payment) => (
-                      <div key={payment.id} className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 shadow-sm">
-                        <div className="flex items-start justify-between mb-3">
+                    paymentHistory.map((payment, index) => (
+                      <div key={payment.id} className="member-payment-card bg-white rounded-xl p-4 sm:p-5 shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100 animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
+                        <div className="flex items-start justify-between mb-4">
                           <div className="flex-1 min-w-0">
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-2">
-                              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium w-fit ${getStatusColor(payment.status)}`}>
+                            <div className="flex items-center space-x-3 mb-3">
+                              <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold ${getStatusColor(payment.status)}`}>
+                                <FaCheckCircle className="w-3 h-3 mr-1" />
                                 {getDisplayValue(payment.status, 'N/A')}
                               </span>
-                              <span className="text-xs sm:text-sm text-gray-500">
+                              <span className="text-sm font-semibold text-gray-500">
                                 {formatDate(payment.transaction_date)}
                               </span>
                             </div>
-                            <h3 className="text-sm sm:text-base font-semibold text-gray-900">
+                            <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
                               {formatCurrency(payment.amount)}
                             </h3>
-                            <p className="text-xs sm:text-sm text-gray-600 mt-1 break-words">
+                            <p className="text-sm font-semibold text-gray-600 mb-2">
                               {getDisplayValue(payment.payment_type || payment.type, 'Payment')}
                             </p>
-                          </div>
-                        </div>
-                        
-                        <div className="grid grid-cols-1 gap-2 text-xs sm:text-sm">
-                          <div>
-                            <span className="text-gray-500">Purpose:</span>
-                            <p className="font-medium text-gray-900 break-words">
+                            <p className="text-xs text-gray-500">
                               {payment.purpose || payment.description || 'N/A'}
                             </p>
                           </div>
@@ -1037,89 +1092,92 @@ function IndividualMemberDashboard({ user, onLogout }) {
             {/* Transactions Tab */}
             {activeTab === 'transactions' && (
               <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-6">Transaction History</h3>
-                {/* Desktop Transaction History Table */}
-                <div className="hidden lg:block bg-white shadow rounded-lg">
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Date
-                        </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Description
-                        </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Type
-                        </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Amount
-                        </th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Status
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {transactionHistory.map((transaction) => (
-                          <tr key={transaction.id} className="hover:bg-gray-50 transition-colors">
-                            <td className="px-4 py-4 text-sm text-gray-900">
-                            {formatDate(transaction.transaction_date)}
-                          </td>
-                            <td className="px-4 py-4 text-sm text-gray-900">
-                            {getDisplayValue(transaction.description, 'Transaction')}
-                          </td>
-                            <td className="px-4 py-4 text-sm text-gray-500">
-                            {getDisplayValue(transaction.type, 'N/A')}
-                          </td>
-                            <td className="px-4 py-4 text-sm font-medium text-gray-900">
-                            {formatCurrency(transaction.amount)}
-                          </td>
-                            <td className="px-4 py-4">
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(transaction.status)}`}>
-                              {getDisplayValue(transaction.status, 'N/A')}
-                            </span>
-                          </td>
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6">Transaction History</h3>
+                
+                {/* Enhanced Desktop Transaction History Table */}
+                <div className="hidden lg:block bg-white shadow-xl rounded-xl overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gradient-to-r from-gray-50 to-blue-50">
+                        <tr>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            <div className="flex items-center">
+                              <FaClock className="w-4 h-4 mr-2" />
+                              Date
+                            </div>
+                          </th>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Description</th>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Type</th>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            <div className="flex items-center">
+                              <FaMoneyBillWave className="w-4 h-4 mr-2" />
+                              Amount
+                            </div>
+                          </th>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {transactionHistory.map((transaction, index) => (
+                          <tr key={transaction.id} className={`hover:bg-gray-50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                            <td className="px-6 py-4 text-sm font-semibold text-gray-900">
+                              {formatDate(transaction.transaction_date)}
+                            </td>
+                            <td className="px-6 py-4 text-sm font-semibold text-gray-900">
+                              {getDisplayValue(transaction.description, 'Transaction')}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-600">
+                              {getDisplayValue(transaction.type, 'N/A')}
+                            </td>
+                            <td className="px-6 py-4 text-sm font-bold text-green-600 text-lg">
+                              {formatCurrency(transaction.amount)}
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold ${getStatusColor(transaction.status)}`}>
+                                <FaCheckCircle className="w-3 h-3 mr-1" />
+                                {getDisplayValue(transaction.status, 'N/A')}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
 
-                {/* Mobile Transaction History Cards */}
+                {/* Enhanced Mobile Transaction History Cards */}
                 <div className="lg:hidden space-y-4">
                   {transactionHistory.length === 0 ? (
-                    <div className="text-center py-8">
-                      <div className="text-gray-400 mb-4">
-                        <FaHistory className="w-12 h-12 mx-auto" />
+                    <div className="empty-state">
+                      <div className="empty-state-icon">
+                        <FaHistory className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
                       </div>
-                      <p className="text-lg font-medium text-gray-900 mb-1">No transactions found</p>
-                      <p className="text-sm text-gray-500">Transaction history will appear here once activities are recorded.</p>
+                      <h3 className="empty-state-title">No transactions found</h3>
+                      <p className="empty-state-description">Transaction history will appear here once activities are recorded.</p>
                     </div>
                   ) : (
-                    transactionHistory.map((transaction) => (
-                      <div key={transaction.id} className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 shadow-sm">
-                        <div className="flex items-start justify-between mb-3">
+                    transactionHistory.map((transaction, index) => (
+                      <div key={transaction.id} className="member-transaction-card bg-white rounded-xl p-4 sm:p-5 shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100 animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
+                        <div className="flex items-start justify-between mb-4">
                           <div className="flex-1 min-w-0">
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-2">
-                              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium w-fit ${getStatusColor(transaction.status)}`}>
+                            <div className="flex items-center space-x-3 mb-3">
+                              <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold ${getStatusColor(transaction.status)}`}>
+                                <FaCheckCircle className="w-3 h-3 mr-1" />
                                 {getDisplayValue(transaction.status, 'N/A')}
                               </span>
-                              <span className="text-xs sm:text-sm text-gray-500">
+                              <span className="text-sm font-semibold text-gray-500">
                                 {formatDate(transaction.transaction_date)}
                               </span>
                             </div>
-                            <h3 className="text-sm sm:text-base font-semibold text-gray-900 break-words">
+                            <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 break-words">
                               {getDisplayValue(transaction.description, 'Transaction')}
                             </h3>
-                            <p className="text-xs sm:text-sm text-gray-600 mt-1 break-words">
+                            <p className="text-sm font-semibold text-gray-600 mb-2 break-words">
                               {getDisplayValue(transaction.type, 'N/A')}
                             </p>
                           </div>
                           <div className="text-right ml-2">
-                            <div className="text-sm sm:text-base font-bold text-gray-900">
+                            <div className="text-lg sm:text-xl font-bold text-green-600">
                               {formatCurrency(transaction.amount)}
                             </div>
                           </div>

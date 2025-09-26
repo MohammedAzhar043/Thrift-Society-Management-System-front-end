@@ -863,12 +863,31 @@ function BillCollectorDashboard({ user, onLogout }) {
       onError: (err) => {
         let errorMessage = 'Failed to create loan request. Please try again.';
         
+        // Translate technical error messages to user-friendly messages
         if (err.message) {
-          errorMessage = err.message;
+          if (err.message.includes('Member status is MemberStatus.PENDING')) {
+            errorMessage = 'The member\'s account is still being reviewed. Please wait for approval before creating loan requests.';
+          } else if (err.message.includes('MemberStatus.INACTIVE')) {
+            errorMessage = 'The member\'s account is inactive. Please contact support to reactivate the account.';
+          } else if (err.message.includes('MemberStatus.SUSPENDED')) {
+            errorMessage = 'The member\'s account has been suspended. Please contact support for assistance.';
+          } else if (err.message.includes('Not eligible for loan')) {
+            errorMessage = 'This member is not currently eligible for a loan. Please contact support for more information.';
+          } else if (err.message.includes('insufficient balance')) {
+            errorMessage = 'Insufficient account balance. Please ensure the member has enough funds.';
+          } else if (err.message.includes('loan limit exceeded')) {
+            errorMessage = 'This member has reached their maximum loan limit. Please contact support for more information.';
+          } else if (err.message.includes('Member not found')) {
+            errorMessage = 'The selected member was not found. Please refresh and try again.';
+          } else if (err.message.includes('Group not found')) {
+            errorMessage = 'The selected group was not found. Please refresh and try again.';
+          } else {
+            errorMessage = 'Unable to create loan request at this time. Please try again later or contact support if the issue persists.';
+          }
         } else if (err.detail) {
-          errorMessage = err.detail;
+          errorMessage = 'Unable to create loan request at this time. Please try again later or contact support if the issue persists.';
         } else if (typeof err === 'string') {
-          errorMessage = err;
+          errorMessage = 'Unable to create loan request at this time. Please try again later or contact support if the issue persists.';
         }
         
         setError(errorMessage);
