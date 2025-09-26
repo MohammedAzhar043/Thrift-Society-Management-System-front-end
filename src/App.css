@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Enhanced Mobile Optimizations for Members Management */
+/* Enhanced Mobile Optimizations for Admin Clerk Dashboard */
 @layer components {
   .member-card {
     @apply bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden group;
@@ -57,6 +57,136 @@
   .info-icon.orange {
     @apply bg-orange-100;
   }
+
+  /* Admin Clerk Dashboard specific components */
+  .activity-card {
+    @apply bg-white rounded-xl p-4 sm:p-5 shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100;
+  }
+  
+  .activity-card:hover {
+    @apply transform scale-[1.01];
+  }
+  
+  .approval-card {
+    @apply bg-white rounded-xl p-4 sm:p-5 shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100;
+  }
+  
+  .collection-card {
+    @apply bg-white rounded-xl p-4 sm:p-5 shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100;
+  }
+  
+  .stats-card {
+    @apply bg-white overflow-hidden shadow-lg rounded-xl hover:shadow-xl transition-all duration-300;
+  }
+  
+  .stats-card:hover {
+    @apply transform scale-[1.02];
+  }
+  
+  .tab-button {
+    @apply py-3 sm:py-4 px-2 sm:px-3 border-b-2 font-semibold text-xs sm:text-sm whitespace-nowrap transition-all duration-200 rounded-t-lg;
+  }
+  
+  .tab-button.active {
+    @apply border-blue-500 text-blue-600 bg-blue-50;
+  }
+  
+  .tab-button.inactive {
+    @apply border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50;
+  }
+  
+  .action-button {
+    @apply px-4 py-3 sm:py-4 border border-transparent rounded-xl shadow-md text-sm sm:text-base font-semibold transition-all duration-200 transform hover:scale-[1.02];
+  }
+  
+  .action-button.primary {
+    @apply text-white bg-blue-600 hover:bg-blue-700 hover:shadow-lg;
+  }
+  
+  .action-button.success {
+    @apply text-white bg-green-600 hover:bg-green-700 hover:shadow-lg;
+  }
+  
+  .action-button.warning {
+    @apply text-white bg-yellow-600 hover:bg-yellow-700 hover:shadow-lg;
+  }
+  
+  .action-button.danger {
+    @apply text-white bg-red-600 hover:bg-red-700 hover:shadow-lg;
+  }
+  
+  .badge {
+    @apply inline-flex items-center px-3 py-1.5 text-xs font-bold rounded-full;
+  }
+  
+  .badge.primary {
+    @apply bg-blue-500 text-white;
+  }
+  
+  .badge.success {
+    @apply bg-green-500 text-white;
+  }
+  
+  .badge.warning {
+    @apply bg-yellow-500 text-white;
+  }
+  
+  .badge.danger {
+    @apply bg-red-500 text-white;
+  }
+  
+  .badge.info {
+    @apply bg-gray-500 text-white;
+  }
+  
+  .section-header {
+    @apply text-lg sm:text-xl font-semibold text-gray-900 mb-6;
+  }
+  
+  .empty-state {
+    @apply text-center py-12;
+  }
+  
+  .empty-state-icon {
+    @apply w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4;
+  }
+  
+  .empty-state-title {
+    @apply text-base sm:text-lg font-semibold text-gray-900 mb-2;
+  }
+  
+  .empty-state-description {
+    @apply text-sm text-gray-500;
+  }
+
+  /* Transaction History specific components */
+  .transaction-summary-card {
+    @apply bg-gradient-to-br rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300;
+  }
+  
+  .transaction-card {
+    @apply bg-white rounded-xl p-4 sm:p-5 shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100;
+  }
+  
+  .transaction-card:hover {
+    @apply transform scale-[1.01];
+  }
+  
+  .transaction-amount {
+    @apply text-green-600 font-bold text-base sm:text-lg;
+  }
+  
+  .collection-tag {
+    @apply inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold;
+  }
+  
+  .transaction-detail-label {
+    @apply text-gray-500 text-xs sm:text-sm;
+  }
+  
+  .time {
+    @apply text-gray-900 font-semibold text-sm;
+  }
 }
 
 /* Mobile-specific optimizations */
@@ -76,6 +206,85 @@
   .info-icon svg {
     @apply w-4 h-4;
   }
+  
+  .activity-card {
+    @apply p-3;
+  }
+  
+  .approval-card {
+    @apply p-3;
+  }
+  
+  .collection-card {
+    @apply p-3;
+  }
+  
+  .stats-card {
+    @apply p-4;
+  }
+  
+  .tab-button {
+    @apply py-2 px-2 text-xs;
+  }
+  
+  .action-button {
+    @apply px-3 py-2 text-sm;
+  }
+  
+  .section-header {
+    @apply text-base mb-4;
+  }
+  
+  .empty-state {
+    @apply py-8;
+  }
+  
+  .empty-state-icon {
+    @apply w-12 h-12;
+  }
+  
+  .empty-state-title {
+    @apply text-sm;
+  }
+  
+  .empty-state-description {
+    @apply text-xs;
+  }
+  
+  .transaction-summary-card {
+    @apply p-3;
+  }
+  
+  .transaction-card {
+    @apply p-3;
+  }
+  
+  .transaction-amount {
+    @apply text-sm;
+  }
+  
+  .transaction-detail-label {
+    @apply text-xs;
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .activity-card {
+    @apply p-4;
+  }
+  
+  .approval-card {
+    @apply p-4;
+  }
+  
+  .collection-card {
+    @apply p-4;
+  }
+  
+  .stats-card {
+    @apply p-5;
+  }
 }
 
 /* Smooth animations for better UX */
@@ -88,8 +297,49 @@
     animation: slideUp 0.4s ease-out;
   }
   
+  .animate-slide-down {
+    animation: slideDown 0.4s ease-out;
+  }
+  
   .animate-bounce-in {
     animation: bounceIn 0.5s ease-out;
+  }
+  
+  .animate-scale-in {
+    animation: scaleIn 0.3s ease-out;
+  }
+  
+  .animate-pulse-slow {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  .animate-bounce-gentle {
+    animation: bounceGentle 2s ease-in-out infinite;
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .text-shadow {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+  
+  .text-shadow-lg {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .backdrop-blur-xs {
+    backdrop-filter: blur(2px);
+  }
+  
+  .backdrop-blur-sm {
+    backdrop-filter: blur(4px);
   }
 }
 
@@ -106,6 +356,17 @@
   from {
     opacity: 0;
     transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
   }
   to {
     opacity: 1;
@@ -131,6 +392,26 @@
   }
 }
 
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bounceGentle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
 /* Touch-friendly improvements */
 @media (hover: none) and (pointer: coarse) {
   .member-card:hover {
@@ -141,7 +422,116 @@
     @apply transform scale-95;
   }
   
+  .activity-card:hover {
+    @apply transform-none;
+  }
+  
+  .activity-card:active {
+    @apply transform scale-95;
+  }
+  
+  .approval-card:hover {
+    @apply transform-none;
+  }
+  
+  .approval-card:active {
+    @apply transform scale-95;
+  }
+  
+  .collection-card:hover {
+    @apply transform-none;
+  }
+  
+  .collection-card:active {
+    @apply transform scale-95;
+  }
+  
+  .stats-card:hover {
+    @apply transform-none;
+  }
+  
+  .stats-card:active {
+    @apply transform scale-95;
+  }
+  
   button:active {
     @apply transform scale-95;
+  }
+  
+  .action-button:hover {
+    @apply transform-none;
+  }
+  
+  .action-button:active {
+    @apply transform scale-95;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .activity-card {
+    @apply border-2 border-gray-300;
+  }
+  
+  .approval-card {
+    @apply border-2 border-gray-300;
+  }
+  
+  .collection-card {
+    @apply border-2 border-gray-300;
+  }
+  
+  .badge {
+    @apply border border-gray-300;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-slide-up,
+  .animate-slide-down,
+  .animate-bounce-in,
+  .animate-scale-in,
+  .animate-pulse-slow,
+  .animate-bounce-gentle {
+    animation: none;
+  }
+  
+  .member-card,
+  .activity-card,
+  .approval-card,
+  .collection-card,
+  .stats-card,
+  .action-button {
+    @apply transition-none;
+  }
+  
+  .member-card:hover,
+  .activity-card:hover,
+  .approval-card:hover,
+  .collection-card:hover,
+  .stats-card:hover,
+  .action-button:hover {
+    @apply transform-none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .member-card,
+  .activity-card,
+  .approval-card,
+  .collection-card,
+  .stats-card {
+    @apply shadow-none border border-gray-300;
+  }
+  
+  .action-button {
+    @apply bg-gray-100 text-gray-900 border border-gray-300;
+  }
+  
+  .badge {
+    @apply bg-gray-100 text-gray-900 border border-gray-300;
   }
 }

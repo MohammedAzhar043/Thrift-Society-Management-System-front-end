@@ -769,19 +769,19 @@ function AdminClerkDashboard({ user, onLogout }) {
       <main className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-6 lg:py-8">
         
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
           {/* Stats Cards */}
-          <div className="bg-white overflow-hidden shadow rounded-lg">
+          <div className="stats-card bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200">
             <div className="px-4 py-5 sm:p-6">
               <div className="flex items-center">
-                <div className="flex-shrink-0 bg-blue-500 rounded-md p-3">
-                  <FaEye className="text-white h-6 w-6" />
+                <div className="flex-shrink-0 bg-blue-500 rounded-xl p-3 sm:p-4 shadow-lg">
+                  <FaEye className="text-white h-5 w-5 sm:h-6 sm:w-6" />
                 </div>
-                <div className="ml-5 w-0 flex-1">
+                <div className="ml-4 sm:ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Daily Collection</dt>
+                    <dt className="text-xs sm:text-sm font-semibold text-blue-700 truncate">Daily Collection</dt>
                     <dd className="flex items-baseline">
-                      <div className="text-2xl font-semibold text-gray-900">{formatCurrency(dashboardStats.daily_collection)}</div>
+                      <div className="text-lg sm:text-xl lg:text-2xl font-bold text-blue-900">{formatCurrency(dashboardStats.daily_collection)}</div>
                     </dd>
                   </dl>
                 </div>
@@ -789,17 +789,17 @@ function AdminClerkDashboard({ user, onLogout }) {
             </div>
           </div>
 
-          <div className="bg-white overflow-hidden shadow rounded-lg">
+          <div className="stats-card bg-gradient-to-br from-green-50 to-green-100 border border-green-200">
             <div className="px-4 py-5 sm:p-6">
               <div className="flex items-center">
-                <div className="flex-shrink-0 bg-green-500 rounded-md p-3">
-                  <FaChartLine className="text-white h-6 w-6" />
+                <div className="flex-shrink-0 bg-green-500 rounded-xl p-3 sm:p-4 shadow-lg">
+                  <FaChartLine className="text-white h-5 w-5 sm:h-6 sm:w-6" />
                 </div>
-                <div className="ml-5 w-0 flex-1">
+                <div className="ml-4 sm:ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Weekly Collection</dt>
+                    <dt className="text-xs sm:text-sm font-semibold text-green-700 truncate">Weekly Collection</dt>
                     <dd className="flex items-baseline">
-                      <div className="text-2xl font-semibold text-gray-900">{formatCurrency(dashboardStats.weekly_collection)}</div>
+                      <div className="text-lg sm:text-xl lg:text-2xl font-bold text-green-900">{formatCurrency(dashboardStats.weekly_collection)}</div>
                     </dd>
                   </dl>
                 </div>
@@ -807,17 +807,17 @@ function AdminClerkDashboard({ user, onLogout }) {
             </div>
           </div>
 
-          <div className="bg-white overflow-hidden shadow rounded-lg">
+          <div className="stats-card bg-gradient-to-br from-yellow-50 to-yellow-100 border border-yellow-200">
             <div className="px-4 py-5 sm:p-6">
               <div className="flex items-center">
-                <div className="flex-shrink-0 bg-yellow-500 rounded-md p-3">
-                  <FaFileAlt className="text-white h-6 w-6" />
+                <div className="flex-shrink-0 bg-yellow-500 rounded-xl p-3 sm:p-4 shadow-lg">
+                  <FaFileAlt className="text-white h-5 w-5 sm:h-6 sm:w-6" />
                 </div>
-                <div className="ml-5 w-0 flex-1">
+                <div className="ml-4 sm:ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Monthly Collection</dt>
+                    <dt className="text-xs sm:text-sm font-semibold text-yellow-700 truncate">Monthly Collection</dt>
                     <dd className="flex items-baseline">
-                      <div className="text-2xl font-semibold text-gray-900">{formatCurrency(dashboardStats.monthly_collection)}</div>
+                      <div className="text-lg sm:text-xl lg:text-2xl font-bold text-yellow-900">{formatCurrency(dashboardStats.monthly_collection)}</div>
                     </dd>
                   </dl>
                 </div>
@@ -825,17 +825,17 @@ function AdminClerkDashboard({ user, onLogout }) {
             </div>
           </div>
 
-          <div className="bg-white overflow-hidden shadow rounded-lg">
+          <div className="stats-card bg-gradient-to-br from-red-50 to-red-100 border border-red-200">
             <div className="px-4 py-5 sm:p-6">
               <div className="flex items-center">
-                <div className="flex-shrink-0 bg-red-500 rounded-md p-3">
-                  <FaExclamationTriangle className="text-white h-6 w-6" />
+                <div className="flex-shrink-0 bg-red-500 rounded-xl p-3 sm:p-4 shadow-lg">
+                  <FaExclamationTriangle className="text-white h-5 w-5 sm:h-6 sm:w-6" />
                 </div>
-                <div className="ml-5 w-0 flex-1">
+                <div className="ml-4 sm:ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Pending Verifications</dt>
+                    <dt className="text-xs sm:text-sm font-semibold text-red-700 truncate">Pending Verifications</dt>
                     <dd className="flex items-baseline">
-                      <div className="text-2xl font-semibold text-gray-900">{dashboardStats.pending_verifications}</div>
+                      <div className="text-lg sm:text-xl lg:text-2xl font-bold text-red-900">{dashboardStats.pending_verifications}</div>
                     </dd>
                   </dl>
                 </div>
@@ -845,18 +845,18 @@ function AdminClerkDashboard({ user, onLogout }) {
         </div>
 
         {/* Additional Stats Row */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white overflow-hidden shadow rounded-lg">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
+          <div className="stats-card bg-gradient-to-br from-indigo-50 to-indigo-100 border border-indigo-200">
             <div className="px-4 py-5 sm:p-6">
               <div className="flex items-center">
-                <div className="flex-shrink-0 bg-indigo-500 rounded-md p-3">
-                  <FaUsers className="text-white h-6 w-6" />
+                <div className="flex-shrink-0 bg-indigo-500 rounded-xl p-3 sm:p-4 shadow-lg">
+                  <FaUsers className="text-white h-5 w-5 sm:h-6 sm:w-6" />
                 </div>
-                <div className="ml-5 w-0 flex-1">
+                <div className="ml-4 sm:ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Total Groups</dt>
+                    <dt className="text-xs sm:text-sm font-semibold text-indigo-700 truncate">Total Groups</dt>
                     <dd className="flex items-baseline">
-                      <div className="text-2xl font-semibold text-gray-900">{dashboardStats.total_groups}</div>
+                      <div className="text-lg sm:text-xl lg:text-2xl font-bold text-indigo-900">{dashboardStats.total_groups}</div>
                     </dd>
                   </dl>
                 </div>
@@ -864,17 +864,17 @@ function AdminClerkDashboard({ user, onLogout }) {
             </div>
           </div>
 
-          <div className="bg-white overflow-hidden shadow rounded-lg">
+          <div className="stats-card bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200">
             <div className="px-4 py-5 sm:p-6">
               <div className="flex items-center">
-                <div className="flex-shrink-0 bg-purple-500 rounded-md p-3">
-                  <FaUsers className="text-white h-6 w-6" />
+                <div className="flex-shrink-0 bg-purple-500 rounded-xl p-3 sm:p-4 shadow-lg">
+                  <FaUsers className="text-white h-5 w-5 sm:h-6 sm:w-6" />
                 </div>
-                <div className="ml-5 w-0 flex-1">
+                <div className="ml-4 sm:ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Total Members</dt>
+                    <dt className="text-xs sm:text-sm font-semibold text-purple-700 truncate">Total Members</dt>
                     <dd className="flex items-baseline">
-                      <div className="text-2xl font-semibold text-gray-900">{dashboardStats.total_members}</div>
+                      <div className="text-lg sm:text-xl lg:text-2xl font-bold text-purple-900">{dashboardStats.total_members}</div>
                     </dd>
                   </dl>
                 </div>
@@ -882,17 +882,17 @@ function AdminClerkDashboard({ user, onLogout }) {
             </div>
           </div>
 
-          <div className="bg-white overflow-hidden shadow rounded-lg">
+          <div className="stats-card bg-gradient-to-br from-teal-50 to-teal-100 border border-teal-200 sm:col-span-2 lg:col-span-1">
             <div className="px-4 py-5 sm:p-6">
               <div className="flex items-center">
-                <div className="flex-shrink-0 bg-teal-500 rounded-md p-3">
-                  <FaMoneyBillWave className="text-white h-6 w-6" />
+                <div className="flex-shrink-0 bg-teal-500 rounded-xl p-3 sm:p-4 shadow-lg">
+                  <FaMoneyBillWave className="text-white h-5 w-5 sm:h-6 sm:w-6" />
                 </div>
-                <div className="ml-5 w-0 flex-1">
+                <div className="ml-4 sm:ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Active Loans</dt>
+                    <dt className="text-xs sm:text-sm font-semibold text-teal-700 truncate">Active Loans</dt>
                     <dd className="flex items-baseline">
-                      <div className="text-2xl font-semibold text-gray-900">{dashboardStats.active_loans}</div>
+                      <div className="text-lg sm:text-xl lg:text-2xl font-bold text-teal-900">{dashboardStats.active_loans}</div>
                     </dd>
                   </dl>
                 </div>
@@ -902,15 +902,15 @@ function AdminClerkDashboard({ user, onLogout }) {
         </div>
 
         {/* Tab Navigation */}
-        <div className="bg-white shadow rounded-lg mb-8">
+        <div className="bg-white shadow-lg rounded-xl mb-8 sticky top-0 z-10">
           <div className="border-b border-gray-200">
-            <nav className="-mb-px flex space-x-1 sm:space-x-2 lg:space-x-4 px-2 sm:px-4 lg:px-6 overflow-x-auto">
+            <nav className="-mb-px flex space-x-1 sm:space-x-2 lg:space-x-4 px-2 sm:px-4 lg:px-6 overflow-x-auto scrollbar-hide">
               <button
                 onClick={() => setActiveTab('overview')}
-                className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
+                className={`py-3 sm:py-4 px-2 sm:px-3 border-b-2 font-semibold text-xs sm:text-sm whitespace-nowrap transition-all duration-200 rounded-t-lg ${
                   activeTab === 'overview'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'border-blue-500 text-blue-600 bg-blue-50'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50'
                 }`}
               >
                 <FaEye className="inline mr-1 sm:mr-2 w-3 h-3 sm:w-4 sm:h-4" />
@@ -918,10 +918,10 @@ function AdminClerkDashboard({ user, onLogout }) {
               </button>
               <button
                 onClick={() => setActiveTab('pending-approvals')}
-                className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
+                className={`py-3 sm:py-4 px-2 sm:px-3 border-b-2 font-semibold text-xs sm:text-sm whitespace-nowrap transition-all duration-200 rounded-t-lg ${
                   activeTab === 'pending-approvals'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'border-blue-500 text-blue-600 bg-blue-50'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50'
                 }`}
               >
                 <FaClipboardList className="inline mr-1 sm:mr-2 w-3 h-3 sm:w-4 sm:h-4" />
@@ -930,10 +930,10 @@ function AdminClerkDashboard({ user, onLogout }) {
               </button>
               <button
                 onClick={() => setActiveTab('collections')}
-                className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
+                className={`py-3 sm:py-4 px-2 sm:px-3 border-b-2 font-semibold text-xs sm:text-sm whitespace-nowrap transition-all duration-200 rounded-t-lg ${
                   activeTab === 'collections'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'border-blue-500 text-blue-600 bg-blue-50'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50'
                 }`}
               >
                 <FaCheckCircle className="inline mr-1 sm:mr-2 w-3 h-3 sm:w-4 sm:h-4" />
@@ -942,10 +942,10 @@ function AdminClerkDashboard({ user, onLogout }) {
               </button>
               <button
                 onClick={() => setActiveTab('reports')}
-                className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
+                className={`py-3 sm:py-4 px-2 sm:px-3 border-b-2 font-semibold text-xs sm:text-sm whitespace-nowrap transition-all duration-200 rounded-t-lg ${
                   activeTab === 'reports'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'border-blue-500 text-blue-600 bg-blue-50'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50'
                 }`}
               >
                 <FaFileAlt className="inline mr-1 sm:mr-2 w-3 h-3 sm:w-4 sm:h-4" />
@@ -953,10 +953,10 @@ function AdminClerkDashboard({ user, onLogout }) {
               </button>
               <button
                 onClick={() => setActiveTab('monitoring')}
-                className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
+                className={`py-3 sm:py-4 px-2 sm:px-3 border-b-2 font-semibold text-xs sm:text-sm whitespace-nowrap transition-all duration-200 rounded-t-lg ${
                   activeTab === 'monitoring'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'border-blue-500 text-blue-600 bg-blue-50'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50'
                 }`}
               >
                 <FaChartLine className="inline mr-1 sm:mr-2 w-3 h-3 sm:w-4 sm:h-4" />
@@ -965,10 +965,10 @@ function AdminClerkDashboard({ user, onLogout }) {
               </button>
               <button
                 onClick={() => setActiveTab('transactions')}
-                className={`py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
+                className={`py-3 sm:py-4 px-2 sm:px-3 border-b-2 font-semibold text-xs sm:text-sm whitespace-nowrap transition-all duration-200 rounded-t-lg ${
                   activeTab === 'transactions'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'border-blue-500 text-blue-600 bg-blue-50'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50'
                 }`}
               >
                 <FaHistory className="inline mr-1 sm:mr-2 w-3 h-3 sm:w-4 sm:h-4" />
@@ -984,16 +984,16 @@ function AdminClerkDashboard({ user, onLogout }) {
               <div className="space-y-6">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Recent Activities */}
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-lg font-medium text-gray-900">Recent Activities</h3>
+                  <div className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100">
+                    <div className="flex justify-between items-center mb-6">
+                      <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Recent Activities</h3>
                       <button
                         onClick={() => loadDashboardData()}
                         disabled={loading}
-                        className="p-2 text-gray-400 hover:text-gray-600 disabled:opacity-50"
+                        className="p-2 sm:p-3 text-gray-400 hover:text-blue-600 disabled:opacity-50 rounded-lg hover:bg-blue-50 transition-all duration-200"
                         title="Refresh activities"
                       >
-                        <FaSync className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                        <FaSync className={`h-4 w-4 sm:h-5 sm:w-5 ${loading ? 'animate-spin' : ''}`} />
                       </button>
                     </div>
                     {loading ? (
@@ -1002,39 +1002,68 @@ function AdminClerkDashboard({ user, onLogout }) {
                         <p className="mt-2 text-sm text-gray-500">Loading activities...</p>
                       </div>
                     ) : recentActivities.length > 0 ? (
-                      <div className="space-y-3">
-                        {recentActivities.map((activity) => (
-                          <div key={activity.id} className="flex items-center justify-between p-3 bg-white rounded-md shadow-sm">
-                            <div className="flex items-center">
-                              <FaClock className="text-gray-400 mr-3" />
-                              <div>
-                                <p className="text-sm font-medium text-gray-900">{activity.action}</p>
-                                <p className="text-xs text-gray-500">{activity.group}</p>
+                      <div className="space-y-4">
+                        {recentActivities.map((activity, index) => (
+                          <div 
+                            key={activity.id} 
+                            className="bg-white rounded-xl p-4 sm:p-5 shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100 animate-fade-in"
+                            style={{ animationDelay: `${index * 0.1}s` }}
+                          >
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-start flex-1 min-w-0">
+                                <div className="flex-shrink-0 mr-3 sm:mr-4">
+                                  {activity.type === 'member' ? (
+                                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                      <FaUsers className="text-blue-600 w-4 h-4 sm:w-5 sm:h-5" />
+                                    </div>
+                                  ) : activity.type === 'collection' ? (
+                                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                      <FaMoneyBillWave className="text-green-600 w-4 h-4 sm:w-5 sm:h-5" />
+                                    </div>
+                                  ) : activity.type === 'transaction' ? (
+                                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                                      <FaHistory className="text-purple-600 w-4 h-4 sm:w-5 sm:h-5" />
+                                    </div>
+                                  ) : (
+                                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                                      <FaClock className="text-gray-600 w-4 h-4 sm:w-5 sm:h-5" />
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm sm:text-base font-semibold text-gray-900 mb-1">{activity.action}</p>
+                                  <p className="text-xs sm:text-sm text-gray-600 truncate">{activity.group}</p>
+                                  <p className="text-xs text-gray-400 mt-1 flex items-center">
+                                    <FaClock className="w-3 h-3 mr-1" />
+                                    {activity.time}
+                                  </p>
+                                </div>
                               </div>
-                            </div>
-                            <div className="text-right">
-                              <div className="text-sm">
+                              <div className="text-right ml-3 flex-shrink-0">
                                 {activity.type === 'member' ? (
-                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                  <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs sm:text-sm font-bold bg-blue-500 text-white shadow-sm">
                                     Member Request
                                   </span>
                                 ) : (
-                                  <span className="font-medium text-green-600">
-                                    {activity.amount && activity.amount !== 'N/A' ? activity.amount : 'N/A'}
-                                  </span>
+                                  <div className="text-right">
+                                    <div className="text-sm sm:text-base font-bold text-green-600">
+                                      {activity.amount && activity.amount !== 'N/A' ? activity.amount : 'N/A'}
+                                    </div>
+                                  </div>
                                 )}
                               </div>
-                              <p className="text-xs text-gray-500">{activity.time}</p>
                             </div>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <div className="text-center py-8">
-                        <FaClock className="mx-auto h-12 w-12 text-gray-400" />
-                        <h3 className="mt-2 text-sm font-medium text-gray-900">No recent activities</h3>
-                        <p className="mt-1 text-sm text-gray-500">Activities will appear here as they occur.</p>
-                        <div className="mt-4 text-xs text-gray-400">
+                      <div className="text-center py-12">
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <FaClock className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
+                        </div>
+                        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">No recent activities</h3>
+                        <p className="text-sm text-gray-500 mb-4">Activities will appear here as they occur.</p>
+                        <div className="space-y-1 text-xs sm:text-sm text-gray-400">
                           <p>• Pending approvals</p>
                           <p>• Collection verifications</p>
                           <p>• Transaction history</p>
@@ -1044,28 +1073,28 @@ function AdminClerkDashboard({ user, onLogout }) {
                   </div>
 
                   {/* Quick Actions */}
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
-                    <div className="space-y-3">
+                  <div className="bg-gradient-to-br from-gray-50 to-green-50 rounded-xl p-4 sm:p-6 shadow-sm border border-gray-100">
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6">Quick Actions</h3>
+                    <div className="space-y-4">
                       <button
                         onClick={() => setShowReportsModal(true)}
-                        className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+                        className="w-full flex items-center justify-center px-4 py-3 sm:py-4 border border-transparent rounded-xl shadow-md text-sm sm:text-base font-semibold text-white bg-blue-600 hover:bg-blue-700 hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02]"
                       >
-                        <FaFileAlt className="mr-2" />
+                        <FaFileAlt className="mr-2 sm:mr-3 w-4 h-4 sm:w-5 sm:h-5" />
                         Generate Excel Report
                       </button>
                       <button
                         onClick={() => setShowVerificationModal(true)}
-                        className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700"
+                        className="w-full flex items-center justify-center px-4 py-3 sm:py-4 border border-transparent rounded-xl shadow-md text-sm sm:text-base font-semibold text-white bg-green-600 hover:bg-green-700 hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02]"
                       >
-                        <FaCheckCircle className="mr-2" />
+                        <FaCheckCircle className="mr-2 sm:mr-3 w-4 h-4 sm:w-5 sm:h-5" />
                         Verify Collections
                       </button>
                       <button
                         onClick={() => setActiveTab('monitoring')}
-                        className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700"
+                        className="w-full flex items-center justify-center px-4 py-3 sm:py-4 border border-transparent rounded-xl shadow-md text-sm sm:text-base font-semibold text-white bg-purple-600 hover:bg-purple-700 hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02]"
                       >
-                        <FaChartLine className="mr-2" />
+                        <FaChartLine className="mr-2 sm:mr-3 w-4 h-4 sm:w-5 sm:h-5" />
                         View Monitoring
                       </button>
                     </div>
@@ -1077,59 +1106,136 @@ function AdminClerkDashboard({ user, onLogout }) {
             {/* Pending Approvals Tab */}
             {activeTab === 'pending-approvals' && (
               <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Pending Approvals</h3>
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6">Pending Approvals</h3>
                 {pendingApprovals.length > 0 ? (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Type</th>
-                          <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Name</th>
-                          <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Amount</th>
-                          <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Location</th>
-                          <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Date</th>
-                          <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Status</th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {pendingApprovals.map((approval) => (
-                          <tr key={approval.id}>
-                            <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap">
-                              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                approval.type === 'member' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
-                              }`}>
-                                {approval.type}
-                              </span>
-                            </td>
-                            <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900">{approval.name}</td>
-                            <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
-                              {approval.type === 'member' ? (
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                  Not Applicable
-                                </span>
-                              ) : (
-                                <span className="font-medium text-green-600">
-                                  {approval.amount ? `₹${parseFloat(approval.amount).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : 'N/A'}
-                                </span>
-                              )}
-                            </td>
-                            <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">{approval.location || 'N/A'}</td>
-                            <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">{approval.date}</td>
-                            <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap">
-                              <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                {approval.status}
-                              </span>
-                            </td>
+                  <>
+                    {/* Desktop Table View */}
+                    <div className="hidden lg:block overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gradient-to-r from-gray-50 to-blue-50">
+                          <tr>
+                            <th className="px-4 lg:px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">
+                              <div className="flex items-center">
+                                <FaUsers className="w-4 h-4 mr-2" />
+                                Type
+                              </div>
+                            </th>
+                            <th className="px-4 lg:px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Name</th>
+                            <th className="px-4 lg:px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Amount</th>
+                            <th className="px-4 lg:px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Location</th>
+                            <th className="px-4 lg:px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Date</th>
+                            <th className="px-4 lg:px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Status</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {pendingApprovals.map((approval, index) => (
+                            <tr key={approval.id} className={`hover:bg-gray-50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                              <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                                <span className={`inline-flex items-center px-3 py-1.5 text-xs font-bold rounded-full ${
+                                  approval.type === 'member' ? 'bg-blue-500 text-white' : 'bg-green-500 text-white'
+                                }`}>
+                                  {approval.type === 'member' ? (
+                                    <FaUsers className="w-3 h-3 mr-1" />
+                                  ) : (
+                                    <FaMoneyBillWave className="w-3 h-3 mr-1" />
+                                  )}
+                                  {approval.type}
+                                </span>
+                              </td>
+                              <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{approval.name}</td>
+                              <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {approval.type === 'member' ? (
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                    Not Applicable
+                                  </span>
+                                ) : (
+                                  <span className="font-bold text-green-600 text-base">
+                                    {approval.amount ? `₹${parseFloat(approval.amount).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : 'N/A'}
+                                  </span>
+                                )}
+                              </td>
+                              <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-500">{approval.location || 'N/A'}</td>
+                              <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-500">{approval.date}</td>
+                              <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                                <span className="inline-flex items-center px-3 py-1.5 text-xs font-bold rounded-full bg-yellow-500 text-white">
+                                  <FaClock className="w-3 h-3 mr-1" />
+                                  {approval.status}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Mobile Card View */}
+                    <div className="lg:hidden space-y-4">
+                      {pendingApprovals.map((approval, index) => (
+                        <div key={approval.id} className="bg-white rounded-xl p-4 sm:p-5 shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100 animate-fade-in">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-center">
+                              <div className={`w-10 h-10 rounded-lg flex items-center justify-center mr-3 ${
+                                approval.type === 'member' ? 'bg-blue-100' : 'bg-green-100'
+                              }`}>
+                                {approval.type === 'member' ? (
+                                  <FaUsers className="text-blue-600 w-5 h-5" />
+                                ) : (
+                                  <FaMoneyBillWave className="text-green-600 w-5 h-5" />
+                                )}
+                              </div>
+                              <div>
+                                <h4 className="text-base sm:text-lg font-bold text-gray-900">{approval.name}</h4>
+                                <p className="text-sm text-gray-600">{approval.location || 'N/A'}</p>
+                              </div>
+                            </div>
+                            <span className={`inline-flex items-center px-3 py-1.5 text-xs font-bold rounded-full ${
+                              approval.type === 'member' ? 'bg-blue-500 text-white' : 'bg-green-500 text-white'
+                            }`}>
+                              {approval.type}
+                            </span>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                              <p className="text-xs text-gray-500 mb-1">Amount</p>
+                              <p className="text-sm font-semibold text-gray-900">
+                                {approval.type === 'member' ? (
+                                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                    Not Applicable
+                                  </span>
+                                ) : (
+                                  <span className="font-bold text-green-600 text-base">
+                                    {approval.amount ? `₹${parseFloat(approval.amount).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : 'N/A'}
+                                  </span>
+                                )}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-500 mb-1">Date</p>
+                              <p className="text-sm font-semibold text-gray-900">{approval.date}</p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            <span className="inline-flex items-center px-3 py-1.5 text-xs font-bold rounded-full bg-yellow-500 text-white">
+                              <FaClock className="w-3 h-3 mr-1" />
+                              {approval.status}
+                            </span>
+                            <div className="text-xs text-gray-400">
+                              Pending Review
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
                 ) : (
-                  <div className="text-center py-8">
-                    <FaClipboardList className="mx-auto h-12 w-12 text-gray-400" />
-                    <h3 className="mt-2 text-sm font-medium text-gray-900">No pending approvals</h3>
-                    <p className="mt-1 text-sm text-gray-500">All approvals have been processed.</p>
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <FaClipboardList className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
+                    </div>
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">No pending approvals</h3>
+                    <p className="text-sm text-gray-500">All approvals have been processed.</p>
                   </div>
                 )}
               </div>
@@ -1138,118 +1244,227 @@ function AdminClerkDashboard({ user, onLogout }) {
             {/* Collection Verification Tab */}
             {activeTab === 'collections' && (
               <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Collection Verification</h3>
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6">Collection Verification</h3>
                 {pendingCollections.length > 0 ? (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Date</th>
-                          <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Group</th>
-                          <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Members</th>
-                          <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Amount</th>
-                          <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Collector</th>
-                          <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Status</th>
-                          <th className="px-2 sm:px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {pendingCollections.map((collection) => (
-                          <tr key={collection.id}>
-                            <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900">
-                              {new Date(collection.collection_date).toLocaleDateString()}
-                            </td>
-                            <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
-                              {collection.group?.name || 'N/A'}
-                            </td>
-                            <td className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500">
-                              {collection.collection_items && collection.collection_items.length > 0 ? (
-                                <div className="space-y-1 max-h-20 overflow-y-auto">
-                                  {(() => {
-                                    // Group collection items by member to avoid duplicates
-                                    const memberMap = new Map();
-                                    collection.collection_items.forEach((item) => {
-                                      const memberId = item.member_id;
-                                      if (!memberMap.has(memberId)) {
-                                        memberMap.set(memberId, {
-                                          member: item.member,
-                                          totalAmount: 0,
-                                          paymentTypes: []
-                                        });
-                                      }
-                                      const memberData = memberMap.get(memberId);
-                                      memberData.totalAmount += parseFloat(item.amount || 0);
-                                      memberData.paymentTypes.push(item.payment_type);
-                                    });
-                                    
-                                    return Array.from(memberMap.values()).map((memberData, index) => (
-                                      <div key={index} className="break-words">
-                                        <span className="inline-flex items-center px-1 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 break-all">
-                                          <span className="truncate max-w-[100px] sm:max-w-[150px] lg:max-w-none">
+                  <>
+                    {/* Desktop Table View */}
+                    <div className="hidden lg:block overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gradient-to-r from-gray-50 to-green-50">
+                          <tr>
+                            <th className="px-4 lg:px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">
+                              <div className="flex items-center">
+                                <FaCalendarAlt className="w-4 h-4 mr-2" />
+                                Date
+                              </div>
+                            </th>
+                            <th className="px-4 lg:px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Group</th>
+                            <th className="px-4 lg:px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Members</th>
+                            <th className="px-4 lg:px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Amount</th>
+                            <th className="px-4 lg:px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Collector</th>
+                            <th className="px-4 lg:px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Status</th>
+                            <th className="px-4 lg:px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {pendingCollections.map((collection, index) => (
+                            <tr key={collection.id} className={`hover:bg-gray-50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                              <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                                {new Date(collection.collection_date).toLocaleDateString()}
+                              </td>
+                              <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                                {collection.group?.name || 'N/A'}
+                              </td>
+                              <td className="px-4 lg:px-6 py-4 text-sm text-gray-500">
+                                {collection.collection_items && collection.collection_items.length > 0 ? (
+                                  <div className="space-y-2 max-h-24 overflow-y-auto">
+                                    {(() => {
+                                      // Group collection items by member to avoid duplicates
+                                      const memberMap = new Map();
+                                      collection.collection_items.forEach((item) => {
+                                        const memberId = item.member_id;
+                                        if (!memberMap.has(memberId)) {
+                                          memberMap.set(memberId, {
+                                            member: item.member,
+                                            totalAmount: 0,
+                                            paymentTypes: []
+                                          });
+                                        }
+                                        const memberData = memberMap.get(memberId);
+                                        memberData.totalAmount += parseFloat(item.amount || 0);
+                                        memberData.paymentTypes.push(item.payment_type);
+                                      });
+                                      
+                                      return Array.from(memberMap.values()).map((memberData, index) => (
+                                        <div key={index} className="break-words">
+                                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800">
+                                            <FaUsers className="w-3 h-3 mr-1" />
                                             {memberData.member?.user?.full_name || memberData.member?.user?.username || `Member ${memberData.member?.id || 'Unknown'}`}
                                           </span>
+                                          <div className="text-xs text-gray-500 mt-1">
+                                            ₹{memberData.totalAmount.toLocaleString('en-IN', {minimumFractionDigits: 2})} ({memberData.paymentTypes.join(', ')})
+                                          </div>
+                                        </div>
+                                      ));
+                                    })()}
+                                  </div>
+                                ) : (
+                                  <span className="text-gray-400">No members</span>
+                                )}
+                              </td>
+                              <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-base font-bold text-green-600">
+                                {formatCurrency(collection.grand_total)}
+                              </td>
+                              <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                {collection.collector?.username || 'N/A'}
+                              </td>
+                              <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                                <span className="inline-flex items-center px-3 py-1.5 text-xs font-bold rounded-full bg-yellow-500 text-white">
+                                  <FaClock className="w-3 h-3 mr-1" />
+                                  Pending Verification
+                                </span>
+                              </td>
+                              <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <div className="flex gap-2">
+                                  <button
+                                    onClick={() => verifyCollectionRecord(collection.id)}
+                                    className="text-green-600 hover:text-green-900 text-xs px-3 py-1.5 rounded-lg hover:bg-green-50 transition-colors duration-200 font-semibold"
+                                    title="Verify Collection"
+                                  >
+                                    <FaCheckCircle className="inline mr-1" /> Verify
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      setSelectedCollection(collection);
+                                      setShowCollectionDetailsModal(true);
+                                    }}
+                                    className="text-blue-600 hover:text-blue-900 text-xs px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-colors duration-200 font-semibold"
+                                    title="View Details"
+                                  >
+                                    <FaEye className="inline mr-1" /> View
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Mobile Card View */}
+                    <div className="lg:hidden space-y-4">
+                      {pendingCollections.map((collection, index) => (
+                        <div key={collection.id} className="bg-white rounded-xl p-4 sm:p-5 shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100 animate-fade-in">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-center">
+                              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                                <FaMoneyBillWave className="text-green-600 w-5 h-5" />
+                              </div>
+                              <div>
+                                <h4 className="text-base sm:text-lg font-bold text-gray-900">{collection.group?.name || 'N/A'}</h4>
+                                <p className="text-sm text-gray-600">{collection.collector?.username || 'N/A'}</p>
+                              </div>
+                            </div>
+                            <span className="inline-flex items-center px-3 py-1.5 text-xs font-bold rounded-full bg-yellow-500 text-white">
+                              <FaClock className="w-3 h-3 mr-1" />
+                              Pending
+                            </span>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                              <p className="text-xs text-gray-500 mb-1">Date</p>
+                              <p className="text-sm font-semibold text-gray-900">
+                                {new Date(collection.collection_date).toLocaleDateString()}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-500 mb-1">Amount</p>
+                              <p className="text-base font-bold text-green-600">
+                                {formatCurrency(collection.grand_total)}
+                              </p>
+                            </div>
+                          </div>
+                          
+                          {collection.collection_items && collection.collection_items.length > 0 && (
+                            <div className="mb-4">
+                              <p className="text-xs text-gray-500 mb-2">Members ({collection.collection_items.length})</p>
+                              <div className="space-y-2 max-h-24 overflow-y-auto">
+                                {(() => {
+                                  // Group collection items by member to avoid duplicates
+                                  const memberMap = new Map();
+                                  collection.collection_items.forEach((item) => {
+                                    const memberId = item.member_id;
+                                    if (!memberMap.has(memberId)) {
+                                      memberMap.set(memberId, {
+                                        member: item.member,
+                                        totalAmount: 0,
+                                        paymentTypes: []
+                                      });
+                                    }
+                                    const memberData = memberMap.get(memberId);
+                                    memberData.totalAmount += parseFloat(item.amount || 0);
+                                    memberData.paymentTypes.push(item.payment_type);
+                                  });
+                                  
+                                  return Array.from(memberMap.values()).slice(0, 3).map((memberData, index) => (
+                                    <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                                      <div className="flex items-center">
+                                        <FaUsers className="w-3 h-3 text-blue-600 mr-2" />
+                                        <span className="text-xs font-semibold text-gray-900 truncate">
+                                          {memberData.member?.user?.full_name || memberData.member?.user?.username || `Member ${memberData.member?.id || 'Unknown'}`}
                                         </span>
-                                        <div className="text-xs text-gray-400 mt-1 break-all">
-                                          ₹{memberData.totalAmount.toLocaleString('en-IN', {minimumFractionDigits: 2})} ({memberData.paymentTypes.join(', ')})
+                                      </div>
+                                      <div className="text-right">
+                                        <div className="text-xs font-bold text-green-600">
+                                          ₹{memberData.totalAmount.toLocaleString('en-IN', {minimumFractionDigits: 2})}
+                                        </div>
+                                        <div className="text-xs text-gray-500">
+                                          {memberData.paymentTypes.join(', ')}
                                         </div>
                                       </div>
-                                    ));
-                                  })()}
-                                </div>
-                              ) : (
-                                <span className="text-gray-400">No members</span>
-                              )}
-                            </td>
-                            <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900">
-                              {formatCurrency(collection.grand_total)}
-                            </td>
-                            <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
-                              {collection.collector?.username || 'N/A'}
-                            </td>
-                            <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap">
-                              <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                Pending Verification
-                              </span>
-                            </td>
-                            <td className="px-2 sm:px-4 lg:px-6 py-4 whitespace-nowrap text-xs sm:text-sm font-medium">
-                              <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
-                              <button
-                                onClick={() => verifyCollectionRecord(collection.id)}
-                                  className="text-green-600 hover:text-green-900 text-xs px-2 py-1 rounded hover:bg-green-50"
-                                >
-                                  <span className="hidden sm:inline">
-                                    <FaCheckCircle className="inline mr-1" /> Verify
-                                  </span>
-                                  <span className="sm:hidden">
-                                    <FaCheckCircle className="inline" />
-                                  </span>
-                              </button>
-                              <button
-                                onClick={() => {
-                                  setSelectedCollection(collection);
-                                  setShowCollectionDetailsModal(true);
-                                }}
-                                  className="text-blue-600 hover:text-blue-900 text-xs px-2 py-1 rounded hover:bg-blue-50"
-                                >
-                                  <span className="hidden sm:inline">
-                                    <FaEye className="inline mr-1" /> View
-                                  </span>
-                                  <span className="sm:hidden">
-                                    <FaEye className="inline" />
-                                  </span>
-                              </button>
+                                    </div>
+                                  ));
+                                })()}
+                                {collection.collection_items.length > 3 && (
+                                  <div className="text-xs text-gray-500 text-center py-1">
+                                    +{collection.collection_items.length - 3} more members
+                                  </div>
+                                )}
                               </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                            </div>
+                          )}
+                          
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => verifyCollectionRecord(collection.id)}
+                              className="flex-1 flex items-center justify-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 text-sm font-semibold"
+                            >
+                              <FaCheckCircle className="w-4 h-4 mr-2" />
+                              Verify
+                            </button>
+                            <button
+                              onClick={() => {
+                                setSelectedCollection(collection);
+                                setShowCollectionDetailsModal(true);
+                              }}
+                              className="flex-1 flex items-center justify-center px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm font-semibold"
+                            >
+                              <FaEye className="w-4 h-4 mr-2" />
+                              View
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
                 ) : (
-                  <div className="text-center py-8">
-                    <FaCheckCircle className="mx-auto h-12 w-12 text-gray-400" />
-                    <h3 className="mt-2 text-sm font-medium text-gray-900">No collections pending verification</h3>
-                    <p className="mt-1 text-sm text-gray-500">All collections have been verified.</p>
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <FaCheckCircle className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
+                    </div>
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">No collections pending verification</h3>
+                    <p className="text-sm text-gray-500">All collections have been verified.</p>
                   </div>
                 )}
               </div>
@@ -1452,53 +1667,59 @@ function AdminClerkDashboard({ user, onLogout }) {
             {/* Transactions Tab */}
             {activeTab === 'transactions' && (
               <div>
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-medium text-gray-900">Transaction History</h3>
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Transaction History</h3>
                   <button
                     onClick={() => loadDashboardData()}
                     disabled={loading}
-                    className="p-2 text-gray-400 hover:text-gray-600 disabled:opacity-50"
+                    className="p-2 sm:p-3 text-gray-400 hover:text-blue-600 disabled:opacity-50 rounded-lg hover:bg-blue-50 transition-all duration-200"
                     title="Refresh transaction data"
                   >
-                    <FaSync className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                    <FaSync className={`h-4 w-4 sm:h-5 sm:w-5 ${loading ? 'animate-spin' : ''}`} />
                   </button>
                 </div>
                 
                 {loading ? (
-                  <div className="text-center py-8">
+                  <div className="text-center py-12">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
                     <p className="mt-2 text-sm text-gray-500">Loading transaction history...</p>
                   </div>
                 ) : transactionHistory.length > 0 ? (
                   <div className="space-y-6">
-                    {/* Summary Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="bg-blue-50 rounded-lg p-4">
+                    {/* Enhanced Summary Cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                      <div className="transaction-summary-card bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300">
                         <div className="flex items-center">
-                          <FaHistory className="h-8 w-8 text-blue-600" />
-                          <div className="ml-4">
-                            <p className="text-sm font-medium text-blue-600">Total Transactions</p>
-                            <p className="text-2xl font-bold text-blue-900">{transactionHistory.length}</p>
+                          <div className="flex-shrink-0 bg-blue-500 rounded-xl p-3 sm:p-4 shadow-lg">
+                            <FaHistory className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
+                          </div>
+                          <div className="ml-4 sm:ml-5">
+                            <p className="text-xs sm:text-sm font-semibold text-blue-700">Total Transactions</p>
+                            <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-900">{transactionHistory.length}</p>
                           </div>
                         </div>
                       </div>
-                      <div className="bg-green-50 rounded-lg p-4">
+                      <div className="transaction-summary-card bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300">
                         <div className="flex items-center">
-                          <FaMoneyBillWave className="h-8 w-8 text-green-600" />
-                          <div className="ml-4">
-                            <p className="text-sm font-medium text-green-600">Total Amount</p>
-                            <p className="text-2xl font-bold text-green-900">
+                          <div className="flex-shrink-0 bg-green-500 rounded-xl p-3 sm:p-4 shadow-lg">
+                            <FaMoneyBillWave className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
+                          </div>
+                          <div className="ml-4 sm:ml-5">
+                            <p className="text-xs sm:text-sm font-semibold text-green-700">Total Amount</p>
+                            <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-green-900">
                               {formatCurrency(transactionHistory.reduce((sum, t) => sum + (t.amount || 0), 0))}
                             </p>
                           </div>
                         </div>
                       </div>
-                      <div className="bg-purple-50 rounded-lg p-4">
+                      <div className="transaction-summary-card bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 sm:col-span-2 lg:col-span-1">
                         <div className="flex items-center">
-                          <FaChartLine className="h-8 w-8 text-purple-600" />
-                          <div className="ml-4">
-                            <p className="text-sm font-medium text-purple-600">Collection Transactions</p>
-                            <p className="text-2xl font-bold text-purple-900">
+                          <div className="flex-shrink-0 bg-purple-500 rounded-xl p-3 sm:p-4 shadow-lg">
+                            <FaChartLine className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
+                          </div>
+                          <div className="ml-4 sm:ml-5">
+                            <p className="text-xs sm:text-sm font-semibold text-purple-700">Collection Transactions</p>
+                            <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-purple-900">
                               {transactionHistory.filter(t => t.transaction_type === 'collection').length}
                             </p>
                           </div>
@@ -1506,33 +1727,42 @@ function AdminClerkDashboard({ user, onLogout }) {
                       </div>
                     </div>
 
-                    {/* Desktop Transaction Table */}
-                    <div className="hidden lg:block bg-white shadow rounded-lg">
+                    {/* Enhanced Desktop Transaction Table */}
+                    <div className="hidden lg:block bg-white shadow-xl rounded-xl overflow-hidden">
                       <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200">
-                          <thead className="bg-gray-50">
+                          <thead className="bg-gradient-to-r from-gray-50 to-blue-50">
                             <tr>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Date
+                              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                <div className="flex items-center">
+                                  <FaCalendarAlt className="w-4 h-4 mr-2" />
+                                  Date
+                                </div>
                               </th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Type
+                              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                <div className="flex items-center">
+                                  <FaFileAlt className="w-4 h-4 mr-2" />
+                                  Type
+                                </div>
                               </th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                 Description
                               </th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Amount
+                              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                <div className="flex items-center">
+                                  <FaMoneyBillWave className="w-4 h-4 mr-2" />
+                                  Amount
+                                </div>
                               </th>
-                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                 Reference
                               </th>
                             </tr>
                           </thead>
                           <tbody className="bg-white divide-y divide-gray-200">
-                            {transactionHistory.map((transaction) => (
-                              <tr key={transaction.id} className="hover:bg-gray-50 transition-colors">
-                                <td className="px-4 py-4 text-sm text-gray-900">
+                            {transactionHistory.map((transaction, index) => (
+                              <tr key={transaction.id} className={`hover:bg-gray-50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                                <td className="px-6 py-4 text-sm font-semibold text-gray-900">
                                   {new Date(transaction.created_at).toLocaleDateString('en-US', {
                                     year: 'numeric',
                                     month: 'short',
@@ -1541,25 +1771,28 @@ function AdminClerkDashboard({ user, onLogout }) {
                                     minute: '2-digit'
                                   })}
                                 </td>
-                                <td className="px-4 py-4">
-                                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                <td className="px-6 py-4">
+                                  <span className={`collection-tag inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold ${
                                     transaction.transaction_type === 'collection' 
-                                      ? 'bg-green-100 text-green-800' 
-                                      : 'bg-blue-100 text-blue-800'
+                                      ? 'bg-green-500 text-white' 
+                                      : 'bg-blue-500 text-white'
                                   }`}>
+                                    {transaction.transaction_type === 'collection' ? (
+                                      <FaMoneyBillWave className="w-3 h-3 mr-1" />
+                                    ) : (
+                                      <FaFileAlt className="w-3 h-3 mr-1" />
+                                    )}
                                     {transaction.transaction_type}
                                   </span>
                                 </td>
-                                <td className="px-4 py-4 text-sm text-gray-900">
-                                  <div className="font-medium">
+                                <td className="px-6 py-4 text-sm font-semibold text-gray-900">
                                   {transaction.description}
-                                  </div>
                                 </td>
-                                <td className="px-4 py-4 text-sm font-medium text-gray-900">
+                                <td className="px-6 py-4 text-sm font-bold text-green-600 text-lg">
                                   {formatCurrency(transaction.amount)}
                                 </td>
-                                <td className="px-4 py-4 text-sm text-gray-500">
-                                  {transaction.reference || '-'}
+                                <td className="px-6 py-4 text-sm text-gray-600">
+                                  {transaction.reference || 'N/A'}
                                 </td>
                               </tr>
                             ))}
@@ -1568,21 +1801,26 @@ function AdminClerkDashboard({ user, onLogout }) {
                       </div>
                     </div>
 
-                    {/* Mobile Transaction Cards */}
+                    {/* Enhanced Mobile Transaction Cards */}
                     <div className="lg:hidden space-y-4">
-                      {transactionHistory.map((transaction) => (
-                        <div key={transaction.id} className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 shadow-sm">
-                          <div className="flex items-start justify-between mb-3">
+                      {transactionHistory.map((transaction, index) => (
+                        <div key={transaction.id} className="transaction-card bg-white rounded-xl p-4 sm:p-5 shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100 animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
+                          <div className="flex items-start justify-between mb-4">
                             <div className="flex-1 min-w-0">
-                              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-2">
-                                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium w-fit ${
+                              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
+                                <span className={`collection-tag inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold w-fit ${
                                   transaction.transaction_type === 'collection' 
-                                    ? 'bg-green-100 text-green-800' 
-                                    : 'bg-blue-100 text-blue-800'
+                                    ? 'bg-green-500 text-white' 
+                                    : 'bg-blue-500 text-white'
                                 }`}>
+                                  {transaction.transaction_type === 'collection' ? (
+                                    <FaMoneyBillWave className="w-3 h-3 mr-1" />
+                                  ) : (
+                                    <FaFileAlt className="w-3 h-3 mr-1" />
+                                  )}
                                   {transaction.transaction_type}
                                 </span>
-                                <span className="text-xs sm:text-sm text-gray-500">
+                                <span className="text-xs sm:text-sm text-gray-600 font-medium">
                                   {new Date(transaction.created_at).toLocaleDateString('en-US', {
                                     year: 'numeric',
                                     month: 'short',
@@ -1590,27 +1828,28 @@ function AdminClerkDashboard({ user, onLogout }) {
                                   })}
                                 </span>
                               </div>
-                              <h3 className="text-sm sm:text-base font-semibold text-gray-900 break-words">
+                              <h3 className="text-sm sm:text-base font-bold text-gray-900 break-words mb-2">
                                 {transaction.description}
                               </h3>
                             </div>
-                            <div className="text-right ml-2">
-                              <div className="text-sm sm:text-base font-bold text-gray-900">
+                            <div className="text-right ml-3 flex-shrink-0">
+                              <div className="transaction-amount text-base sm:text-lg font-bold text-green-600">
                                 {formatCurrency(transaction.amount)}
                               </div>
                             </div>
                           </div>
                           
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm">
-                            <div>
-                              <span className="text-gray-500">Reference:</span>
-                              <p className="font-medium text-gray-900 break-words">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm">
+                            <div className="flex items-center">
+                              <span className="transaction-detail-label text-gray-500 mr-2">Reference:</span>
+                              <p className="font-semibold text-gray-900 break-words">
                                 {transaction.reference || 'N/A'}
                               </p>
                             </div>
-                            <div>
-                              <span className="text-gray-500">Time:</span>
-                              <p className="font-medium text-gray-900">
+                            <div className="flex items-center">
+                              <FaClock className="w-3 h-3 text-gray-400 mr-1" />
+                              <span className="transaction-detail-label text-gray-500 mr-2">Time:</span>
+                              <p className="font-semibold text-gray-900">
                                 {new Date(transaction.created_at).toLocaleTimeString('en-US', {
                                   hour: '2-digit',
                                   minute: '2-digit'
@@ -1623,13 +1862,15 @@ function AdminClerkDashboard({ user, onLogout }) {
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center py-8">
-                    <FaHistory className="mx-auto h-12 w-12 text-gray-400" />
-                    <h3 className="mt-2 text-sm font-medium text-gray-900">No transaction history</h3>
-                    <p className="mt-1 text-sm text-gray-500">Transaction history will appear here.</p>
+                  <div className="empty-state">
+                    <div className="empty-state-icon">
+                      <FaHistory className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
+                    </div>
+                    <h3 className="empty-state-title">No transaction history</h3>
+                    <p className="empty-state-description">Transaction history will appear here.</p>
                     <button
                       onClick={() => loadDashboardData()}
-                      className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                      className="mt-6 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors duration-200 font-semibold shadow-lg hover:shadow-xl"
                     >
                       Refresh Data
                     </button>
