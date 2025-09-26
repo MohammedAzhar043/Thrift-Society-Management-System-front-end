@@ -517,6 +517,17 @@
   }
 }
 
+/* Admin Dashboard Components */
+.admin-stats-card {
+  @apply bg-white rounded-xl p-4 sm:p-5 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100;
+  min-height: 100px;
+  max-width: 100%;
+}
+
+.admin-card {
+  @apply bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100;
+}
+
 /* Member Dashboard Components */
 .member-summary-card {
   @apply bg-gradient-to-br rounded-xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 border;
@@ -544,6 +555,17 @@
 
 .member-request-card {
   @apply bg-white rounded-xl p-4 sm:p-5 shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100;
+}
+
+/* Mobile-specific optimizations for admin dashboard */
+@media (max-width: 640px) {
+  .admin-stats-card {
+    @apply p-3;
+  }
+  
+  .admin-card {
+    @apply p-4;
+  }
 }
 
 /* Mobile-specific optimizations for member dashboard */

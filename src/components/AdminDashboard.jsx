@@ -1119,33 +1119,33 @@ function AdminDashboard({ user, onLogout }) {
                       colSpan={7}
                     />
                   ) : (
-                    memberApprovals.map((item) => (
-                      <Table.Row key={item.id}>
-                        <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm font-medium text-gray-900 whitespace-nowrap">
+                    memberApprovals.map((item, index) => (
+                      <Table.Row key={item.id} className={`hover:bg-gray-50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                        <Table.Cell className="px-4 sm:px-6 py-4 text-sm font-semibold text-gray-900 whitespace-nowrap">
                           {item.name}
                         </Table.Cell>
-                        <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap">
+                        <Table.Cell className="px-4 sm:px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
                           {item.group_name || "N/A"}
                         </Table.Cell>
-                        <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap">
+                        <Table.Cell className="px-4 sm:px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
                           {item.location || "N/A"}
                         </Table.Cell>
-                        <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap">
+                        <Table.Cell className="px-4 sm:px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
                           {item.team_leader || "Not assigned"}
                         </Table.Cell>
-                        <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap">
+                        <Table.Cell className="px-4 sm:px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
                           {item.bill_collector || "Not assigned"}
                         </Table.Cell>
-                        <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap">
+                        <Table.Cell className="px-4 sm:px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
                           {item.date}
                         </Table.Cell>
-                        <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm font-medium">
-                          <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
+                        <Table.Cell className="px-4 sm:px-6 py-4 text-sm font-medium">
+                          <div className="flex flex-col sm:flex-row gap-2">
                             <button
                               onClick={() =>
                                 handleApproval("member", item.id, "approve")
                               }
-                              className="w-full sm:w-auto text-xs px-2 py-1 bg-green-600 hover:bg-green-700 text-white rounded flex items-center justify-center gap-1"
+                              className="w-full sm:w-auto text-xs px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center justify-center gap-1 font-semibold shadow-md hover:shadow-lg transition-all duration-200"
                             >
                               <FaCheck className="w-3 h-3" />
                               <span className="hidden sm:inline">Approve</span>
@@ -1154,7 +1154,7 @@ function AdminDashboard({ user, onLogout }) {
                               onClick={() =>
                                 handleApproval("member", item.id, "reject")
                               }
-                              className="w-full sm:w-auto text-xs px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded flex items-center justify-center gap-1"
+                              className="w-full sm:w-auto text-xs px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center justify-center gap-1 font-semibold shadow-md hover:shadow-lg transition-all duration-200"
                             >
                               <FaTimes className="w-3 h-3" />
                               <span className="hidden sm:inline">Reject</span>
@@ -1197,36 +1197,36 @@ function AdminDashboard({ user, onLogout }) {
                       colSpan={8}
                     />
                   ) : (
-                    loanApprovals.map((loan) => (
-                      <Table.Row key={loan.id}>
-                        <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm font-medium text-gray-900 whitespace-nowrap">
+                    loanApprovals.map((loan, index) => (
+                      <Table.Row key={loan.id} className={`hover:bg-gray-50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                        <Table.Cell className="px-4 sm:px-6 py-4 text-sm font-semibold text-gray-900 whitespace-nowrap">
                           {loan.name}
                         </Table.Cell>
-                        <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap">
+                        <Table.Cell className="px-4 sm:px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
                           {loan.group_name || "N/A"}
                         </Table.Cell>
-                        <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap">
+                        <Table.Cell className="px-4 sm:px-6 py-4 text-sm font-bold text-green-600 whitespace-nowrap">
                           {formatIndianCurrency(loan.amount)}
                         </Table.Cell>
-                        <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap">
+                        <Table.Cell className="px-4 sm:px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
                           {loan.location}
                         </Table.Cell>
-                        <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap">
+                        <Table.Cell className="px-4 sm:px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
                           {loan.team_leader || "Not assigned"}
                         </Table.Cell>
-                        <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap">
+                        <Table.Cell className="px-4 sm:px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
                           {loan.bill_collector || "Not assigned"}
                         </Table.Cell>
-                        <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap">
+                        <Table.Cell className="px-4 sm:px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
                           {loan.date}
                         </Table.Cell>
-                        <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm font-medium">
-                          <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
+                        <Table.Cell className="px-4 sm:px-6 py-4 text-sm font-medium">
+                          <div className="flex flex-col sm:flex-row gap-2">
                             <button
                               onClick={() =>
                                 handleApproval("loan", loan.id, "approve")
                               }
-                              className="w-full sm:w-auto text-xs px-2 py-1 bg-green-600 hover:bg-green-700 text-white rounded flex items-center justify-center gap-1"
+                              className="w-full sm:w-auto text-xs px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center justify-center gap-1 font-semibold shadow-md hover:shadow-lg transition-all duration-200"
                             >
                               <FaCheck className="w-3 h-3" />
                               <span className="hidden sm:inline">Approve</span>
@@ -1235,7 +1235,7 @@ function AdminDashboard({ user, onLogout }) {
                               onClick={() =>
                                 handleApproval("loan", loan.id, "reject")
                               }
-                              className="w-full sm:w-auto text-xs px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded flex items-center justify-center gap-1"
+                              className="w-full sm:w-auto text-xs px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center justify-center gap-1 font-semibold shadow-md hover:shadow-lg transition-all duration-200"
                             >
                               <FaTimes className="w-3 h-3" />
                               <span className="hidden sm:inline">Reject</span>
@@ -1279,18 +1279,18 @@ function AdminDashboard({ user, onLogout }) {
                 {groups.length === 0 ? (
                   <Table.EmptyRow message="No groups found" colSpan={6} />
                 ) : (
-                  groups.map((group) => (
-                    <Table.Row key={group.id}>
-                      <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm font-medium text-gray-900 whitespace-nowrap">
+                  groups.map((group, index) => (
+                    <Table.Row key={group.id} className={`hover:bg-gray-50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                      <Table.Cell className="px-4 sm:px-6 py-4 text-sm font-semibold text-gray-900 whitespace-nowrap">
                         {group.name}
                       </Table.Cell>
-                      <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap">
+                      <Table.Cell className="px-4 sm:px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
                         {group.location}
                       </Table.Cell>
-                      <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap">
+                      <Table.Cell className="px-4 sm:px-6 py-4 text-sm font-bold text-blue-600 whitespace-nowrap">
                         {group.member_count || 0}
                       </Table.Cell>
-                      <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap">
+                      <Table.Cell className="px-4 sm:px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
                         {group.team_leader
                           ? `${
                               group.team_leader.full_name ||
@@ -1298,16 +1298,16 @@ function AdminDashboard({ user, onLogout }) {
                             } (Team Leader)`
                           : "Not assigned"}
                       </Table.Cell>
-                      <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm text-gray-500 whitespace-nowrap">
+                      <Table.Cell className="px-4 sm:px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
                         {group.bill_collector?.full_name ||
                           group.bill_collector?.username ||
                           "Not assigned"}
                       </Table.Cell>
-                      <Table.Cell className="px-2 sm:px-4 lg:px-6 py-4 text-xs sm:text-sm font-medium">
-                        <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
+                      <Table.Cell className="px-4 sm:px-6 py-4 text-sm font-medium">
+                        <div className="flex flex-col sm:flex-row gap-2">
                           <button
                             onClick={() => handleEditGroup(group)}
-                            className="w-full sm:w-auto text-xs px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded flex items-center justify-center gap-1"
+                            className="w-full sm:w-auto text-xs px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center justify-center gap-1 font-semibold shadow-md hover:shadow-lg transition-all duration-200"
                           >
                             <FaEdit className="w-3 h-3" />
                             <span className="hidden sm:inline">Edit</span>
@@ -1315,7 +1315,7 @@ function AdminDashboard({ user, onLogout }) {
                           <button
                             onClick={() => handleDeleteGroup(group.id)}
                             disabled={isDeletingGroup}
-                            className={`w-full sm:w-auto text-xs px-2 py-1 rounded flex items-center justify-center gap-1 ${
+                            className={`w-full sm:w-auto text-xs px-3 py-2 rounded-lg flex items-center justify-center gap-1 font-semibold shadow-md hover:shadow-lg transition-all duration-200 ${
                               isDeletingGroup
                                 ? "bg-red-400 cursor-not-allowed"
                                 : "bg-red-600 hover:bg-red-700"

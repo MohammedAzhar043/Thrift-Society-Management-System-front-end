@@ -46,6 +46,8 @@ const StatsCards = ({ dashboardStats, memberApprovals, loanApprovals }) => {
           title={stat.title}
           value={stat.value}
           iconBgColor={stat.iconBgColor}
+          className="animate-fade-in"
+          style={{ animationDelay: `${index * 0.1}s` }}
         />
       ))}
     </div>

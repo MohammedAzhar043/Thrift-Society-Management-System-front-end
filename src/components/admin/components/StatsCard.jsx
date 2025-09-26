@@ -8,16 +8,16 @@ const StatsCard = ({
   className = "" 
 }) => {
   return (
-    <div className={`bg-white overflow-hidden shadow rounded-lg ${className}`}>
-      <div className="px-3 py-4 sm:px-4 sm:py-5 lg:p-6 flex items-center">
-        <div className={`flex-shrink-0 ${iconBgColor} rounded-md p-2 sm:p-3`}>
-          <Icon className="text-white h-5 w-5 sm:h-6 sm:w-6" />
+    <div className={`admin-stats-card bg-white rounded-xl p-4 sm:p-5 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 ${className}`}>
+      <div className="flex items-start">
+        <div className={`flex-shrink-0 ${iconBgColor} rounded-lg p-2.5 sm:p-3 shadow-md`}>
+          <Icon className="text-white h-4 w-4 sm:h-5 sm:w-5" />
         </div>
-        <div className="ml-3 sm:ml-5">
-          <p className="text-xs sm:text-sm font-medium text-gray-500">
+        <div className="ml-3 sm:ml-4 min-w-0 flex-1">
+          <p className="text-xs sm:text-sm font-semibold text-gray-600 mb-1 leading-tight break-words">
             {title}
           </p>
-          <p className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900">
+          <p className="text-lg sm:text-xl font-bold text-gray-900 leading-tight break-words">
             {value}
           </p>
         </div>

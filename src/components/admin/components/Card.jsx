@@ -8,7 +8,7 @@ const Card = ({
   overflow = "overflow-hidden" 
 }) => {
   return (
-    <div className={`bg-white shadow sm:rounded-lg ${overflow} ${margin} ${className}`}>
+    <div className={`admin-card bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 ${overflow} ${margin} ${className}`}>
       {children}
     </div>
   );

@@ -7,12 +7,12 @@ const SectionHeader = ({
   children 
 }) => {
   return (
-    <div className={`px-4 py-5 sm:px-6 border-b border-gray-200 ${className}`}>
-      <h3 className="text-lg font-medium text-gray-900">
+    <div className={`px-6 py-6 border-b border-gray-100 ${className}`}>
+      <h3 className="text-lg sm:text-xl font-semibold text-gray-900">
         {title}
       </h3>
       {description && (
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-2 text-sm font-medium text-gray-600">
           {description}
         </p>
       )}
