@@ -199,24 +199,144 @@ function AdminClerkDashboard({ user, onLogout }) {
       toast.success('Collection record verified successfully!');
       await loadDashboardData(); // Refresh data
     } catch (err) {
-      toast.error(`Failed to verify collection: ${err.message}`);
+      toast((t) => (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+          <span>Failed to verify collection: {err.message}</span>
+          <button
+            onClick={() => {
+              toast.dismiss(t.id);
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'white',
+              cursor: 'pointer',
+              padding: '0',
+              marginLeft: '10px',
+              fontSize: '18px',
+              fontWeight: 'bold'
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      ), {
+        duration: 6000,
+        position: "top-center",
+        style: {
+          background: '#EF4444',
+          color: '#fff',
+          padding: '12px 16px',
+          fontSize: '14px',
+        },
+      });
     }
   };
 
   const generateReport = async () => {
     // Validate based on report type
     if (!reportType) {
-      toast.error('Please select a report type');
+      toast((t) => (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+          <span>Please select a report type</span>
+          <button
+            onClick={() => {
+              toast.dismiss(t.id);
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'white',
+              cursor: 'pointer',
+              padding: '0',
+              marginLeft: '10px',
+              fontSize: '18px',
+              fontWeight: 'bold'
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      ), {
+        duration: 6000,
+        position: "top-center",
+        style: {
+          background: '#EF4444',
+          color: '#fff',
+          padding: '12px 16px',
+          fontSize: '14px',
+        },
+      });
       return;
     }
 
     if (reportType === 'weekly' && (!reportStartDate || !reportEndDate)) {
-      toast.error('Please fill in start and end dates for weekly report');
+      toast((t) => (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+          <span>Please fill in start and end dates for weekly report</span>
+          <button
+            onClick={() => {
+              toast.dismiss(t.id);
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'white',
+              cursor: 'pointer',
+              padding: '0',
+              marginLeft: '10px',
+              fontSize: '18px',
+              fontWeight: 'bold'
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      ), {
+        duration: 6000,
+        position: "top-center",
+        style: {
+          background: '#EF4444',
+          color: '#fff',
+          padding: '12px 16px',
+          fontSize: '14px',
+        },
+      });
       return;
     }
 
     if ((reportType === 'daily' || reportType === 'monthly') && !reportDate) {
-      toast.error('Please select a date for the report');
+      toast((t) => (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+          <span>Please select a date for the report</span>
+          <button
+            onClick={() => {
+              toast.dismiss(t.id);
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'white',
+              cursor: 'pointer',
+              padding: '0',
+              marginLeft: '10px',
+              fontSize: '18px',
+              fontWeight: 'bold'
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      ), {
+        duration: 6000,
+        position: "top-center",
+        style: {
+          background: '#EF4444',
+          color: '#fff',
+          padding: '12px 16px',
+          fontSize: '14px',
+        },
+      });
       return;
     }
 
@@ -462,7 +582,37 @@ function AdminClerkDashboard({ user, onLogout }) {
         errorMessage = 'Connection error: Please check your internet connection and try again.';
       }
       
-      toast.error(errorMessage);
+      toast((t) => (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+          <span>{errorMessage}</span>
+          <button
+            onClick={() => {
+              toast.dismiss(t.id);
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'white',
+              cursor: 'pointer',
+              padding: '0',
+              marginLeft: '10px',
+              fontSize: '18px',
+              fontWeight: 'bold'
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      ), {
+        duration: 6000,
+        position: "top-center",
+        style: {
+          background: '#EF4444',
+          color: '#fff',
+          padding: '12px 16px',
+          fontSize: '14px',
+        },
+      });
     } finally {
       setIsGeneratingReport(false);
     }
@@ -474,7 +624,37 @@ function AdminClerkDashboard({ user, onLogout }) {
       await loadDashboardData();
       toast.success('Data refreshed successfully!');
     } catch (err) {
-      toast.error('Failed to refresh data');
+      toast((t) => (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+          <span>Failed to refresh data</span>
+          <button
+            onClick={() => {
+              toast.dismiss(t.id);
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'white',
+              cursor: 'pointer',
+              padding: '0',
+              marginLeft: '10px',
+              fontSize: '18px',
+              fontWeight: 'bold'
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      ), {
+        duration: 6000,
+        position: "top-center",
+        style: {
+          background: '#EF4444',
+          color: '#fff',
+          padding: '12px 16px',
+          fontSize: '14px',
+        },
+      });
     } finally {
       setIsRefreshingData(false);
     }

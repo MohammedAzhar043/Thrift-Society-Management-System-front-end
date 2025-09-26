@@ -154,13 +154,73 @@ function IndividualMemberDashboard({ user, onLogout }) {
     e.preventDefault();
     
     if (!loanApplication.requested_amount) {
-      toast.error('Please enter the requested amount');
+      toast((t) => (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+          <span>Please enter the requested amount</span>
+          <button
+            onClick={() => {
+              toast.dismiss(t.id);
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'white',
+              cursor: 'pointer',
+              padding: '0',
+              marginLeft: '10px',
+              fontSize: '18px',
+              fontWeight: 'bold'
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      ), {
+        duration: 6000,
+        position: "top-center",
+        style: {
+          background: '#EF4444',
+          color: '#fff',
+          padding: '12px 16px',
+          fontSize: '14px',
+        },
+      });
       return;
     }
     
     const amount = parseFloat(loanApplication.requested_amount);
     if (isNaN(amount) || amount <= 0) {
-      toast.error('Please enter a valid loan amount');
+      toast((t) => (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+          <span>Please enter a valid loan amount</span>
+          <button
+            onClick={() => {
+              toast.dismiss(t.id);
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'white',
+              cursor: 'pointer',
+              padding: '0',
+              marginLeft: '10px',
+              fontSize: '18px',
+              fontWeight: 'bold'
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      ), {
+        duration: 6000,
+        position: "top-center",
+        style: {
+          background: '#EF4444',
+          color: '#fff',
+          padding: '12px 16px',
+          fontSize: '14px',
+        },
+      });
       return;
     }
     
@@ -203,7 +263,37 @@ function IndividualMemberDashboard({ user, onLogout }) {
           errorMessage = err.message;
         }
         
-        toast.error(errorMessage);
+        toast((t) => (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+            <span>{errorMessage}</span>
+            <button
+              onClick={() => {
+                toast.dismiss(t.id);
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'white',
+                cursor: 'pointer',
+                padding: '0',
+                marginLeft: '10px',
+                fontSize: '18px',
+                fontWeight: 'bold'
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        ), {
+          duration: 6000,
+          position: "top-center",
+          style: {
+            background: '#EF4444',
+            color: '#fff',
+            padding: '12px 16px',
+            fontSize: '14px',
+          },
+        });
       }
     });
   };
@@ -255,7 +345,37 @@ function IndividualMemberDashboard({ user, onLogout }) {
     const term = parseInt(loanCalculator.term_months);
 
     if (isNaN(principal) || isNaN(rate) || isNaN(term) || principal <= 0 || rate <= 0 || term <= 0) {
-      toast.error('Please enter valid loan details.');
+      toast((t) => (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+          <span>Please enter valid loan details.</span>
+          <button
+            onClick={() => {
+              toast.dismiss(t.id);
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'white',
+              cursor: 'pointer',
+              padding: '0',
+              marginLeft: '10px',
+              fontSize: '18px',
+              fontWeight: 'bold'
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      ), {
+        duration: 6000,
+        position: "top-center",
+        style: {
+          background: '#EF4444',
+          color: '#fff',
+          padding: '12px 16px',
+          fontSize: '14px',
+        },
+      });
       return;
     }
 

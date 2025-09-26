@@ -18,7 +18,11 @@ const CreateGroupModal = ({
       title="Create New Group"
       size="sm"
     >
-      <form onSubmit={onSubmit}>
+      <form onSubmit={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onSubmit(e);
+      }}>
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Group Name *
@@ -87,6 +91,7 @@ const CreateGroupModal = ({
             type="submit"
             variant="primary"
             loading={isLoading}
+            disabled={isLoading}
           >
             Create Group
           </Button>

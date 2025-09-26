@@ -78,7 +78,37 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
       const data = await apiService.getUsers();
       setUsers(data);
     } catch (error) {
-      toast.error("Failed to load users");
+      toast((t) => (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+          <span>Failed to load users</span>
+          <button
+            onClick={() => {
+              toast.dismiss(t.id);
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'white',
+              cursor: 'pointer',
+              padding: '0',
+              marginLeft: '10px',
+              fontSize: '18px',
+              fontWeight: 'bold'
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      ), {
+        duration: 6000,
+        position: "top-center",
+        style: {
+          background: '#EF4444',
+          color: '#fff',
+          padding: '12px 16px',
+          fontSize: '14px',
+        },
+      });
     } finally {
       setIsLoading(false);
     }
@@ -89,7 +119,37 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
       const data = await apiService.getRoles();
       setRoles(data);
     } catch (error) {
-      toast.error("Failed to load roles");
+      toast((t) => (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+          <span>Failed to load roles</span>
+          <button
+            onClick={() => {
+              toast.dismiss(t.id);
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'white',
+              cursor: 'pointer',
+              padding: '0',
+              marginLeft: '10px',
+              fontSize: '18px',
+              fontWeight: 'bold'
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      ), {
+        duration: 6000,
+        position: "top-center",
+        style: {
+          background: '#EF4444',
+          color: '#fff',
+          padding: '12px 16px',
+          fontSize: '14px',
+        },
+      });
     }
   };
 
@@ -98,7 +158,37 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
       const data = await apiService.getGroups();
       setGroups(data);
     } catch (error) {
-      toast.error("Failed to load groups");
+      toast((t) => (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+          <span>Failed to load groups</span>
+          <button
+            onClick={() => {
+              toast.dismiss(t.id);
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'white',
+              cursor: 'pointer',
+              padding: '0',
+              marginLeft: '10px',
+              fontSize: '18px',
+              fontWeight: 'bold'
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      ), {
+        duration: 6000,
+        position: "top-center",
+        style: {
+          background: '#EF4444',
+          color: '#fff',
+          padding: '12px 16px',
+          fontSize: '14px',
+        },
+      });
     }
   };
 
@@ -203,7 +293,37 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
     
     // Validate form
     if (!validateForm()) {
-      toast.error("Please fix the errors below before submitting");
+      toast((t) => (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+          <span>Please fix the errors below before submitting</span>
+          <button
+            onClick={() => {
+              toast.dismiss(t.id);
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'white',
+              cursor: 'pointer',
+              padding: '0',
+              marginLeft: '10px',
+              fontSize: '18px',
+              fontWeight: 'bold'
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      ), {
+        duration: 6000,
+        position: "top-center",
+        style: {
+          background: '#EF4444',
+          color: '#fff',
+          padding: '12px 16px',
+          fontSize: '14px',
+        },
+      });
       return;
     }
 
@@ -212,7 +332,37 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
       const selectedRole = roles.find(role => role.id === parseInt(userForm.role_id));
       if (selectedRole && selectedRole.name === 'member' && !userForm.group_id) {
         setFieldErrors({...fieldErrors, group_id: "Group assignment is required for members"});
-        toast.error("Group assignment is required for members");
+        toast((t) => (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+            <span>Group assignment is required for members</span>
+            <button
+              onClick={() => {
+                toast.dismiss(t.id);
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'white',
+                cursor: 'pointer',
+                padding: '0',
+                marginLeft: '10px',
+                fontSize: '18px',
+                fontWeight: 'bold'
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        ), {
+          duration: 6000,
+          position: "top-center",
+          style: {
+            background: '#EF4444',
+            color: '#fff',
+            padding: '12px 16px',
+            fontSize: '14px',
+          },
+        });
         return;
       }
     }
@@ -255,7 +405,37 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
             await apiService.uploadUserDocument(editingUser.id, userForm.aadhar_document_file);
             documentsUploaded++;
           } catch (error) {
-            toast.error("Aadhar document upload failed. Please upload manually.");
+            toast((t) => (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                <span>Aadhar document upload failed. Please upload manually.</span>
+                <button
+                  onClick={() => {
+                    toast.dismiss(t.id);
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'white',
+                    cursor: 'pointer',
+                    padding: '0',
+                    marginLeft: '10px',
+                    fontSize: '18px',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+            ), {
+              duration: 6000,
+              position: "top-center",
+              style: {
+                background: '#EF4444',
+                color: '#fff',
+                padding: '12px 16px',
+                fontSize: '14px',
+              },
+            });
           }
         }
         
@@ -265,7 +445,37 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
             await apiService.uploadBankPassbook(editingUser.id, userForm.bank_passbook_file);
             documentsUploaded++;
           } catch (error) {
-            toast.error("Bank passbook upload failed. Please upload manually.");
+            toast((t) => (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                <span>Bank passbook upload failed. Please upload manually.</span>
+                <button
+                  onClick={() => {
+                    toast.dismiss(t.id);
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'white',
+                    cursor: 'pointer',
+                    padding: '0',
+                    marginLeft: '10px',
+                    fontSize: '18px',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+            ), {
+              duration: 6000,
+              position: "top-center",
+              style: {
+                background: '#EF4444',
+                color: '#fff',
+                padding: '12px 16px',
+                fontSize: '14px',
+              },
+            });
           }
         }
         
@@ -282,7 +492,37 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
               };
               await apiService.updateMember(editingUser.member.id, memberData);
             } catch (error) {
-              toast.error("User updated but member record update failed");
+              toast((t) => (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                  <span>User updated but member record update failed</span>
+                  <button
+                    onClick={() => {
+                      toast.dismiss(t.id);
+                    }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: 'white',
+                      cursor: 'pointer',
+                      padding: '0',
+                      marginLeft: '10px',
+                      fontSize: '18px',
+                      fontWeight: 'bold'
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ), {
+                duration: 6000,
+                position: "top-center",
+                style: {
+                  background: '#EF4444',
+                  color: '#fff',
+                  padding: '12px 16px',
+                  fontSize: '14px',
+                },
+              });
             }
           }
         }
@@ -305,10 +545,70 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
             await apiService.uploadUserDocument(newUser.id, userForm.aadhar_document_file);
             documentsUploaded++;
           } catch (error) {
-            toast.error("Aadhar document upload failed. Please upload manually.");
+            toast((t) => (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                <span>Aadhar document upload failed. Please upload manually.</span>
+                <button
+                  onClick={() => {
+                    toast.dismiss(t.id);
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'white',
+                    cursor: 'pointer',
+                    padding: '0',
+                    marginLeft: '10px',
+                    fontSize: '18px',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+            ), {
+              duration: 6000,
+              position: "top-center",
+              style: {
+                background: '#EF4444',
+                color: '#fff',
+                padding: '12px 16px',
+                fontSize: '14px',
+              },
+            });
           }
         } else {
-          toast.error("Aadhar document is required for all users");
+          toast((t) => (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+              <span>Aadhar document is required for all users</span>
+              <button
+                onClick={() => {
+                  toast.dismiss(t.id);
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'white',
+                  cursor: 'pointer',
+                  padding: '0',
+                  marginLeft: '10px',
+                  fontSize: '18px',
+                  fontWeight: 'bold'
+                }}
+              >
+                ✕
+              </button>
+            </div>
+          ), {
+            duration: 6000,
+            position: "top-center",
+            style: {
+              background: '#EF4444',
+              color: '#fff',
+              padding: '12px 16px',
+              fontSize: '14px',
+            },
+          });
           return;
         }
         
@@ -318,7 +618,37 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
             await apiService.uploadBankPassbook(newUser.id, userForm.bank_passbook_file);
             documentsUploaded++;
           } catch (error) {
-            toast.error("Bank passbook upload failed. Please upload manually.");
+            toast((t) => (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                <span>Bank passbook upload failed. Please upload manually.</span>
+                <button
+                  onClick={() => {
+                    toast.dismiss(t.id);
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'white',
+                    cursor: 'pointer',
+                    padding: '0',
+                    marginLeft: '10px',
+                    fontSize: '18px',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+            ), {
+              duration: 6000,
+              position: "top-center",
+              style: {
+                background: '#EF4444',
+                color: '#fff',
+                padding: '12px 16px',
+                fontSize: '14px',
+              },
+            });
           }
         }
         
@@ -327,7 +657,37 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
           try {
             await apiService.assignRoleToUser(newUser.id, parseInt(userForm.role_id));
           } catch (error) {
-            toast.error("User created but role assignment failed");
+            toast((t) => (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                <span>User created but role assignment failed</span>
+                <button
+                  onClick={() => {
+                    toast.dismiss(t.id);
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'white',
+                    cursor: 'pointer',
+                    padding: '0',
+                    marginLeft: '10px',
+                    fontSize: '18px',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+            ), {
+              duration: 6000,
+              position: "top-center",
+              style: {
+                background: '#EF4444',
+                color: '#fff',
+                padding: '12px 16px',
+                fontSize: '14px',
+              },
+            });
           }
         }
         
@@ -396,21 +756,201 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
         // Handle specific field errors from backend
         if (error.message.includes("Username already registered")) {
           setFieldErrors({...fieldErrors, username: "Username already exists"});
-          toast.error("Username already exists");
+          toast((t) => (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+              <span>Username already exists</span>
+              <button
+                onClick={() => {
+                  toast.dismiss(t.id);
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'white',
+                  cursor: 'pointer',
+                  padding: '0',
+                  marginLeft: '10px',
+                  fontSize: '18px',
+                  fontWeight: 'bold'
+                }}
+              >
+                ✕
+              </button>
+            </div>
+          ), {
+            duration: 6000,
+            position: "top-center",
+            style: {
+              background: '#EF4444',
+              color: '#fff',
+              padding: '12px 16px',
+              fontSize: '14px',
+            },
+          });
         } else if (error.message.includes("Email already registered")) {
           setFieldErrors({...fieldErrors, email: "Email already exists"});
-          toast.error("Email already exists");
+          toast((t) => (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+              <span>Email already exists</span>
+              <button
+                onClick={() => {
+                  toast.dismiss(t.id);
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'white',
+                  cursor: 'pointer',
+                  padding: '0',
+                  marginLeft: '10px',
+                  fontSize: '18px',
+                  fontWeight: 'bold'
+                }}
+              >
+                ✕
+              </button>
+            </div>
+          ), {
+            duration: 6000,
+            position: "top-center",
+            style: {
+              background: '#EF4444',
+              color: '#fff',
+              padding: '12px 16px',
+              fontSize: '14px',
+            },
+          });
         } else if (error.message.includes("Aadhar ID already registered")) {
           setFieldErrors({...fieldErrors, aadhar_id: "Aadhar ID already exists"});
-          toast.error("Aadhar ID already exists");
+          toast((t) => (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+              <span>Aadhar ID already exists</span>
+              <button
+                onClick={() => {
+                  toast.dismiss(t.id);
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'white',
+                  cursor: 'pointer',
+                  padding: '0',
+                  marginLeft: '10px',
+                  fontSize: '18px',
+                  fontWeight: 'bold'
+                }}
+              >
+                ✕
+              </button>
+            </div>
+          ), {
+            duration: 6000,
+            position: "top-center",
+            style: {
+              background: '#EF4444',
+              color: '#fff',
+              padding: '12px 16px',
+              fontSize: '14px',
+            },
+          });
         } else if (error.message.includes("Aadhar document is required")) {
           setFieldErrors({...fieldErrors, aadhar_document: "Aadhar document is required for all users"});
-          toast.error("Aadhar document is required for all users");
+          toast((t) => (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+              <span>Aadhar document is required for all users</span>
+              <button
+                onClick={() => {
+                  toast.dismiss(t.id);
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'white',
+                  cursor: 'pointer',
+                  padding: '0',
+                  marginLeft: '10px',
+                  fontSize: '18px',
+                  fontWeight: 'bold'
+                }}
+              >
+                ✕
+              </button>
+            </div>
+          ), {
+            duration: 6000,
+            position: "top-center",
+            style: {
+              background: '#EF4444',
+              color: '#fff',
+              padding: '12px 16px',
+              fontSize: '14px',
+            },
+          });
         } else if (error.message.includes("Group assignment is required for members")) {
           setFieldErrors({...fieldErrors, group_id: "Group assignment is required for members"});
-          toast.error("Group assignment is required for members");
+          toast((t) => (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+            <span>Group assignment is required for members</span>
+            <button
+              onClick={() => {
+                toast.dismiss(t.id);
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'white',
+                cursor: 'pointer',
+                padding: '0',
+                marginLeft: '10px',
+                fontSize: '18px',
+                fontWeight: 'bold'
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        ), {
+          duration: 6000,
+          position: "top-center",
+          style: {
+            background: '#EF4444',
+            color: '#fff',
+            padding: '12px 16px',
+            fontSize: '14px',
+          },
+        });
         } else {
-          toast.error(error.message || "Failed to save user");
+          toast((t) => (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+              <span>{error.message || "Failed to save user"}</span>
+              <button
+                onClick={() => {
+                  toast.dismiss(t.id);
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'white',
+                  cursor: 'pointer',
+                  padding: '0',
+                  marginLeft: '10px',
+                  fontSize: '18px',
+                  fontWeight: 'bold'
+                }}
+              >
+                ✕
+              </button>
+            </div>
+          ), {
+            duration: 6000,
+            position: "top-center",
+            style: {
+              background: '#EF4444',
+              color: '#fff',
+              padding: '12px 16px',
+              fontSize: '14px',
+            },
+          });
         }
       }
     });
@@ -602,7 +1142,37 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
       
       await loadUsers();
     } catch (error) {
-      toast.error(error.message || "Failed to update user status");
+      toast((t) => (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+          <span>{error.message || "Failed to update user status"}</span>
+          <button
+            onClick={() => {
+              toast.dismiss(t.id);
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'white',
+              cursor: 'pointer',
+              padding: '0',
+              marginLeft: '10px',
+              fontSize: '18px',
+              fontWeight: 'bold'
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      ), {
+        duration: 6000,
+        position: "top-center",
+        style: {
+          background: '#EF4444',
+          color: '#fff',
+          padding: '12px 16px',
+          fontSize: '14px',
+        },
+      });
     }
   };
 

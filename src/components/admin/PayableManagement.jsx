@@ -43,7 +43,37 @@ const BonusManagement = () => {
       setMembers(membersData);
       setBonusSummary(summaryData);
     } catch (err) {
-      toast.error(err.message || 'Failed to load data');
+      toast((t) => (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+          <span>{err.message || 'Failed to load data'}</span>
+          <button
+            onClick={() => {
+              toast.dismiss(t.id);
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'white',
+              cursor: 'pointer',
+              padding: '0',
+              marginLeft: '10px',
+              fontSize: '18px',
+              fontWeight: 'bold'
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      ), {
+        duration: 6000,
+        position: "top-center",
+        style: {
+          background: '#EF4444',
+          color: '#fff',
+          padding: '12px 16px',
+          fontSize: '14px',
+        },
+      });
       setError(err.message || 'Failed to load data');
     } finally {
       setLoading(false);
@@ -55,7 +85,37 @@ const BonusManagement = () => {
       const payableesData = await apiService.getMemberBonuses(filters);
       setBonuses(payableesData);
     } catch (err) {
-      toast.error(err.message || 'Failed to load payablees');
+      toast((t) => (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+          <span>{err.message || 'Failed to load payablees'}</span>
+          <button
+            onClick={() => {
+              toast.dismiss(t.id);
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'white',
+              cursor: 'pointer',
+              padding: '0',
+              marginLeft: '10px',
+              fontSize: '18px',
+              fontWeight: 'bold'
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      ), {
+        duration: 6000,
+        position: "top-center",
+        style: {
+          background: '#EF4444',
+          color: '#fff',
+          padding: '12px 16px',
+          fontSize: '14px',
+        },
+      });
       setError(err.message || 'Failed to load payablees');
     }
   };
@@ -89,7 +149,37 @@ const BonusManagement = () => {
                 loadBonuses();
                 loadData(); // Reload summary
               } catch (err) {
-                toast.error(err.message || 'Failed to approve payable');
+                toast((t) => (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                    <span>{err.message || 'Failed to approve payable'}</span>
+                    <button
+                      onClick={() => {
+                        toast.dismiss(t.id);
+                      }}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: 'white',
+                        cursor: 'pointer',
+                        padding: '0',
+                        marginLeft: '10px',
+                        fontSize: '18px',
+                        fontWeight: 'bold'
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ), {
+                  duration: 6000,
+                  position: "top-center",
+                  style: {
+                    background: '#EF4444',
+                    color: '#fff',
+                    padding: '12px 16px',
+                    fontSize: '14px',
+                  },
+                });
               }
             }}
             className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
@@ -124,7 +214,37 @@ const BonusManagement = () => {
                 loadBonuses();
                 loadData(); // Reload summary
               } catch (err) {
-                toast.error(err.message || 'Failed to mark payable as paid');
+                toast((t) => (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                    <span>{err.message || 'Failed to mark payable as paid'}</span>
+                    <button
+                      onClick={() => {
+                        toast.dismiss(t.id);
+                      }}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: 'white',
+                        cursor: 'pointer',
+                        padding: '0',
+                        marginLeft: '10px',
+                        fontSize: '18px',
+                        fontWeight: 'bold'
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ), {
+                  duration: 6000,
+                  position: "top-center",
+                  style: {
+                    background: '#EF4444',
+                    color: '#fff',
+                    padding: '12px 16px',
+                    fontSize: '14px',
+                  },
+                });
               }
             }}
             className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
@@ -159,7 +279,37 @@ const BonusManagement = () => {
                 loadBonuses();
                 loadData(); // Reload summary
               } catch (err) {
-                toast.error(err.message || 'Failed to cancel payable');
+                toast((t) => (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                    <span>{err.message || 'Failed to cancel payable'}</span>
+                    <button
+                      onClick={() => {
+                        toast.dismiss(t.id);
+                      }}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: 'white',
+                        cursor: 'pointer',
+                        padding: '0',
+                        marginLeft: '10px',
+                        fontSize: '18px',
+                        fontWeight: 'bold'
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ), {
+                  duration: 6000,
+                  position: "top-center",
+                  style: {
+                    background: '#EF4444',
+                    color: '#fff',
+                    padding: '12px 16px',
+                    fontSize: '14px',
+                  },
+                });
               }
             }}
             className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"

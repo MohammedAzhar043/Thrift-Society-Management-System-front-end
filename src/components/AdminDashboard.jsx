@@ -43,6 +43,7 @@ function AdminDashboard({ user, onLogout }) {
   // Form submission hooks
   const { isSubmitting: isCreatingGroup, submitForm: submitGroupForm, resetForm: resetGroupForm } = useFormSubmission();
   const { isSubmitting: isUpdatingGroup, submitForm: submitUpdateGroupForm, resetForm: resetUpdateGroupForm } = useFormSubmission();
+  const { isSubmitting: isDeletingGroup, submitForm: submitDeleteGroupForm, resetForm: resetDeleteGroupForm } = useFormSubmission();
   const { isSubmitting: isGeneratingReport, submitForm: submitGenerateReportForm } = useFormSubmission();
   
   // Modal states
@@ -320,6 +321,12 @@ function AdminDashboard({ user, onLogout }) {
 
   const handleCreateGroup = async (e) => {
     e.preventDefault();
+    e.stopPropagation();
+    
+    // Prevent multiple submissions
+    if (isCreatingGroup) {
+      return;
+    }
     
     // Basic validation
     if (!groupForm.name.trim()) {
@@ -355,11 +362,14 @@ function AdminDashboard({ user, onLogout }) {
       // Test the API call
       const response = await apiService.createGroup(groupData);
       
-      toast.success("Group created successfully!");
+      // Close modal and reset form
       setShowCreateGroupModal(false);
       setGroupForm({ name: "", location: "", bill_collector_name: "" });
       await loadAdditionalData();
       refreshDashboard();
+      
+      // Show success message after all operations are complete
+      toast.success("Group created successfully!");
     }, {
       onError: (error) => {
         const errorMessage = error.message || "Failed to create group. Please try again.";
@@ -381,6 +391,12 @@ function AdminDashboard({ user, onLogout }) {
 
   const handleUpdateGroup = async (e) => {
     e.preventDefault();
+    e.stopPropagation();
+    
+    // Prevent multiple submissions
+    if (isUpdatingGroup) {
+      return;
+    }
     
     // Basic validation
     if (!groupForm.name.trim()) {
@@ -454,7 +470,7 @@ function AdminDashboard({ user, onLogout }) {
       await loadAdditionalData();
       refreshDashboard();
       
-      // Close modal and show success message
+      // Close modal and reset form
       setShowEditGroupModal(false);
       setEditingGroup(null);
       setGroupForm({
@@ -463,6 +479,7 @@ function AdminDashboard({ user, onLogout }) {
         bill_collector_name: ""
       });
       
+      // Show success message after all operations are complete
       toast.success("Group updated successfully!");
     }, {
       onError: (error) => {
@@ -472,6 +489,11 @@ function AdminDashboard({ user, onLogout }) {
   };
 
   const handleDeleteGroup = async (groupId) => {
+    // Prevent multiple confirmation dialogs
+    if (isDeletingGroup) {
+      return;
+    }
+    
     // Show confirmation toast instead of alert
     toast((t) => (
       <div className="flex items-center space-x-4">
@@ -501,21 +523,54 @@ function AdminDashboard({ user, onLogout }) {
   };
 
   const confirmDeleteGroup = async (groupId) => {
-    try {
+    await submitDeleteGroupForm(async () => {
       await apiService.deleteGroup(groupId);
+      
+      // Refresh data after successful deletion
+      await loadAdditionalData();
+      refreshDashboard();
+      
+      // Show success message after all operations are complete
       toast.success("Group deleted successfully!", {
         duration: 3000,
         position: "top-center",
       });
-      await loadAdditionalData();
-      refreshDashboard();
-    } catch (error) {
-      const errorMessage = error.message || "Failed to delete group. Please try again.";
-      toast.error(errorMessage, {
-        duration: 5000,
-        position: "top-center",
-      });
-    }
+    }, {
+      onError: (error) => {
+        const errorMessage = error.message || "Failed to delete group. Please try again.";
+        const toastId = toast((t) => (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+            <span>{errorMessage}</span>
+            <button
+              onClick={() => {
+                toast.dismiss(t.id);
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'white',
+                cursor: 'pointer',
+                padding: '0',
+                marginLeft: '10px',
+                fontSize: '18px',
+                fontWeight: 'bold'
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        ), {
+          duration: 6000,
+          position: "top-center",
+          style: {
+            background: '#EF4444',
+            color: '#fff',
+            padding: '12px 16px',
+            fontSize: '14px',
+          },
+        });
+      }
+    });
   };
 
   const handleViewReports = () => {
@@ -848,7 +903,7 @@ function AdminDashboard({ user, onLogout }) {
             },
           },
           error: {
-            duration: 4000,
+            duration: 6000,
             iconTheme: {
               primary: '#EF4444',
               secondary: '#fff',
@@ -856,6 +911,7 @@ function AdminDashboard({ user, onLogout }) {
             style: {
               background: '#EF4444',
               color: '#fff',
+              zIndex: 9999,
             },
           },
           info: {
@@ -871,6 +927,19 @@ function AdminDashboard({ user, onLogout }) {
           },
         }}
       />
+      
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          [data-hot-toast] button {
+            pointer-events: auto !important;
+            cursor: pointer !important;
+            z-index: 9999 !important;
+          }
+          [data-hot-toast] button:hover {
+            opacity: 0.8 !important;
+          }
+        `
+      }} />
       
       <DashboardHeader 
         title="Admin Dashboard"
@@ -1066,10 +1135,21 @@ function AdminDashboard({ user, onLogout }) {
                         </button>
                         <button
                           onClick={() => handleDeleteGroup(group.id)}
-                          className="w-full sm:w-auto text-xs px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded flex items-center justify-center gap-1"
+                          disabled={isDeletingGroup}
+                          className={`w-full sm:w-auto text-xs px-2 py-1 rounded flex items-center justify-center gap-1 ${
+                            isDeletingGroup 
+                              ? 'bg-red-400 cursor-not-allowed' 
+                              : 'bg-red-600 hover:bg-red-700'
+                          } text-white`}
                         >
-                          <FaTrash className="w-3 h-3" />
-                          <span className="hidden sm:inline">Delete</span>
+                          {isDeletingGroup ? (
+                            <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
+                          ) : (
+                            <FaTrash className="w-3 h-3" />
+                          )}
+                          <span className="hidden sm:inline">
+                            {isDeletingGroup ? 'Deleting...' : 'Delete'}
+                          </span>
                         </button>
                       </div>
                     </Table.Cell>

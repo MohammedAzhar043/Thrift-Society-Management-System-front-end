@@ -2,8 +2,8 @@
  * API service for communicating with the backend
  */
 
-const API_BASE_URL = 'http://82.112.231.241:8000/api/v1';
-
+// const API_BASE_URL = 'http://82.112.231.241:8000/api/v1';
+const API_BASE_URL = 'http://localhost:8000/api/v1';
 class ApiService {
   constructor() {
     this.baseURL = API_BASE_URL;
@@ -623,7 +623,7 @@ class ApiService {
     return await response.json();
   }
 
-  // Bonus Management APIs
+  // Payable Management APIs
   async createMemberBonus(payableData) {
     return await this.request('/admin/payablees', {
       method: 'POST',
