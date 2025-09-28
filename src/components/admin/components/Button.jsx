@@ -29,7 +29,7 @@ const Button = ({
     info: "bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500 text-white"
   };
   
-  const disabledClasses = disabled ? "opacity-50 cursor-not-allowed" : "";
+  const disabledClasses = disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer";
   
   const classes = `${baseClasses} ${sizeClasses[size]} ${variantClasses[variant]} ${disabledClasses} ${className}`;
   

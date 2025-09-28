@@ -2,61 +2,7 @@
 
 /* Enhanced Mobile Optimizations for Admin Clerk Dashboard */
 @layer components {
-  .member-card {
-    @apply bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden group;
-  }
   
-  .member-card:hover {
-    @apply transform scale-[1.02];
-  }
-  
-  .status-badge {
-    @apply inline-flex items-center px-4 py-2 rounded-full text-sm font-bold shadow-sm;
-  }
-  
-  .status-badge.active {
-    @apply bg-green-500 text-white;
-  }
-  
-  .status-badge.pending {
-    @apply bg-yellow-500 text-white;
-  }
-  
-  .status-badge.suspended {
-    @apply bg-orange-500 text-white;
-  }
-  
-  .status-badge.rejected {
-    @apply bg-red-500 text-white;
-  }
-  
-  .status-badge.inactive {
-    @apply bg-gray-500 text-white;
-  }
-  
-  .filter-section {
-    @apply bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 shadow-sm border border-blue-100;
-  }
-  
-  .info-icon {
-    @apply w-10 h-10 rounded-lg flex items-center justify-center;
-  }
-  
-  .info-icon.blue {
-    @apply bg-blue-100;
-  }
-  
-  .info-icon.green {
-    @apply bg-green-100;
-  }
-  
-  .info-icon.purple {
-    @apply bg-purple-100;
-  }
-  
-  .info-icon.orange {
-    @apply bg-orange-100;
-  }
 
   /* Admin Clerk Dashboard specific components */
   .activity-card {
@@ -191,21 +137,7 @@
 
 /* Mobile-specific optimizations */
 @media (max-width: 640px) {
-  .member-card {
-    @apply mx-2;
-  }
   
-  .filter-section {
-    @apply p-4;
-  }
-  
-  .info-icon {
-    @apply w-8 h-8;
-  }
-  
-  .info-icon svg {
-    @apply w-4 h-4;
-  }
   
   .activity-card {
     @apply p-3;
@@ -414,13 +346,6 @@
 
 /* Touch-friendly improvements */
 @media (hover: none) and (pointer: coarse) {
-  .member-card:hover {
-    @apply transform-none;
-  }
-  
-  .member-card:active {
-    @apply transform scale-95;
-  }
   
   .activity-card:hover {
     @apply transform-none;
@@ -498,7 +423,6 @@
     animation: none;
   }
   
-  .member-card,
   .activity-card,
   .approval-card,
   .collection-card,
@@ -507,7 +431,6 @@
     @apply transition-none;
   }
   
-  .member-card:hover,
   .activity-card:hover,
   .approval-card:hover,
   .collection-card:hover,
@@ -608,7 +531,6 @@
 
 /* Print styles */
 @media print {
-  .member-card,
   .activity-card,
   .approval-card,
   .collection-card,

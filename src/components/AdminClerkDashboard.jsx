@@ -775,7 +775,7 @@ function AdminClerkDashboard({ user, onLogout }) {
             </button>
             <button
               onClick={handleLogout}
-                className="inline-flex items-center px-1.5 sm:px-2 py-1.5 sm:py-2 border border-transparent text-xs sm:text-sm font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-red-500 transition-colors duration-200"
+                className="inline-flex items-center px-1.5 sm:px-2 py-1.5 sm:py-2 border border-transparent text-xs sm:text-sm font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-red-500 transition-colors duration-200 cursor-pointer"
             >
                 <FaSignOutAlt className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
                 <span className="hidden sm:inline">Logout</span>
@@ -926,7 +926,7 @@ function AdminClerkDashboard({ user, onLogout }) {
             <nav className="-mb-px flex space-x-1 sm:space-x-2 lg:space-x-4 px-2 sm:px-4 lg:px-6 overflow-x-auto scrollbar-hide">
               <button
                 onClick={() => setActiveTab('overview')}
-                className={`py-3 sm:py-4 px-2 sm:px-3 border-b-2 font-semibold text-xs sm:text-sm whitespace-nowrap transition-all duration-200 rounded-t-lg ${
+                className={`py-3 sm:py-4 px-2 sm:px-3 border-b-2 font-semibold text-xs sm:text-sm whitespace-nowrap transition-all duration-200 rounded-t-lg cursor-pointer ${
                   activeTab === 'overview'
                     ? 'border-blue-500 text-blue-600 bg-blue-50'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50'
@@ -937,7 +937,7 @@ function AdminClerkDashboard({ user, onLogout }) {
               </button>
               <button
                 onClick={() => setActiveTab('pending-approvals')}
-                className={`py-3 sm:py-4 px-2 sm:px-3 border-b-2 font-semibold text-xs sm:text-sm whitespace-nowrap transition-all duration-200 rounded-t-lg ${
+                className={`py-3 sm:py-4 px-2 sm:px-3 border-b-2 font-semibold text-xs sm:text-sm whitespace-nowrap transition-all duration-200 rounded-t-lg cursor-pointer ${
                   activeTab === 'pending-approvals'
                     ? 'border-blue-500 text-blue-600 bg-blue-50'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50'
@@ -949,7 +949,7 @@ function AdminClerkDashboard({ user, onLogout }) {
               </button>
               <button
                 onClick={() => setActiveTab('collections')}
-                className={`py-3 sm:py-4 px-2 sm:px-3 border-b-2 font-semibold text-xs sm:text-sm whitespace-nowrap transition-all duration-200 rounded-t-lg ${
+                className={`py-3 sm:py-4 px-2 sm:px-3 border-b-2 font-semibold text-xs sm:text-sm whitespace-nowrap transition-all duration-200 rounded-t-lg cursor-pointer ${
                   activeTab === 'collections'
                     ? 'border-blue-500 text-blue-600 bg-blue-50'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50'
@@ -961,7 +961,7 @@ function AdminClerkDashboard({ user, onLogout }) {
               </button>
               <button
                 onClick={() => setActiveTab('reports')}
-                className={`py-3 sm:py-4 px-2 sm:px-3 border-b-2 font-semibold text-xs sm:text-sm whitespace-nowrap transition-all duration-200 rounded-t-lg ${
+                className={`py-3 sm:py-4 px-2 sm:px-3 border-b-2 font-semibold text-xs sm:text-sm whitespace-nowrap transition-all duration-200 rounded-t-lg cursor-pointer ${
                   activeTab === 'reports'
                     ? 'border-blue-500 text-blue-600 bg-blue-50'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50'
@@ -972,7 +972,7 @@ function AdminClerkDashboard({ user, onLogout }) {
               </button>
               <button
                 onClick={() => setActiveTab('monitoring')}
-                className={`py-3 sm:py-4 px-2 sm:px-3 border-b-2 font-semibold text-xs sm:text-sm whitespace-nowrap transition-all duration-200 rounded-t-lg ${
+                className={`py-3 sm:py-4 px-2 sm:px-3 border-b-2 font-semibold text-xs sm:text-sm whitespace-nowrap transition-all duration-200 rounded-t-lg cursor-pointer ${
                   activeTab === 'monitoring'
                     ? 'border-blue-500 text-blue-600 bg-blue-50'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50'
@@ -984,7 +984,7 @@ function AdminClerkDashboard({ user, onLogout }) {
               </button>
               <button
                 onClick={() => setActiveTab('transactions')}
-                className={`py-3 sm:py-4 px-2 sm:px-3 border-b-2 font-semibold text-xs sm:text-sm whitespace-nowrap transition-all duration-200 rounded-t-lg ${
+                className={`py-3 sm:py-4 px-2 sm:px-3 border-b-2 font-semibold text-xs sm:text-sm whitespace-nowrap transition-all duration-200 rounded-t-lg cursor-pointer ${
                   activeTab === 'transactions'
                     ? 'border-blue-500 text-blue-600 bg-blue-50'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50'
@@ -1097,21 +1097,21 @@ function AdminClerkDashboard({ user, onLogout }) {
                     <div className="space-y-4">
                       <button
                         onClick={() => setShowReportsModal(true)}
-                        className="w-full flex items-center justify-center px-4 py-3 sm:py-4 border border-transparent rounded-xl shadow-md text-sm sm:text-base font-semibold text-white bg-blue-600 hover:bg-blue-700 hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02]"
+                        className="w-full flex items-center justify-center px-4 py-3 sm:py-4 border border-transparent rounded-xl shadow-md text-sm sm:text-base font-semibold text-white bg-blue-600 hover:bg-blue-700 hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02] cursor-pointer"
                       >
                         <FaFileAlt className="mr-2 sm:mr-3 w-4 h-4 sm:w-5 sm:h-5" />
                         Generate Excel Report
                       </button>
                       <button
                         onClick={() => setShowVerificationModal(true)}
-                        className="w-full flex items-center justify-center px-4 py-3 sm:py-4 border border-transparent rounded-xl shadow-md text-sm sm:text-base font-semibold text-white bg-green-600 hover:bg-green-700 hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02]"
+                        className="w-full flex items-center justify-center px-4 py-3 sm:py-4 border border-transparent rounded-xl shadow-md text-sm sm:text-base font-semibold text-white bg-green-600 hover:bg-green-700 hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02] cursor-pointer"
                       >
                         <FaCheckCircle className="mr-2 sm:mr-3 w-4 h-4 sm:w-5 sm:h-5" />
                         Verify Collections
                       </button>
                       <button
                         onClick={() => setActiveTab('monitoring')}
-                        className="w-full flex items-center justify-center px-4 py-3 sm:py-4 border border-transparent rounded-xl shadow-md text-sm sm:text-base font-semibold text-white bg-purple-600 hover:bg-purple-700 hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02]"
+                        className="w-full flex items-center justify-center px-4 py-3 sm:py-4 border border-transparent rounded-xl shadow-md text-sm sm:text-base font-semibold text-white bg-purple-600 hover:bg-purple-700 hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02] cursor-pointer"
                       >
                         <FaChartLine className="mr-2 sm:mr-3 w-4 h-4 sm:w-5 sm:h-5" />
                         View Monitoring
@@ -1347,7 +1347,7 @@ function AdminClerkDashboard({ user, onLogout }) {
                                 <div className="flex gap-2">
                                   <button
                                     onClick={() => verifyCollectionRecord(collection.id)}
-                                    className="text-green-600 hover:text-green-900 text-xs px-3 py-1.5 rounded-lg hover:bg-green-50 transition-colors duration-200 font-semibold"
+                                    className="text-green-600 hover:text-green-900 text-xs px-3 py-1.5 rounded-lg hover:bg-green-50 transition-colors duration-200 font-semibold cursor-pointer"
                                     title="Verify Collection"
                                   >
                                     <FaCheckCircle className="inline mr-1" /> Verify
@@ -1457,7 +1457,7 @@ function AdminClerkDashboard({ user, onLogout }) {
                           <div className="flex gap-2">
                             <button
                               onClick={() => verifyCollectionRecord(collection.id)}
-                              className="flex-1 flex items-center justify-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 text-sm font-semibold"
+                              className="flex-1 flex items-center justify-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 text-sm font-semibold cursor-pointer"
                             >
                               <FaCheckCircle className="w-4 h-4 mr-2" />
                               Verify
@@ -1674,7 +1674,7 @@ function AdminClerkDashboard({ user, onLogout }) {
                     <p className="mt-1 text-sm text-gray-500">Collection monitoring data will appear here.</p>
                     <button
                       onClick={() => loadDashboardData()}
-                      className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                      className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer"
                     >
                       Refresh Data
                     </button>
@@ -1889,7 +1889,7 @@ function AdminClerkDashboard({ user, onLogout }) {
                     <p className="empty-state-description">Transaction history will appear here.</p>
                     <button
                       onClick={() => loadDashboardData()}
-                      className="mt-6 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors duration-200 font-semibold shadow-lg hover:shadow-xl"
+                      className="mt-6 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors duration-200 font-semibold shadow-lg hover:shadow-xl cursor-pointer"
                     >
                       Refresh Data
                     </button>
@@ -1976,7 +1976,7 @@ function AdminClerkDashboard({ user, onLogout }) {
               <div className="mt-6 flex space-x-3">
                 <button
                   onClick={() => setShowCollectionDetailsModal(false)}
-                  className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+                  className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 cursor-pointer"
                 >
                   Close
                 </button>
@@ -1999,85 +1999,141 @@ function AdminClerkDashboard({ user, onLogout }) {
       {/* Reports Modal */}
       {showReportsModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+          <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-md shadow-lg rounded-md bg-white">
             <div className="mt-3">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Generate Excel Report</h3>
-                <button
-                  onClick={() => setShowReportsModal(false)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <FaTimes className="h-6 w-6" />
-                </button>
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Report Type *</label>
-                <select
-                  value={reportType}
-                  onChange={(e) => setReportType(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="collections">Collections</option>
-                  <option value="members">Members</option>
-                  <option value="loans">Loans</option>
-                  <option value="groups">Groups</option>
-                </select>
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Date Range</label>
-                <div className="grid grid-cols-2 gap-2">
-                  <input
-                    type="date"
-                    value={reportStartDate}
-                    onChange={(e) => setReportStartDate(e.target.value)}
-                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Start Date"
-                  />
-                  <input
-                    type="date"
-                    value={reportEndDate}
-                    onChange={(e) => setReportEndDate(e.target.value)}
-                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="End Date"
-                  />
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-1">
+                <div className="bg-white rounded-xl p-6 sm:p-8">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-bold text-gray-900 flex items-center">
+                      <svg className="w-6 h-6 mr-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      Generate Excel Report
+                    </h3>
+                    <button
+                      onClick={() => setShowReportsModal(false)}
+                      className="text-gray-400 hover:text-gray-600 cursor-pointer transition-colors duration-200 p-2 rounded-lg hover:bg-gray-100"
+                    >
+                      <FaTimes className="h-6 w-6" />
+                    </button>
+                  </div>
+                  
+                  {/* Report Type Field */}
+                  <div className="mb-6">
+                    <label className="block text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                      <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                      </svg>
+                      Report Type *
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={reportType}
+                        onChange={(e) => setReportType(e.target.value)}
+                        className="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 focus:bg-white text-gray-800 appearance-none cursor-pointer"
+                      >
+                        <option value="collections">Collections</option>
+                        <option value="members">Members</option>
+                        <option value="loans">Loans</option>
+                        <option value="groups">Groups</option>
+                      </select>
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                      </div>
+                      <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Date Range Fields */}
+                  <div className="mb-6">
+                    <label className="block text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                      <svg className="w-4 h-4 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      Date Range
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="relative">
+                        <input
+                          type="date"
+                          value={reportStartDate}
+                          onChange={(e) => setReportStartDate(e.target.value)}
+                          className="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-gray-50 focus:bg-white text-gray-800"
+                          placeholder="Start Date"
+                        />
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                      </div>
+                      <div className="relative">
+                        <input
+                          type="date"
+                          value={reportEndDate}
+                          onChange={(e) => setReportEndDate(e.target.value)}
+                          className="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-gray-50 focus:bg-white text-gray-800"
+                          placeholder="End Date"
+                        />
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Report Summary */}
+                  <div className="mb-8 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl">
+                    <div className="flex items-start">
+                      <svg className="w-5 h-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                      <div>
+                        <p className="text-sm font-semibold text-blue-800 mb-2">Report Summary:</p>
+                        <ul className="text-sm text-blue-700 space-y-1">
+                          <li><span className="font-medium">Type:</span> {reportType.charAt(0).toUpperCase() + reportType.slice(1)}</li>
+                          <li><span className="font-medium">Period:</span> {reportStartDate} to {reportEndDate}</li>
+                          <li><span className="font-medium">Format:</span> Excel (.xlsx) with auto-sized columns</li>
+                          <li><span className="font-medium">Status:</span> Ready to generate</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Action Buttons */}
+                  <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3">
+                    <button
+                      type="button"
+                      onClick={() => setShowReportsModal(false)}
+                      className="w-full sm:w-auto px-6 py-3 text-sm font-semibold text-gray-700 bg-gray-200 rounded-xl hover:bg-gray-300 cursor-pointer transition-all duration-200"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={generateReport}
+                      disabled={isGeneratingReport}
+                      className={`w-full sm:w-auto px-6 py-3 text-sm font-semibold rounded-xl flex items-center justify-center transition-all duration-200 ${
+                        isGeneratingReport
+                          ? "bg-gray-400 cursor-not-allowed text-gray-600"
+                          : "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white cursor-pointer shadow-lg hover:shadow-xl"
+                      }`}
+                    >
+                      {isGeneratingReport && (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      )}
+                      {isGeneratingReport ? "Generating..." : "Generate Excel Report"}
+                    </button>
+                  </div>
                 </div>
-              </div>
-              <div className="mb-4 p-3 bg-gray-50 rounded-md">
-                <p className="text-sm text-gray-600">
-                  <strong>Report Summary:</strong><br />
-                  • Type: {reportType.charAt(0).toUpperCase() + reportType.slice(1)}<br />
-                  • Period: {reportStartDate} to {reportEndDate}<br />
-                  • Format: Excel (.xlsx) with auto-sized columns<br />
-                  • Status: Ready to generate
-                </p>
-              </div>
-              <div className="flex justify-end space-x-3">
-                <button
-                  type="button"
-                  onClick={() => setShowReportsModal(false)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={generateReport}
-                  disabled={isGeneratingReport}
-                  className={`px-4 py-2 text-sm font-medium rounded-md ${
-                    isGeneratingReport 
-                      ? 'bg-gray-400 cursor-not-allowed' 
-                      : 'bg-green-600 hover:bg-green-700'
-                  } text-white`}
-                >
-                  {isGeneratingReport ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Generating...
-                    </>
-                  ) : (
-                    'Generate Excel Report'
-                  )}
-                </button>
               </div>
             </div>
           </div>
@@ -2093,7 +2149,7 @@ function AdminClerkDashboard({ user, onLogout }) {
                 <h3 className="text-lg font-medium text-gray-900">Collection Verification</h3>
                 <button
                   onClick={() => setShowVerificationModal(false)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-gray-400 hover:text-gray-600 cursor-pointer"
                 >
                   <FaTimes className="h-6 w-6" />
                 </button>

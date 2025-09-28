@@ -1196,7 +1196,7 @@ function BillCollectorDashboard({ user, onLogout }) {
           </div>
           <button
             onClick={onLogout}
-            className="flex items-center text-gray-700 hover:text-gray-900"
+            className="flex items-center text-gray-700 hover:text-gray-900 cursor-pointer"
           >
             <FaSignOutAlt className="mr-1" /> Logout
           </button>
@@ -1215,7 +1215,7 @@ function BillCollectorDashboard({ user, onLogout }) {
               <div className="ml-auto pl-3">
                 <button
                   onClick={() => setError(null)}
-                  className="text-red-400 hover:text-red-600"
+                  className="text-red-400 hover:text-red-600 cursor-pointer"
                 >
                   <FaTimesCircle className="h-5 w-5" />
                 </button>
@@ -1237,7 +1237,7 @@ function BillCollectorDashboard({ user, onLogout }) {
               <div className="ml-auto pl-3">
                 <button
                   onClick={() => setSuccessMessage(null)}
-                  className="text-green-400 hover:text-green-600"
+                  className="text-green-400 hover:text-green-600 cursor-pointer"
                 >
                   <FaTimesCircle className="h-5 w-5" />
                 </button>
@@ -1496,7 +1496,7 @@ function BillCollectorDashboard({ user, onLogout }) {
                 </div>
                 <button
                   onClick={() => setShowCollectionModal(false)}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
                 >
                   <FaTimesCircle className="text-2xl" />
                 </button>
@@ -1552,7 +1552,7 @@ function BillCollectorDashboard({ user, onLogout }) {
                     <button
                       type="button"
                       onClick={addCollectionItem}
-                      className="w-full sm:w-auto inline-flex items-center justify-center px-3 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm sm:text-base font-semibold rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                      className="w-full sm:w-auto inline-flex items-center justify-center px-3 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm sm:text-base font-semibold rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer"
                     >
                       <FaPlus className="mr-1 sm:mr-2 w-4 h-4" /> 
                       <span className="hidden sm:inline">Add Collection Item</span>
@@ -1606,7 +1606,7 @@ function BillCollectorDashboard({ user, onLogout }) {
                             <button
                               type="button"
                               onClick={() => removeCollectionItem(index)}
-                            className="ml-4 p-3 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                            className="ml-4 p-3 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
                             title="Remove this collection item"
                             >
                             <FaTimesCircle className="text-xl" />
@@ -1641,7 +1641,7 @@ function BillCollectorDashboard({ user, onLogout }) {
                                     updateCollectionItem(index, 'principal_amount', breakdown.principal.toFixed(2));
                                     updateCollectionItem(index, 'interest_amount', breakdown.interest.toFixed(2));
                                   }}
-                                  className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium"
+                                  className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium cursor-pointer"
                                 >
                                   💰 Fill EMI Amounts
                                 </button>
@@ -1651,7 +1651,7 @@ function BillCollectorDashboard({ user, onLogout }) {
                                 onClick={() => {
                                   updateCollectionItem(index, 'deposit_amount', '100');
                                 }}
-                                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium"
+                                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium cursor-pointer"
                               >
                                 💳 Add ₹100 Deposit
                               </button>
@@ -1663,7 +1663,7 @@ function BillCollectorDashboard({ user, onLogout }) {
                                   updateCollectionItem(index, 'deposit_amount', '');
                                   updateCollectionItem(index, 'joining_fee', '');
                                 }}
-                                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm font-medium"
+                                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm font-medium cursor-pointer"
                               >
                                 🗑️ Clear All
                               </button>
@@ -2005,7 +2005,7 @@ function BillCollectorDashboard({ user, onLogout }) {
                         <button
                           type="button"
                           onClick={handlePrintGroupMembers}
-                          className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                          className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer"
                         >
                           <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
@@ -2292,14 +2292,14 @@ function BillCollectorDashboard({ user, onLogout }) {
                   <button
                     type="button"
                     onClick={() => setShowCollectionModal(false)}
-                    className="px-8 py-3 border-2 border-gray-300 rounded-lg text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
+                    className="px-8 py-3 border-2 border-gray-300 rounded-lg text-gray-700 font-semibold hover:bg-gray-50 transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmittingCollection || collectionForm.collection_items.length === 0}
-                    className="px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
+                    className="px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer"
                   >
                     {isSubmittingCollection ? (
                       <span className="flex items-center">
@@ -2328,7 +2328,7 @@ function BillCollectorDashboard({ user, onLogout }) {
                 </h3>
                 <button
                   onClick={() => setShowTransactionModal(false)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-gray-400 hover:text-gray-600 cursor-pointer"
                 >
                   <FaTimesCircle className="h-6 w-6" />
                 </button>
@@ -2540,14 +2540,14 @@ function BillCollectorDashboard({ user, onLogout }) {
                   <button
                     type="button"
                     onClick={cancelPrintGroupMembers}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="button"
                     onClick={(e) => confirmPrintGroupMembers(e)}
-                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors cursor-pointer"
                   >
                     Yes, Print
                   </button>

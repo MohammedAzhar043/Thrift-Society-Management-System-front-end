@@ -622,7 +622,7 @@ function TeamLeaderDashboard({ user, onLogout }) {
           <p className="text-red-600 mb-4">{error}</p>
           <button
             onClick={loadDashboardData}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 cursor-pointer"
           >
             Retry
           </button>
@@ -656,7 +656,7 @@ function TeamLeaderDashboard({ user, onLogout }) {
                 </div>
                 <button
                   onClick={() => setSuccessMessage("")}
-                  className="text-green-600 hover:text-green-800 transition-colors duration-200 p-1 rounded-full hover:bg-green-100"
+                  className="text-green-600 hover:text-green-800 transition-colors duration-200 p-1 rounded-full hover:bg-green-100 cursor-pointer"
                 >
                   <FaTimesCircle className="h-4 w-4" />
                 </button>
@@ -679,7 +679,7 @@ function TeamLeaderDashboard({ user, onLogout }) {
             <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
               <button
                 onClick={onLogout}
-                className="inline-flex items-center px-1.5 sm:px-2 py-1.5 sm:py-2 border border-transparent text-xs sm:text-sm font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-red-500 transition-colors duration-200"
+                className="inline-flex items-center px-1.5 sm:px-2 py-1.5 sm:py-2 border border-transparent text-xs sm:text-sm font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-red-500 transition-colors duration-200 cursor-pointer"
               >
                 <FaSignOutAlt className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
                 <span className="hidden sm:inline">Logout</span>
@@ -958,7 +958,7 @@ function TeamLeaderDashboard({ user, onLogout }) {
                       setFieldErrors({});
                       setShowAddMemberModal(true);
                     }}
-                    className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-4 border border-transparent text-base font-bold rounded-xl shadow-lg text-white bg-blue-600 hover:bg-blue-700 transform hover:scale-[1.02] transition-all duration-200"
+                    className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-4 border border-transparent text-base font-bold rounded-xl shadow-lg text-white bg-blue-600 hover:bg-blue-700 transform hover:scale-[1.02] transition-all duration-200 cursor-pointer"
                   >
                     <FaUserPlus className="mr-3 text-lg" /> Add New Member
                   </button>
@@ -1025,7 +1025,7 @@ function TeamLeaderDashboard({ user, onLogout }) {
                                   setSelectedMember(member);
                                   setShowMemberDetailsModal(true);
                                 }}
-                                className="text-blue-600 hover:text-blue-900 transition-colors duration-200 p-2 rounded-lg hover:bg-blue-50"
+                                className="text-blue-600 hover:text-blue-900 transition-colors duration-200 p-2 rounded-lg hover:bg-blue-50 cursor-pointer"
                               >
                                 <FaEye className="w-4 h-4" />
                               </button>
@@ -1083,7 +1083,7 @@ function TeamLeaderDashboard({ user, onLogout }) {
                                 setSelectedMember(member);
                                 setShowMemberDetailsModal(true);
                               }}
-                              className="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-100 transition-colors duration-200 flex-shrink-0"
+                              className="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-100 transition-colors duration-200 flex-shrink-0 cursor-pointer"
                             >
                               <FaEye className="w-5 h-5" />
                             </button>
@@ -1131,7 +1131,7 @@ function TeamLeaderDashboard({ user, onLogout }) {
                   </div>
                   <button
                     onClick={() => setShowLoanRequestModal(true)}
-                    className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-4 border border-transparent text-base font-bold rounded-xl shadow-lg text-white bg-green-600 hover:bg-green-700 transform hover:scale-[1.02] transition-all duration-200"
+                    className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-4 border border-transparent text-base font-bold rounded-xl shadow-lg text-white bg-green-600 hover:bg-green-700 transform hover:scale-[1.02] transition-all duration-200 cursor-pointer"
                   >
                     <FaHandHoldingUsd className="mr-3 text-lg" /> Request Loan
                   </button>
@@ -2611,7 +2611,7 @@ function TeamLeaderDashboard({ user, onLogout }) {
                       setShowAddMemberModal(false);
                       resetForm();
                     }}
-                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -2621,7 +2621,7 @@ function TeamLeaderDashboard({ user, onLogout }) {
                     className={`px-4 py-2 text-white rounded-md flex items-center ${
                       isCreatingMember
                         ? "bg-blue-400 cursor-not-allowed"
-                        : "bg-blue-600 hover:bg-blue-700"
+                        : "bg-blue-600 hover:bg-blue-700 cursor-pointer"
                     }`}
                   >
                     {isCreatingMember && (
@@ -2733,7 +2733,7 @@ function TeamLeaderDashboard({ user, onLogout }) {
                   <button
                     type="button"
                     onClick={() => setShowLoanRequestModal(false)}
-                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -2743,7 +2743,7 @@ function TeamLeaderDashboard({ user, onLogout }) {
                     className={`px-4 py-2 text-white rounded-md flex items-center ${
                       isCreatingLoan
                         ? "bg-green-400 cursor-not-allowed"
-                        : "bg-green-600 hover:bg-green-700"
+                        : "bg-green-600 hover:bg-green-700 cursor-pointer"
                     }`}
                   >
                     {isCreatingLoan && (
@@ -2819,7 +2819,7 @@ function TeamLeaderDashboard({ user, onLogout }) {
               <div className="mt-6 flex justify-end">
                 <button
                   onClick={() => setShowMemberDetailsModal(false)}
-                  className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+                  className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 cursor-pointer"
                 >
                   Close
                 </button>

@@ -1181,27 +1181,27 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-6xl max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-gray-900">User Management</h2>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl p-4 sm:p-6 w-full max-w-6xl max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-200">
+        <div className="flex justify-between items-center mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-2xl font-bold text-gray-900">User Management</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-400 hover:text-gray-600 cursor-pointer transition-colors duration-200"
           >
             <FaTimes className="h-6 w-6" />
           </button>
         </div>
 
         {/* Search and Add User */}
-        <div className="mb-4 flex flex-col sm:flex-row gap-4">
+        <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row gap-3 sm:gap-4">
           <div className="flex-1">
             <input
               type="text"
               value={userFilter}
               onChange={(e) => setUserFilter(e.target.value)}
               placeholder="Search users by name, email, or role..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 shadow-sm text-sm sm:text-base"
             />
           </div>
           <button
@@ -1232,7 +1232,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
               });
               setShowUserForm(true);
             }}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2"
+            className="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2 cursor-pointer transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 text-sm sm:text-base w-full sm:w-auto justify-center"
           >
             <FaPlus className="h-4 w-4" />
             Add User
@@ -1241,180 +1241,327 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
 
         {/* User Form */}
         {showUserForm && (
-          <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-            <h3 className="text-lg font-medium mb-4">
-              {editingUser ? "Edit User" : "Create New User"}
-            </h3>
+          <div className="mb-6 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+            {/* Form Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-700 px-6 py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-white/20 rounded-lg">
+                    <FaPlus className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-white">
+                      {editingUser ? "Edit User" : "Create New User"}
+                    </h3>
+                    <p className="text-blue-100 text-sm">
+                      {editingUser ? "Update user information and settings" : "Add a new user to the system"}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowUserForm(false);
+                    setEditingUser(null);
+                    resetForm();
+                  }}
+                  className="p-2 hover:bg-white/20 rounded-lg transition-colors duration-200"
+                  title="Close Form"
+                >
+                  <FaTimes className="h-5 w-5 text-white" />
+                </button>
+              </div>
+            </div>
+
+            {/* Form Content */}
+            <div className="p-6">
             <form onSubmit={handleCreateUser}>
               {/* User Information Section */}
-              <div className="mb-6">
-                <h4 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
-                  User Information
-                </h4>
+              <div className="mb-8">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <svg className="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                  <h4 className="text-lg font-semibold text-gray-900">User Information</h4>
+                </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Username *
                   </label>
-                  <input
-                    type="text"
-                    value={userForm.username}
-                    onChange={(e) => setUserForm({...userForm, username: e.target.value})}
-                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      fieldErrors.username ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                    required
-                  />
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    </div>
+                    <input
+                      type="text"
+                      value={userForm.username}
+                      onChange={(e) => setUserForm({...userForm, username: e.target.value})}
+                      className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+                        fieldErrors.username ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-gray-400 focus:bg-white'
+                      }`}
+                      placeholder="Enter username"
+                      required
+                    />
+                  </div>
                   {fieldErrors.username && (
-                    <div className="mt-1 text-xs text-red-600">{fieldErrors.username}</div>
+                    <div className="mt-2 flex items-center text-sm text-red-600">
+                      <svg className="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                      {fieldErrors.username}
+                    </div>
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Email *
                   </label>
-                  <input
-                    type="email"
-                    value={userForm.email}
-                    onChange={(e) => setUserForm({...userForm, email: e.target.value})}
-                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      fieldErrors.email ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                    required
-                  />
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <input
+                      type="email"
+                      value={userForm.email}
+                      onChange={(e) => setUserForm({...userForm, email: e.target.value})}
+                      className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+                        fieldErrors.email ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-gray-400 focus:bg-white'
+                      }`}
+                      placeholder="Enter email address"
+                      required
+                    />
+                  </div>
                   {fieldErrors.email && (
-                    <div className="mt-1 text-xs text-red-600">{fieldErrors.email}</div>
+                    <div className="mt-2 flex items-center text-sm text-red-600">
+                      <svg className="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                      {fieldErrors.email}
+                    </div>
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Password *
                   </label>
                   <div className="relative">
-                  <input
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                    </div>
+                    <input
                       type={showPassword ? "text" : "password"}
-                    value={userForm.password}
-                    onChange={(e) => setUserForm({...userForm, password: e.target.value})}
-                      className={`w-full px-3 py-2 pr-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        fieldErrors.password ? 'border-red-500' : 'border-gray-300'
+                      value={userForm.password}
+                      onChange={(e) => setUserForm({...userForm, password: e.target.value})}
+                      className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+                        fieldErrors.password ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-gray-400 focus:bg-white'
                       }`}
-                    required
-                  />
+                      placeholder="Enter password"
+                      required
+                    />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors duration-200"
                     >
-                      {showPassword ? '🙈' : '👁️'}
+                      {showPassword ? (
+                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                        </svg>
+                      ) : (
+                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                      )}
                     </button>
                   </div>
                   {fieldErrors.password && (
-                    <div className="mt-1 text-xs text-red-600">{fieldErrors.password}</div>
+                    <div className="mt-2 flex items-center text-sm text-red-600">
+                      <svg className="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                      {fieldErrors.password}
+                    </div>
                   )}
                   {!editingUser && userForm.password && (
-                    <div className="mt-1 text-xs">
-                      <div className={`flex items-center gap-2 ${userForm.password.length >= 8 ? 'text-green-600' : 'text-red-600'}`}>
-                        <span>{userForm.password.length >= 8 ? '✓' : '✗'}</span>
-                        <span>At least 8 characters</span>
-                      </div>
-                      <div className={`flex items-center gap-2 ${/[A-Z]/.test(userForm.password) ? 'text-green-600' : 'text-red-600'}`}>
-                        <span>{/[A-Z]/.test(userForm.password) ? '✓' : '✗'}</span>
-                        <span>One uppercase letter</span>
-                      </div>
-                      <div className={`flex items-center gap-2 ${/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(userForm.password) ? 'text-green-600' : 'text-red-600'}`}>
-                        <span>{/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(userForm.password) ? '✓' : '✗'}</span>
-                        <span>One special character</span>
+                    <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                      <p className="text-sm font-medium text-gray-700 mb-2">Password Requirements:</p>
+                      <div className="space-y-1">
+                        <div className={`flex items-center gap-2 text-sm ${userForm.password.length >= 8 ? 'text-green-600' : 'text-red-600'}`}>
+                          <span className={`w-4 h-4 rounded-full flex items-center justify-center text-xs ${userForm.password.length >= 8 ? 'bg-green-100' : 'bg-red-100'}`}>
+                            {userForm.password.length >= 8 ? '✓' : '✗'}
+                          </span>
+                          <span>At least 8 characters</span>
+                        </div>
+                        <div className={`flex items-center gap-2 text-sm ${/[A-Z]/.test(userForm.password) ? 'text-green-600' : 'text-red-600'}`}>
+                          <span className={`w-4 h-4 rounded-full flex items-center justify-center text-xs ${/[A-Z]/.test(userForm.password) ? 'bg-green-100' : 'bg-red-100'}`}>
+                            {/[A-Z]/.test(userForm.password) ? '✓' : '✗'}
+                          </span>
+                          <span>One uppercase letter</span>
+                        </div>
+                        <div className={`flex items-center gap-2 text-sm ${/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(userForm.password) ? 'text-green-600' : 'text-red-600'}`}>
+                          <span className={`w-4 h-4 rounded-full flex items-center justify-center text-xs ${/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(userForm.password) ? 'bg-green-100' : 'bg-red-100'}`}>
+                            {/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(userForm.password) ? '✓' : '✗'}
+                          </span>
+                          <span>One special character</span>
+                        </div>
                       </div>
                     </div>
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Confirm Password *
                   </label>
-                  <input
-                    type="password"
-                    value={userForm.confirm_password}
-                    onChange={(e) => setUserForm({...userForm, confirm_password: e.target.value})}
-                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      fieldErrors.confirm_password ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                    required
-                  />
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <input
+                      type="password"
+                      value={userForm.confirm_password}
+                      onChange={(e) => setUserForm({...userForm, confirm_password: e.target.value})}
+                      className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${
+                        fieldErrors.confirm_password ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-gray-400 focus:bg-white'
+                      }`}
+                      placeholder="Confirm password"
+                      required
+                    />
+                  </div>
                   {fieldErrors.confirm_password && (
-                    <div className="mt-1 text-xs text-red-600">{fieldErrors.confirm_password}</div>
+                    <div className="mt-2 flex items-center text-sm text-red-600">
+                      <svg className="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                      {fieldErrors.confirm_password}
+                    </div>
                   )}
                   {userForm.confirm_password && (
-                    <div className={`mt-1 text-xs ${userForm.password === userForm.confirm_password ? 'text-green-600' : 'text-red-600'}`}>
-                      {userForm.password === userForm.confirm_password ? '✓ Passwords match' : '✗ Passwords do not match'}
+                    <div className={`mt-2 flex items-center text-sm ${userForm.password === userForm.confirm_password ? 'text-green-600' : 'text-red-600'}`}>
+                      <span className={`w-4 h-4 rounded-full flex items-center justify-center text-xs mr-2 ${userForm.password === userForm.confirm_password ? 'bg-green-100' : 'bg-red-100'}`}>
+                        {userForm.password === userForm.confirm_password ? '✓' : '✗'}
+                      </span>
+                      {userForm.password === userForm.confirm_password ? 'Passwords match' : 'Passwords do not match'}
                     </div>
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Full Name
                   </label>
-                  <input
-                    type="text"
-                    value={userForm.full_name}
-                    onChange={(e) => setUserForm({...userForm, full_name: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    </div>
+                    <input
+                      type="text"
+                      value={userForm.full_name}
+                      onChange={(e) => setUserForm({...userForm, full_name: e.target.value})}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 focus:bg-white"
+                      placeholder="Enter full name"
+                    />
+                  </div>
                 </div>
                 </div>
               </div>
 
               {/* Role & Assignment Section */}
-              <div className="mb-6">
-                <h4 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
-                  Role & Assignment
-                </h4>
+              <div className="mb-8">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="p-2 bg-purple-100 rounded-lg">
+                    <svg className="h-5 w-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                  </div>
+                  <h4 className="text-lg font-semibold text-gray-900">Role & Assignment</h4>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Role
                   </label>
-                  <select
-                    value={userForm.role_id}
-                    onChange={(e) => setUserForm({...userForm, role_id: e.target.value, group_id: ""})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">Select Role</option>
-                    {roles.map(role => (
-                      <option key={role.id} value={role.id}>
-                        {role.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                {userForm.role_id && roles.find(role => role.id === parseInt(userForm.role_id))?.name === 'member' && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Group Assignment *
-                    </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                      </svg>
+                    </div>
                     <select
-                      value={userForm.group_id}
-                      onChange={(e) => {
-                        setUserForm({...userForm, group_id: e.target.value});
-                        // Clear error when group is selected
-                        if (fieldErrors.group_id) {
-                          setFieldErrors({...fieldErrors, group_id: null});
-                        }
-                      }}
-                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        fieldErrors.group_id ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                      required
+                      value={userForm.role_id}
+                      onChange={(e) => setUserForm({...userForm, role_id: e.target.value, group_id: ""})}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 focus:bg-white appearance-none bg-white"
                     >
-                      <option value="">Select Group</option>
-                      {groups.map(group => (
-                        <option key={group.id} value={group.id}>
-                          {group.name} - {group.location}
+                      <option value="">Select Role</option>
+                      {roles.map(role => (
+                        <option key={role.id} value={role.id}>
+                          {role.name}
                         </option>
                       ))}
                     </select>
+                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                      <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+                {userForm.role_id && roles.find(role => role.id === parseInt(userForm.role_id))?.name === 'member' && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Group Assignment *
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                      </div>
+                      <select
+                        value={userForm.group_id}
+                        onChange={(e) => {
+                          setUserForm({...userForm, group_id: e.target.value});
+                          // Clear error when group is selected
+                          if (fieldErrors.group_id) {
+                            setFieldErrors({...fieldErrors, group_id: null});
+                          }
+                        }}
+                        className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 focus:bg-white appearance-none bg-white ${
+                          fieldErrors.group_id ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                        }`}
+                        required
+                      >
+                        <option value="">Select Group</option>
+                        {groups.map(group => (
+                          <option key={group.id} value={group.id}>
+                            {group.name} - {group.location}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                        <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                    </div>
                     {fieldErrors.group_id && (
-                      <div className="mt-1 text-xs text-red-600">{fieldErrors.group_id}</div>
+                      <div className="mt-2 flex items-center text-sm text-red-600">
+                        <svg className="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                        {fieldErrors.group_id}
+                      </div>
                     )}
                   </div>
                 )}
@@ -1422,36 +1569,58 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
               </div>
 
               {/* Documentation Section */}
-              <div className="mb-6">
-                <h4 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
-                  Documentation
-                </h4>
+              <div className="mb-8">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="p-2 bg-green-100 rounded-lg">
+                    <svg className="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <h4 className="text-lg font-semibold text-gray-900">Documentation</h4>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Aadhar ID
                   </label>
-                  <input
-                    type="text"
-                    value={userForm.aadhar_id}
-                    onChange={(e) => setUserForm({...userForm, aadhar_id: e.target.value})}
-                    placeholder="12-digit Aadhar number"
-                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      fieldErrors.aadhar_id ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  />
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                      </svg>
+                    </div>
+                    <input
+                      type="text"
+                      value={userForm.aadhar_id}
+                      onChange={(e) => setUserForm({...userForm, aadhar_id: e.target.value})}
+                      placeholder="12-digit Aadhar number"
+                      className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 focus:bg-white ${
+                        fieldErrors.aadhar_id ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                      }`}
+                    />
+                  </div>
                   {fieldErrors.aadhar_id && (
-                    <div className="mt-1 text-xs text-red-600">{fieldErrors.aadhar_id}</div>
+                    <div className="mt-2 flex items-center text-sm text-red-600">
+                      <svg className="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                      {fieldErrors.aadhar_id}
+                    </div>
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Aadhar Document *
                   </label>
                   {editingUser && userForm.aadhar_document_path && (
-                    <div className="mb-2 p-2 bg-green-50 border border-green-200 rounded-md">
-                      <div className="flex items-center text-green-700">
-                        <span className="text-sm">✓ File selected: {userForm.aadhar_document_path}</span>
+                    <div className="mb-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <div className="flex items-center justify-between text-green-700">
+                        <div className="flex items-center">
+                          <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span className="text-sm font-medium">File selected: {userForm.aadhar_document_path}</span>
+                        </div>
                         <button
                           type="button"
                           onClick={() => {
@@ -1461,59 +1630,86 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
                               aadhar_document_file: null
                             });
                           }}
-                          className="ml-2 text-red-600 hover:text-red-800 text-sm"
+                          className="text-red-600 hover:text-red-800 text-sm font-medium px-2 py-1 rounded hover:bg-red-50 transition-colors duration-200"
                         >
                           Remove
                         </button>
                       </div>
                     </div>
                   )}
-                  <input
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                    onChange={(e) => {
-                      const file = e.target.files[0];
-                      if (file) {
-                        setUserForm({
-                          ...userForm, 
-                          aadhar_document_path: file.name,
-                          aadhar_document_file: file
-                        });
-                        // Clear error when file is selected
-                        if (fieldErrors.aadhar_document) {
-                          setFieldErrors({...fieldErrors, aadhar_document: null});
+                  <div className="relative">
+                    <input
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          setUserForm({
+                            ...userForm, 
+                            aadhar_document_path: file.name,
+                            aadhar_document_file: file
+                          });
+                          // Clear error when file is selected
+                          if (fieldErrors.aadhar_document) {
+                            setFieldErrors({...fieldErrors, aadhar_document: null});
+                          }
                         }
-                      }
-                    }}
-                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 ${
-                      fieldErrors.aadhar_document ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                    required={!editingUser}
-                  />
+                      }}
+                      className={`w-full px-4 py-3 border-2 border-dashed rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-400 hover:bg-blue-50 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 ${
+                        fieldErrors.aadhar_document ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                      }`}
+                      required={!editingUser}
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="text-center">
+                        <svg className="mx-auto h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        <p className="text-sm text-gray-500 mt-1">Click to upload or drag and drop</p>
+                      </div>
+                    </div>
+                  </div>
                   {fieldErrors.aadhar_document && (
-                    <div className="mt-1 text-xs text-red-600">{fieldErrors.aadhar_document}</div>
+                    <div className="mt-2 flex items-center text-sm text-red-600">
+                      <svg className="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                      {fieldErrors.aadhar_document}
+                    </div>
                   )}
                 </div>
                 </div>
               </div>
 
               {/* Banking Information Section */}
-              <div className="mb-6">
-                <h4 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
-                  Banking Information
-                </h4>
+              <div className="mb-8">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="p-2 bg-yellow-100 rounded-lg">
+                    <svg className="h-5 w-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                    </svg>
+                  </div>
+                  <h4 className="text-lg font-semibold text-gray-900">Banking Information</h4>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Bank Account Number
                   </label>
-                  <input
-                    type="text"
-                    value={userForm.bank_account_number}
-                    onChange={(e) => setUserForm({...userForm, bank_account_number: e.target.value})}
-                    placeholder="Bank account number"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                      </svg>
+                    </div>
+                    <input
+                      type="text"
+                      value={userForm.bank_account_number}
+                      onChange={(e) => setUserForm({...userForm, bank_account_number: e.target.value})}
+                      placeholder="Bank account number"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 focus:bg-white"
+                    />
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1683,156 +1879,261 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
               </div>
                 </div>
               )}
-              <div className="mt-4 flex gap-2">
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className={`px-4 py-2 text-white rounded-md flex items-center ${
-                    isSubmitting 
-                      ? 'bg-green-400 cursor-not-allowed' 
-                      : 'bg-green-600 hover:bg-green-700'
-                  }`}
-                >
-                  {isSubmitting && (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  )}
-                  {isSubmitting ? (editingUser ? 'Updating...' : 'Creating...') : (editingUser ? 'Update User' : 'Create User')}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowUserForm(false);
-                    setEditingUser(null);
-                    resetForm();
-                  }}
-                  disabled={isSubmitting}
-                  className={`px-4 py-2 text-white rounded-md ${
-                    isSubmitting 
-                      ? 'bg-gray-400 cursor-not-allowed' 
-                      : 'bg-gray-600 hover:bg-gray-700'
-                  }`}
-                >
-                  Cancel
-                </button>
+              {/* Form Actions */}
+              <div className="mt-8 pt-6 border-t border-gray-200">
+                <div className="flex flex-col sm:flex-row gap-3 justify-end">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowUserForm(false);
+                      setEditingUser(null);
+                      resetForm();
+                    }}
+                    disabled={isSubmitting}
+                    className={`px-6 py-3 text-gray-700 bg-white border border-gray-300 rounded-lg flex items-center justify-center transition-all duration-200 w-full sm:w-auto font-medium ${
+                      isSubmitting 
+                        ? 'cursor-not-allowed opacity-50' 
+                        : 'hover:bg-gray-50 hover:border-gray-400 cursor-pointer shadow-sm hover:shadow-md'
+                    }`}
+                  >
+                    <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className={`px-6 py-3 text-white rounded-lg flex items-center justify-center transition-all duration-200 w-full sm:w-auto font-medium ${
+                      isSubmitting 
+                        ? 'bg-green-400 cursor-not-allowed' 
+                        : 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-105'
+                    }`}
+                  >
+                    {isSubmitting && (
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    )}
+                    {isSubmitting ? (
+                      editingUser ? 'Updating User...' : 'Creating User...'
+                    ) : (
+                      <>
+                        {editingUser ? (
+                          <>
+                            <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            Update User
+                          </>
+                        ) : (
+                          <>
+                            <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            </svg>
+                            Create User
+                          </>
+                        )}
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </form>
+            </div>
           </div>
         )}
 
-        {/* Users Table */}
+        {/* Users Table - Desktop View */}
         {isLoading ? (
           <div className="text-center py-4">Loading users...</div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    User
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Email
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Role
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Group
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredUsers.length === 0 ? (
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden lg:block overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
                   <tr>
-                    <td colSpan="6" className="px-6 py-4 text-center text-gray-500">
-                      {userFilter?.trim() === "" ? "No users found" : "No users match your search"}
-                    </td>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      User
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Email
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Role
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Group
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Actions
+                    </th>
                   </tr>
-                ) : (
-                  filteredUsers.map((user) => (
-                    <tr key={user.id}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">
-                            {user.full_name || user.username}
-                          </div>
-                          <div className="text-sm text-gray-500">@{user.username}</div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {user.email}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {user.roles?.[0]?.name ? (
-                          <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
-                            {user.roles[0].name}
-                          </span>
-                        ) : (
-                          <span className="text-gray-400">No role</span>
-                        )}
-                      </td>
-                                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                         {user.member?.group?.name ? (
-                           <span className="font-medium">{user.member.group.name}</span>
-                         ) : (
-                           <span className="text-gray-400">-</span>
-                         )}
-                       </td>
-                       <td className="px-6 py-4 whitespace-nowrap">
-                         <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                           user.is_active 
-                             ? "bg-green-100 text-green-800" 
-                             : "bg-red-100 text-red-800"
-                         }`}>
-                           {user.is_active ? "Active" : "Inactive"}
-                         </span>
-                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => handleEditUser(user)}
-                            className="text-blue-600 hover:text-blue-900"
-                            title="Edit User"
-                          >
-                            <FaEdit className="h-4 w-4" />
-                          </button>
-                          <button
-                            onClick={() => handleToggleUserStatus(user)}
-                            className={`${
-                              user.is_active 
-                                ? "text-red-600 hover:text-red-900" 
-                                : "text-green-600 hover:text-green-900"
-                            }`}
-                            title={user.is_active ? "Deactivate User" : "Activate User"}
-                          >
-                            {user.is_active ? <FaBan className="h-4 w-4" /> : <FaCheck className="h-4 w-4" />}
-                          </button>
-                          <button
-                            onClick={() => handleDeleteUser(user.id)}
-                            className="text-red-600 hover:text-red-900"
-                            title="Delete User"
-                          >
-                            <FaTrash className="h-4 w-4" />
-                          </button>
-                        </div>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-100">
+                  {filteredUsers.length === 0 ? (
+                    <tr>
+                      <td colSpan="6" className="px-6 py-4 text-center text-gray-500">
+                        {userFilter?.trim() === "" ? "No users found" : "No users match your search"}
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                  ) : (
+                    filteredUsers.map((user) => (
+                      <tr key={user.id} className="hover:bg-gray-50 transition-colors duration-150">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div>
+                            <div className="text-sm font-medium text-gray-900">
+                              {user.full_name || user.username}
+                            </div>
+                            <div className="text-sm text-gray-500">@{user.username}</div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {user.email}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {user.roles?.[0]?.name ? (
+                            <span className="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full shadow-sm">
+                              {user.roles[0].name}
+                            </span>
+                          ) : (
+                            <span className="text-gray-400 text-sm">No role</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {user.member?.group?.name ? (
+                            <span className="font-medium">{user.member.group.name}</span>
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full shadow-sm ${
+                            user.is_active 
+                              ? "bg-green-100 text-green-800" 
+                              : "bg-red-100 text-red-800"
+                          }`}>
+                            {user.is_active ? "Active" : "Inactive"}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <div className="flex space-x-1">
+                            <button
+                              onClick={() => handleEditUser(user)}
+                              className="text-blue-600 hover:text-blue-900 cursor-pointer transition-colors duration-200 p-2 rounded-lg hover:bg-blue-50"
+                              title="Edit User"
+                            >
+                              <FaEdit className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={() => handleToggleUserStatus(user)}
+                              className={`${
+                                user.is_active 
+                                  ? "text-red-600 hover:text-red-900 hover:bg-red-50" 
+                                  : "text-green-600 hover:text-green-900 hover:bg-green-50"
+                              } cursor-pointer transition-colors duration-200 p-2 rounded-lg`}
+                              title={user.is_active ? "Deactivate User" : "Activate User"}
+                            >
+                              {user.is_active ? <FaBan className="h-4 w-4" /> : <FaCheck className="h-4 w-4" />}
+                            </button>
+                            <button
+                              onClick={() => handleDeleteUser(user.id)}
+                              className="text-red-600 hover:text-red-900 cursor-pointer transition-colors duration-200 p-2 rounded-lg hover:bg-red-50"
+                              title="Delete User"
+                            >
+                              <FaTrash className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="lg:hidden space-y-3">
+              {filteredUsers.length === 0 ? (
+                <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
+                  {userFilter?.trim() === "" ? "No users found" : "No users match your search"}
+                </div>
+              ) : (
+                filteredUsers.map((user) => (
+                  <div key={user.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-200">
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex-1">
+                        <h3 className="text-sm font-semibold text-gray-900">
+                          {user.full_name || user.username}
+                        </h3>
+                        <p className="text-xs text-gray-500">@{user.username}</p>
+                        <p className="text-xs text-gray-600 mt-1">{user.email}</p>
+                      </div>
+                      <div className="flex space-x-1">
+                        <button
+                          onClick={() => handleEditUser(user)}
+                          className="text-blue-600 hover:text-blue-900 cursor-pointer transition-colors duration-200 p-2 rounded-lg hover:bg-blue-50"
+                          title="Edit User"
+                        >
+                          <FaEdit className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleToggleUserStatus(user)}
+                          className={`${
+                            user.is_active 
+                              ? "text-red-600 hover:text-red-900 hover:bg-red-50" 
+                              : "text-green-600 hover:text-green-900 hover:bg-green-50"
+                          } cursor-pointer transition-colors duration-200 p-2 rounded-lg`}
+                          title={user.is_active ? "Deactivate User" : "Activate User"}
+                        >
+                          {user.is_active ? <FaBan className="h-4 w-4" /> : <FaCheck className="h-4 w-4" />}
+                        </button>
+                        <button
+                          onClick={() => handleDeleteUser(user.id)}
+                          className="text-red-600 hover:text-red-900 cursor-pointer transition-colors duration-200 p-2 rounded-lg hover:bg-red-50"
+                          title="Delete User"
+                        >
+                          <FaTrash className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {user.roles?.[0]?.name && (
+                        <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                          {user.roles[0].name}
+                        </span>
+                      )}
+                      <span className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full ${
+                        user.is_active 
+                          ? "bg-green-100 text-green-800" 
+                          : "bg-red-100 text-red-800"
+                      }`}>
+                        {user.is_active ? "Active" : "Inactive"}
+                      </span>
+                      {user.member?.group?.name && (
+                        <span className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-800 text-xs font-medium rounded-full">
+                          {user.member.group.name}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </>
         )}
         
-        <div className="mt-4 text-sm text-gray-500">
-          Showing {filteredUsers.length} of {users.length} users
-          {userFilter?.trim() !== "" && ` matching "${userFilter}"`}
+        <div className="mt-4 sm:mt-6 px-3 sm:px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">
+          <div className="text-xs sm:text-sm text-gray-600 text-center sm:text-left">
+            <span className="font-medium">Showing {filteredUsers.length} of {users.length} users</span>
+            {userFilter?.trim() !== "" && (
+              <span className="ml-2 text-blue-600">
+                matching "{userFilter}"
+              </span>
+            )}
+          </div>
         </div>
       </div>
     </div>

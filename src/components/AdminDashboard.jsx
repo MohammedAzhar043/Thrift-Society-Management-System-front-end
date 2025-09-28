@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { toast, Toaster } from "react-hot-toast";
-import { FaCheck, FaTimes, FaEdit, FaTrash, FaEye } from "react-icons/fa";
+import { FaCheck, FaTimes, FaEdit, FaTrash, FaEye, FaUsers, FaPlus, FaMapMarkerAlt,FaInfoCircle, FaUserTie } from "react-icons/fa";
 import apiService from "../services/api";
 import { useDashboardData } from "../hooks/useDashboardData";
 import { formatIndianCurrency } from "../utils/formatters";
@@ -54,6 +54,9 @@ function AdminDashboard({ user, onLogout }) {
     submitForm: submitDeleteGroupForm,
     resetForm: resetDeleteGroupForm,
   } = useFormSubmission();
+  
+  // Track which specific group is being deleted
+  const [deletingGroupId, setDeletingGroupId] = useState(null);
   const {
     isSubmitting: isGeneratingReport,
     submitForm: submitGenerateReportForm,
@@ -450,6 +453,7 @@ function AdminDashboard({ user, onLogout }) {
   };
 
   const handleEditGroup = (group) => {
+    console.log("Edit group clicked:", group);
     setEditingGroup(group);
     setGroupForm({
       name: group.name || "",
@@ -584,8 +588,9 @@ function AdminDashboard({ user, onLogout }) {
   };
 
   const handleDeleteGroup = async (groupId) => {
+    console.log("Delete group clicked:", groupId);
     // Prevent multiple confirmation dialogs
-    if (isDeletingGroup) {
+    if (deletingGroupId === groupId) {
       return;
     }
 
@@ -621,6 +626,13 @@ function AdminDashboard({ user, onLogout }) {
   };
 
   const confirmDeleteGroup = async (groupId) => {
+    setDeletingGroupId(groupId);
+    
+    // Safety timeout to clear deleting state after 30 seconds
+    const timeoutId = setTimeout(() => {
+      setDeletingGroupId(null);
+    }, 30000);
+    
     await submitDeleteGroupForm(
       async () => {
         await apiService.deleteGroup(groupId);
@@ -653,6 +665,8 @@ function AdminDashboard({ user, onLogout }) {
                 <button
                   onClick={() => {
                     toast.dismiss(t.id);
+                    clearTimeout(timeoutId);
+                    setDeletingGroupId(null); // Clear the deleting state when error is dismissed
                   }}
                   style={{
                     background: "none",
@@ -680,6 +694,10 @@ function AdminDashboard({ user, onLogout }) {
               },
             }
           );
+        },
+        onFinally: () => {
+          clearTimeout(timeoutId);
+          setDeletingGroupId(null);
         },
       }
     );
@@ -1011,7 +1029,24 @@ function AdminDashboard({ user, onLogout }) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <>
+      <style jsx>{`
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .animate-fade-in {
+          animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
       {/* Toaster for notifications */}
       <Toaster
         position="top-center"
@@ -1085,13 +1120,14 @@ function AdminDashboard({ user, onLogout }) {
       />
 
       <main className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-6 lg:py-8">
-        {/* Main Content */}
+        {/* Enhanced Stats Cards */}
+        <div className="mb-8">
         <StatsCards
           dashboardStats={dashboardStats}
           memberApprovals={memberApprovals}
           loanApprovals={loanApprovals}
         />
-
+        </div>
         {/* Pending Approvals Section */}
         <div className="grid grid-cols-1 lg:grid-cols-1 gap-8 mb-8">
           {/* Pending Member Approvals */}
@@ -1101,7 +1137,14 @@ function AdminDashboard({ user, onLogout }) {
               description="Members awaiting approval"
             />
             <SectionContent>
-              <div className="overflow-x-auto">
+              {memberApprovals.length === 0 ? (
+                <div className="text-center py-8">
+                  <div className="text-gray-500 text-lg">No pending member approvals</div>
+                </div>
+              ) : (
+                <>
+                  {/* Desktop Table View */}
+                  <div className="hidden lg:block overflow-x-auto">
                 <Table
                   headers={[
                     "Name",
@@ -1113,13 +1156,7 @@ function AdminDashboard({ user, onLogout }) {
                     "Action",
                   ]}
                 >
-                  {memberApprovals.length === 0 ? (
-                    <Table.EmptyRow
-                      message="No pending member approvals"
-                      colSpan={7}
-                    />
-                  ) : (
-                    memberApprovals.map((item, index) => (
+                      {memberApprovals.map((item, index) => (
                       <Table.Row key={item.id} className={`hover:bg-gray-50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
                         <Table.Cell className="px-4 sm:px-6 py-4 text-sm font-semibold text-gray-900 whitespace-nowrap">
                           {item.name}
@@ -1145,7 +1182,7 @@ function AdminDashboard({ user, onLogout }) {
                               onClick={() =>
                                 handleApproval("member", item.id, "approve")
                               }
-                              className="w-full sm:w-auto text-xs px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center justify-center gap-1 font-semibold shadow-md hover:shadow-lg transition-all duration-200"
+                                className="w-full sm:w-auto text-xs px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center justify-center gap-1 font-semibold shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
                             >
                               <FaCheck className="w-3 h-3" />
                               <span className="hidden sm:inline">Approve</span>
@@ -1154,7 +1191,7 @@ function AdminDashboard({ user, onLogout }) {
                               onClick={() =>
                                 handleApproval("member", item.id, "reject")
                               }
-                              className="w-full sm:w-auto text-xs px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center justify-center gap-1 font-semibold shadow-md hover:shadow-lg transition-all duration-200"
+                                className="w-full sm:w-auto text-xs px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center justify-center gap-1 font-semibold shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
                             >
                               <FaTimes className="w-3 h-3" />
                               <span className="hidden sm:inline">Reject</span>
@@ -1162,10 +1199,92 @@ function AdminDashboard({ user, onLogout }) {
                           </div>
                         </Table.Cell>
                       </Table.Row>
-                    ))
-                  )}
+                      ))}
                 </Table>
               </div>
+
+                  {/* Mobile Card View */}
+                  <div className="lg:hidden space-y-4">
+                    {memberApprovals.map((item, index) => (
+                      <div key={item.id} className="bg-gradient-to-br from-white to-gray-50/50 rounded-2xl p-5 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200/50 animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
+                        {/* Card Header */}
+                        <div className="flex items-start justify-between mb-6">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-xl font-bold text-gray-900 mb-2 truncate">
+                              {item.name}
+                            </h3>
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 w-fit">
+                                {item.group_name || "N/A"}
+                              </span>
+                              <span className="text-xs text-gray-500">{item.date}</span>
+                            </div>
+                          </div>
+                          <div className="flex flex-col gap-2 ml-4 flex-shrink-0">
+                            <button
+                              onClick={() => handleApproval("member", item.id, "approve")}
+                              className="px-4 py-2.5 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl flex items-center justify-center gap-2 text-sm font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 min-w-[100px] cursor-pointer"
+                            >
+                              <FaCheck className="w-4 h-4" />
+                              Approve
+                            </button>
+                            <button
+                              onClick={() => handleApproval("member", item.id, "reject")}
+                              className="px-4 py-2.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl flex items-center justify-center gap-2 text-sm font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 min-w-[100px] cursor-pointer"
+                            >
+                              <FaTimes className="w-4 h-4" />
+                              Reject
+                            </button>
+                          </div>
+                        </div>
+                        
+                        {/* Card Details */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div className="flex items-center space-x-3 p-4 bg-white/70 rounded-xl border border-gray-100">
+                            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                              <FaUsers className="w-5 h-5 text-blue-600" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Group</p>
+                              <p className="text-sm font-semibold text-gray-900 truncate">{item.group_name || "N/A"}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-3 p-4 bg-white/70 rounded-xl border border-gray-100">
+                            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                              <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                              </svg>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Location</p>
+                              <p className="text-sm font-semibold text-gray-900 truncate">{item.location || "N/A"}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-3 p-4 bg-white/70 rounded-xl border border-gray-100">
+                            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                              <FaUsers className="w-5 h-5 text-purple-600" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Team Leader</p>
+                              <p className="text-sm font-semibold text-gray-900 truncate">{item.team_leader || "Not assigned"}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-3 p-4 bg-white/70 rounded-xl border border-gray-100">
+                            <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                              <FaUsers className="w-5 h-5 text-orange-600" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Bill Collector</p>
+                              <p className="text-sm font-semibold text-gray-900 truncate">{item.bill_collector || "Not assigned"}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
             </SectionContent>
           </Card>
         </div>
@@ -1178,7 +1297,14 @@ function AdminDashboard({ user, onLogout }) {
               description="Loans awaiting approval"
             />
             <SectionContent>
-              <div className="overflow-x-auto">
+              {loanApprovals.length === 0 ? (
+                <div className="text-center py-8">
+                  <div className="text-gray-500 text-lg">No pending loan approvals</div>
+                </div>
+              ) : (
+                <>
+                  {/* Desktop Table View */}
+                  <div className="hidden lg:block overflow-x-auto">
                 <Table
                   headers={[
                     "Name",
@@ -1191,13 +1317,7 @@ function AdminDashboard({ user, onLogout }) {
                     "Action",
                   ]}
                 >
-                  {loanApprovals.length === 0 ? (
-                    <Table.EmptyRow
-                      message="No pending loan approvals"
-                      colSpan={8}
-                    />
-                  ) : (
-                    loanApprovals.map((loan, index) => (
+                      {loanApprovals.map((loan, index) => (
                       <Table.Row key={loan.id} className={`hover:bg-gray-50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
                         <Table.Cell className="px-4 sm:px-6 py-4 text-sm font-semibold text-gray-900 whitespace-nowrap">
                           {loan.name}
@@ -1226,7 +1346,7 @@ function AdminDashboard({ user, onLogout }) {
                               onClick={() =>
                                 handleApproval("loan", loan.id, "approve")
                               }
-                              className="w-full sm:w-auto text-xs px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center justify-center gap-1 font-semibold shadow-md hover:shadow-lg transition-all duration-200"
+                                className="w-full sm:w-auto text-xs px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center justify-center gap-1 font-semibold shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
                             >
                               <FaCheck className="w-3 h-3" />
                               <span className="hidden sm:inline">Approve</span>
@@ -1235,7 +1355,7 @@ function AdminDashboard({ user, onLogout }) {
                               onClick={() =>
                                 handleApproval("loan", loan.id, "reject")
                               }
-                              className="w-full sm:w-auto text-xs px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center justify-center gap-1 font-semibold shadow-md hover:shadow-lg transition-all duration-200"
+                                className="w-full sm:w-auto text-xs px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center justify-center gap-1 font-semibold shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
                             >
                               <FaTimes className="w-3 h-3" />
                               <span className="hidden sm:inline">Reject</span>
@@ -1243,14 +1363,104 @@ function AdminDashboard({ user, onLogout }) {
                           </div>
                         </Table.Cell>
                       </Table.Row>
-                    ))
-                  )}
+                      ))}
                 </Table>
               </div>
+
+                  {/* Mobile Card View */}
+                  <div className="lg:hidden space-y-4">
+                    {loanApprovals.map((loan, index) => (
+                      <div key={loan.id} className="bg-gradient-to-br from-white to-gray-50/50 rounded-2xl p-5 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200/50 animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
+                        {/* Card Header */}
+                        <div className="flex items-start justify-between mb-6">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-xl font-bold text-gray-900 mb-2 truncate">
+                              {loan.name}
+                            </h3>
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 w-fit">
+                                {loan.group_name || "N/A"}
+                              </span>
+                              <span className="text-xs text-gray-500">{loan.date}</span>
+                            </div>
+                          </div>
+                          <div className="text-right ml-4 flex-shrink-0">
+                            <div className="text-2xl font-bold text-green-600 mb-3">
+                              {formatIndianCurrency(loan.amount)}
+                            </div>
+                            <div className="flex flex-col gap-2">
+                              <button
+                                onClick={() => handleApproval("loan", loan.id, "approve")}
+                                className="px-4 py-2.5 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl flex items-center justify-center gap-2 text-sm font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 min-w-[100px] cursor-pointer"
+                              >
+                                <FaCheck className="w-4 h-4" />
+                                Approve
+                              </button>
+                              <button
+                                onClick={() => handleApproval("loan", loan.id, "reject")}
+                                className="px-4 py-2.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl flex items-center justify-center gap-2 text-sm font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 min-w-[100px] cursor-pointer"
+                              >
+                                <FaTimes className="w-4 h-4" />
+                                Reject
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Card Details */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div className="flex items-center space-x-3 p-4 bg-white/70 rounded-xl border border-gray-100">
+                            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                              <FaUsers className="w-5 h-5 text-blue-600" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Group</p>
+                              <p className="text-sm font-semibold text-gray-900 truncate">{loan.group_name || "N/A"}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-3 p-4 bg-white/70 rounded-xl border border-gray-100">
+                            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                              <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                              </svg>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Location</p>
+                              <p className="text-sm font-semibold text-gray-900 truncate">{loan.location}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-3 p-4 bg-white/70 rounded-xl border border-gray-100">
+                            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                              <FaUsers className="w-5 h-5 text-purple-600" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Team Leader</p>
+                              <p className="text-sm font-semibold text-gray-900 truncate">{loan.team_leader || "Not assigned"}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-3 p-4 bg-white/70 rounded-xl border border-gray-100">
+                            <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                              <FaUsers className="w-5 h-5 text-orange-600" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Bill Collector</p>
+                              <p className="text-sm font-semibold text-gray-900 truncate">{loan.bill_collector || "Not assigned"}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
             </SectionContent>
           </Card>
         </div>
 
+        {/* Enhanced Quick Actions */}
+        <div className="bg-white/95 backdrop-blur-sm shadow-xl rounded-2xl mb-8 border border-gray-200/50 hover:shadow-2xl transition-all duration-300">
+          <div className="p-6">
         <QuickActions
           onCreateGroup={() => setShowCreateGroupModal(true)}
           onViewReports={handleViewReports}
@@ -1258,87 +1468,313 @@ function AdminDashboard({ user, onLogout }) {
           onManageUsers={() => setShowUserManagementModal(true)}
           onManagePayables={handleManagePayables}
         />
-        {/* Groups Management Section */}
-        <Card>
-          <SectionHeader
-            title="Group Management"
-            description="All groups in the system"
-          />
-          <SectionContent padding="p-0">
-            <div className="overflow-x-auto">
-              <Table
-                headers={[
-                  "Group Name",
-                  "Location",
-                  "Members",
-                  "Team Leader",
-                  "Bill Collector",
-                  "Action",
-                ]}
-              >
+          </div>
+        </div>
+        {/* Enhanced Groups Management Section */}
+        <div className="bg-white/95 backdrop-blur-sm shadow-xl rounded-2xl mb-8 border border-gray-200/50 hover:shadow-2xl transition-all duration-300">
+          <div className="bg-gradient-to-r from-emerald-600 to-teal-700 px-6 py-4 rounded-t-2xl">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-white/20 rounded-lg">
+                <FaUsers className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold text-white">Group Management</h3>
+                <p className="text-emerald-100 text-sm">Manage groups, members, and team assignments</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="p-0">
+            {/* Desktop Table View */}
+            <div className="hidden lg:block overflow-x-auto rounded-b-2xl">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gradient-to-r from-gray-50 to-emerald-50">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      <div className="flex items-center space-x-2">
+                        <svg className="h-4 w-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <span>Group Name</span>
+                      </div>
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      <div className="flex items-center space-x-2">
+                        <svg className="h-4 w-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span>Location</span>
+                      </div>
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      <div className="flex items-center space-x-2">
+                        <svg className="h-4 w-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                        </svg>
+                        <span>Members</span>
+                      </div>
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      <div className="flex items-center space-x-2">
+                        <svg className="h-4 w-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        <span>Team Leader</span>
+                      </div>
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      <div className="flex items-center space-x-2">
+                        <svg className="h-4 w-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>Bill Collector</span>
+                      </div>
+                    </th>
+                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
                 {groups.length === 0 ? (
-                  <Table.EmptyRow message="No groups found" colSpan={6} />
-                ) : (
-                  groups.map((group, index) => (
-                    <Table.Row key={group.id} className={`hover:bg-gray-50 transition-colors duration-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                      <Table.Cell className="px-4 sm:px-6 py-4 text-sm font-semibold text-gray-900 whitespace-nowrap">
-                        {group.name}
-                      </Table.Cell>
-                      <Table.Cell className="px-4 sm:px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
-                        {group.location}
-                      </Table.Cell>
-                      <Table.Cell className="px-4 sm:px-6 py-4 text-sm font-bold text-blue-600 whitespace-nowrap">
-                        {group.member_count || 0}
-                      </Table.Cell>
-                      <Table.Cell className="px-4 sm:px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
-                        {group.team_leader
-                          ? `${
-                              group.team_leader.full_name ||
-                              group.team_leader.username
-                            } (Team Leader)`
-                          : "Not assigned"}
-                      </Table.Cell>
-                      <Table.Cell className="px-4 sm:px-6 py-4 text-sm text-gray-600 whitespace-nowrap">
-                        {group.bill_collector?.full_name ||
-                          group.bill_collector?.username ||
-                          "Not assigned"}
-                      </Table.Cell>
-                      <Table.Cell className="px-4 sm:px-6 py-4 text-sm font-medium">
-                        <div className="flex flex-col sm:flex-row gap-2">
+                    <tr>
+                      <td colSpan="6" className="px-6 py-12 text-center">
+                        <div className="flex flex-col items-center">
+                          <div className="p-4 bg-gray-100 rounded-full mb-4">
+                            <FaUsers className="h-8 w-8 text-gray-400" />
+                          </div>
+                          <h3 className="text-lg font-medium text-gray-900 mb-2">No Groups Found</h3>
+                          <p className="text-gray-500 mb-4">Get started by creating your first group</p>
                           <button
-                            onClick={() => handleEditGroup(group)}
-                            className="w-full sm:w-auto text-xs px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center justify-center gap-1 font-semibold shadow-md hover:shadow-lg transition-all duration-200"
+                            onClick={() => setShowCreateGroupModal(true)}
+                            className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-lg hover:from-emerald-700 hover:to-teal-800 transition-all duration-200 flex items-center space-x-2 cursor-pointer"
                           >
-                            <FaEdit className="w-3 h-3" />
-                            <span className="hidden sm:inline">Edit</span>
-                          </button>
-                          <button
-                            onClick={() => handleDeleteGroup(group.id)}
-                            disabled={isDeletingGroup}
-                            className={`w-full sm:w-auto text-xs px-3 py-2 rounded-lg flex items-center justify-center gap-1 font-semibold shadow-md hover:shadow-lg transition-all duration-200 ${
-                              isDeletingGroup
-                                ? "bg-red-400 cursor-not-allowed"
-                                : "bg-red-600 hover:bg-red-700"
-                            } text-white`}
-                          >
-                            {isDeletingGroup ? (
-                              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
-                            ) : (
-                              <FaTrash className="w-3 h-3" />
-                            )}
-                            <span className="hidden sm:inline">
-                              {isDeletingGroup ? "Deleting..." : "Delete"}
-                            </span>
+                            <FaPlus className="h-4 w-4" />
+                            <span>Create First Group</span>
                           </button>
                         </div>
-                      </Table.Cell>
-                    </Table.Row>
+                      </td>
+                    </tr>
+                ) : (
+                  groups.map((group, index) => (
+                      <tr key={group.id} className="hover:bg-emerald-50 transition-colors duration-200">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="p-2 bg-emerald-100 rounded-lg mr-3">
+                              <FaUsers className="h-4 w-4 text-emerald-600" />
+                            </div>
+                            <div>
+                              <div className="text-sm font-semibold text-gray-900">{group.name}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <svg className="h-4 w-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span className="text-sm text-gray-600">{group.location}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                              {group.member_count || 0} members
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            {group.team_leader ? (
+                              <div className="flex items-center">
+                                <div className="p-1 bg-green-100 rounded-full mr-2">
+                                  <svg className="h-3 w-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                  </svg>
+                                </div>
+                                <span className="text-sm text-gray-900">
+                                  {group.team_leader.full_name || group.team_leader.username}
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="text-sm text-gray-400 italic">Not assigned</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            {group.bill_collector ? (
+                              <div className="flex items-center">
+                                <div className="p-1 bg-purple-100 rounded-full mr-2">
+                                  <svg className="h-3 w-3 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                </div>
+                                <span className="text-sm text-gray-900">
+                                  {group.bill_collector.full_name || group.bill_collector.username}
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="text-sm text-gray-400 italic">Not assigned</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <div className="flex items-center justify-center space-x-2 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-2 border border-gray-200">
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleEditGroup(group);
+                              }}
+                              className="p-2 text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-lg transition-all duration-200 cursor-pointer group shadow-sm hover:shadow-md transform hover:scale-105"
+                              title="Edit Group"
+                            >
+                              <FaEdit className="h-4 w-4 group-hover:scale-110 transition-transform duration-200" />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleDeleteGroup(group.id);
+                              }}
+                              disabled={deletingGroupId === group.id}
+                              className={`p-2 text-white rounded-lg transition-all duration-200 cursor-pointer group shadow-sm hover:shadow-md transform hover:scale-105 ${
+                                deletingGroupId === group.id
+                                  ? "bg-red-400 cursor-not-allowed"
+                                  : "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700"
+                              }`}
+                              title="Delete Group"
+                            >
+                              {deletingGroupId === group.id ? (
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                              ) : (
+                                <FaTrash className="h-4 w-4 group-hover:scale-110 transition-transform duration-200" />
+                              )}
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
                   ))
                 )}
-              </Table>
+                </tbody>
+              </table>
             </div>
-          </SectionContent>
-        </Card>
+
+            {/* Mobile Card View */}
+            <div className="lg:hidden space-y-3 p-4">
+              {groups.length === 0 ? (
+                <div className="text-center py-8">
+                  <div className="p-4 bg-gray-100 rounded-full mb-4 mx-auto w-fit">
+                    <FaUsers className="h-8 w-8 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Groups Found</h3>
+                  <p className="text-gray-500 mb-4">Get started by creating your first group</p>
+                  <button
+                    onClick={() => setShowCreateGroupModal(true)}
+                    className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-lg hover:from-emerald-700 hover:to-teal-800 transition-all duration-200 flex items-center space-x-2 cursor-pointer mx-auto"
+                  >
+                    <FaPlus className="h-4 w-4" />
+                    <span>Create First Group</span>
+                  </button>
+                </div>
+              ) : (
+                groups.map((group) => (
+                  <div key={group.id} className="bg-white rounded-lg border border-gray-300 shadow-sm p-3">
+                    {/* Header with Group Name and Actions */}
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center">
+                        <div className="p-2 bg-emerald-100 rounded-lg mr-3">
+                          <FaUsers className="h-4 w-4 text-emerald-600" />
+                        </div>
+                        <div>
+                          <div className="text-sm font-semibold text-gray-900">{group.name}</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleEditGroup(group);
+                          }}
+                          className="p-2 text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-lg transition-all duration-200 cursor-pointer group shadow-sm hover:shadow-md transform hover:scale-105"
+                          title="Edit Group"
+                        >
+                          <FaEdit className="h-4 w-4 group-hover:scale-110 transition-transform duration-200" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleDeleteGroup(group.id);
+                          }}
+                          disabled={deletingGroupId === group.id}
+                          className={`p-2 text-white rounded-lg transition-all duration-200 cursor-pointer group shadow-sm hover:shadow-md transform hover:scale-105 ${
+                            deletingGroupId === group.id
+                              ? "bg-red-400 cursor-not-allowed"
+                              : "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700"
+                          }`}
+                          title="Delete Group"
+                        >
+                          {deletingGroupId === group.id ? (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          ) : (
+                            <FaTrash className="h-4 w-4 group-hover:scale-110 transition-transform duration-200" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Location and Members */}
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center">
+                        <svg className="h-4 w-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span className="text-sm text-gray-600">{group.location}</span>
+                      </div>
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                        {group.member_count || 0} members
+                      </span>
+                    </div>
+
+                    {/* Team Leader and Bill Collector */}
+                    <div className="space-y-1">
+                      <div className="flex items-center">
+                        <div className="p-1 bg-green-100 rounded-full mr-2">
+                          <svg className="h-3 w-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                        </div>
+                        <span className="text-xs text-gray-500">Team Leader:</span>
+                        <span className="text-xs text-gray-900 ml-1">
+                          {group.team_leader
+                            ? group.team_leader.full_name || group.team_leader.username
+                            : "Not assigned"}
+                        </span>
+                      </div>
+                      <div className="flex items-center">
+                        <div className="p-1 bg-purple-100 rounded-full mr-2">
+                          <svg className="h-3 w-3 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </div>
+                        <span className="text-xs text-gray-500">Bill Collector:</span>
+                        <span className="text-xs text-gray-900 ml-1">
+                          {group.bill_collector?.full_name || group.bill_collector?.username || "Not assigned"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
 
         <CreateGroupModal
           isOpen={showCreateGroupModal}
@@ -1359,12 +1795,23 @@ function AdminDashboard({ user, onLogout }) {
         {/* Edit Group Modal */}
         {showEditGroupModal && editingGroup && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-              <div className="mt-3">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-medium text-gray-900">
-                    Edit Group: {editingGroup.name}
-                  </h3>
+            <div className="relative top-4 mx-auto p-0 border w-11/12 max-w-2xl shadow-2xl rounded-xl bg-white overflow-hidden">
+              {/* Enhanced Modal Header */}
+              <div className="bg-gradient-to-r from-emerald-600 to-teal-700 px-6 py-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-white/20 rounded-lg">
+                      <FaEdit className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold text-white">
+                        Edit Group
+                      </h3>
+                      <p className="text-emerald-100 text-sm">
+                        Update group information and assignments
+                      </p>
+                    </div>
+                  </div>
                   <button
                     onClick={() => {
                       setShowEditGroupModal(false);
@@ -1375,154 +1822,213 @@ function AdminDashboard({ user, onLogout }) {
                         bill_collector_name: "",
                       });
                     }}
-                    className="text-gray-400 hover:text-gray-600"
+                    className="p-2 hover:bg-white/20 rounded-lg transition-colors duration-200 cursor-pointer"
+                    title="Close Edit Group"
                   >
-                    <FaTimes className="h-6 w-6" />
+                    <FaTimes className="h-6 w-6 text-white" />
                   </button>
                 </div>
-                <form onSubmit={handleUpdateGroup}>
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Group Name *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={groupForm.name}
-                      onChange={(e) =>
-                        setGroupForm({ ...groupForm, name: e.target.value })
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Enter group name"
-                    />
-                  </div>
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Location *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={groupForm.location}
-                      onChange={(e) =>
-                        setGroupForm({ ...groupForm, location: e.target.value })
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Enter location"
-                    />
-                  </div>
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Team Leader (Optional)
-                    </label>
-                    <select
-                      value={groupForm.team_leader_name || ""}
-                      onChange={(e) =>
-                        setGroupForm({
-                          ...groupForm,
-                          team_leader_name: e.target.value,
-                        })
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="">Select a team leader</option>
-                      {editingGroup &&
-                      members.filter((m) => m.group_id === editingGroup.id)
-                        .length > 0 ? (
-                        members
-                          .filter((m) => m.group_id === editingGroup.id)
-                          .map((member) => (
-                            <option
-                              key={member.id}
-                              value={
-                                member.user?.full_name || member.user?.username
-                              }
-                            >
-                              {member.user?.full_name || member.user?.username}
-                              {member.user?.email
-                                ? ` (${member.user.email})`
-                                : ""}
-                            </option>
-                          ))
-                      ) : (
-                        <option value="" disabled>
-                          No members in this group
-                        </option>
-                      )}
-                    </select>
-                  </div>
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Bill Collector (Optional)
-                    </label>
-                    <select
-                      value={groupForm.bill_collector_name || ""}
-                      onChange={(e) =>
-                        setGroupForm({
-                          ...groupForm,
-                          bill_collector_name: e.target.value,
-                        })
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="">Select a bill collector</option>
-                      {billCollectors.length > 0 ? (
-                        billCollectors.map((user) => (
-                          <option
-                            key={user.id}
-                            value={user.full_name || user.username}
+              </div>
+              
+              {/* Modal Content */}
+              <div className="p-6">
+                <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-1">
+                  <div className="bg-white rounded-xl p-6">
+                    <form onSubmit={handleUpdateGroup}>
+                      {/* Group Name Field */}
+                      <div className="mb-6">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Group Name *
+                        </label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <FaUsers className="h-5 w-5 text-gray-400" />
+                          </div>
+                          <input
+                            type="text"
+                            required
+                            value={groupForm.name}
+                            onChange={(e) =>
+                              setGroupForm({ ...groupForm, name: e.target.value })
+                            }
+                            className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                            placeholder="Enter group name"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Location Field */}
+                      <div className="mb-6">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Location *
+                        </label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <FaMapMarkerAlt className="h-5 w-5 text-gray-400" />
+                          </div>
+                          <input
+                            type="text"
+                            required
+                            value={groupForm.location}
+                            onChange={(e) =>
+                              setGroupForm({ ...groupForm, location: e.target.value })
+                            }
+                            className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                            placeholder="Enter location"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Team Leader Field */}
+                      <div className="mb-6">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Team Leader (Optional)
+                        </label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                          </div>
+                          <select
+                            value={groupForm.team_leader_name || ""}
+                            onChange={(e) =>
+                              setGroupForm({
+                                ...groupForm,
+                                team_leader_name: e.target.value,
+                              })
+                            }
+                            className="w-full pl-12 pr-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 appearance-none bg-white cursor-pointer"
                           >
-                            {user.full_name || user.username}
-                          </option>
-                        ))
-                      ) : (
-                        <option value="" disabled>
-                          No bill collectors available
-                        </option>
-                      )}
-                    </select>
-                  </div>
+                            <option value="">Select a team leader</option>
+                            {editingGroup &&
+                            members.filter((m) => m.group_id === editingGroup.id)
+                              .length > 0 ? (
+                              members
+                                .filter((m) => m.group_id === editingGroup.id)
+                                .map((member) => (
+                                  <option
+                                    key={member.id}
+                                    value={
+                                      member.user?.full_name || member.user?.username
+                                    }
+                                  >
+                                    {member.user?.full_name || member.user?.username}
+                                    {member.user?.email
+                                      ? ` (${member.user.email})`
+                                      : ""}
+                                  </option>
+                                ))
+                            ) : (
+                              <option value="" disabled>
+                                No members in this group
+                              </option>
+                            )}
+                          </select>
+                          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
 
-                  <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-                    <p className="text-sm text-blue-700">
-                      <strong>Note:</strong> Team leader can only be selected
-                      from existing group members. Add members to the group
-                      first if you want to assign a team leader.
-                    </p>
-                  </div>
+                      {/* Bill Collector Field */}
+                      <div className="mb-6">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Bill Collector (Optional)
+                        </label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <FaUserTie className="h-5 w-5 text-gray-400" />
+                          </div>
+                          <select
+                            value={groupForm.bill_collector_name || ""}
+                            onChange={(e) =>
+                              setGroupForm({
+                                ...groupForm,
+                                bill_collector_name: e.target.value,
+                              })
+                            }
+                            className="w-full pl-12 pr-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 appearance-none bg-white cursor-pointer"
+                          >
+                            <option value="">Select a bill collector</option>
+                            {billCollectors.length > 0 ? (
+                              billCollectors.map((user) => (
+                                <option
+                                  key={user.id}
+                                  value={user.full_name || user.username}
+                                >
+                                  {user.full_name || user.username}
+                                </option>
+                              ))
+                            ) : (
+                              <option value="" disabled>
+                                No bill collectors available
+                              </option>
+                            )}
+                          </select>
+                          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
 
-                  <div className="flex justify-end space-x-3">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowEditGroupModal(false);
-                        setEditingGroup(null);
-                        setGroupForm({
-                          name: "",
-                          location: "",
-                          bill_collector_name: "",
-                        });
-                      }}
-                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={isUpdatingGroup}
-                      className={`px-4 py-2 text-sm font-medium rounded-md flex items-center ${
-                        isUpdatingGroup
-                          ? "bg-blue-400 cursor-not-allowed"
-                          : "bg-blue-600 hover:bg-blue-700"
-                      } text-white`}
-                    >
-                      {isUpdatingGroup && (
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      )}
-                      {isUpdatingGroup ? "Updating..." : "Update Group"}
-                    </button>
+                      {/* Information Note */}
+                      <div className="mb-8 p-4 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl">
+                        <div className="flex items-start">
+                          <FaInfoCircle className="w-5 h-5 text-emerald-600 mr-3 mt-0.5 flex-shrink-0" />
+                          <p className="text-sm text-emerald-800 leading-relaxed">
+                            <span className="font-semibold">Note:</span> Team leader can only be selected from existing group members. Add members to the group first if you want to assign a team leader.
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowEditGroupModal(false);
+                            setEditingGroup(null);
+                            setGroupForm({
+                              name: "",
+                              location: "",
+                              bill_collector_name: "",
+                            });
+                          }}
+                          className="px-6 py-3 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-200 flex items-center justify-center space-x-2 cursor-pointer"
+                        >
+                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                          <span>Cancel</span>
+                        </button>
+                        <button
+                          type="submit"
+                          disabled={isUpdatingGroup}
+                          className="px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-emerald-600 to-teal-700 border border-transparent rounded-lg hover:from-emerald-700 hover:to-teal-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center space-x-2 cursor-pointer disabled:cursor-not-allowed"
+                        >
+                          {isUpdatingGroup ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                              <span>Updating...</span>
+                            </>
+                          ) : (
+                            <>
+                              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                              <span>Update Group</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </form>
                   </div>
-                </form>
+                </div>
               </div>
             </div>
           </div>
@@ -1531,68 +2037,107 @@ function AdminDashboard({ user, onLogout }) {
         {/* Reports Modal */}
         {showReportsModal && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-md shadow-lg rounded-md bg-white">
               <div className="mt-3">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-medium text-gray-900">
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-1">
+                  <div className="bg-white rounded-xl p-6 sm:p-8">
+                    <div className="flex justify-between items-center mb-6">
+                      <h3 className="text-xl font-bold text-gray-900 flex items-center">
+                        <svg className="w-6 h-6 mr-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
                     Generate Report
                   </h3>
                   <button
                     onClick={() => setShowReportsModal(false)}
-                    className="text-gray-400 hover:text-gray-600"
+                        className="text-gray-400 hover:text-gray-600 cursor-pointer transition-colors duration-200 p-2 rounded-lg hover:bg-gray-100"
                   >
                     <FaTimes className="h-6 w-6" />
                   </button>
                 </div>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    
+                    {/* Report Type Field - Fixed CSS warnings */}
+                    <div className="mb-6">
+                      <label className="text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                        <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
                     Report Type *
                   </label>
+                      <div className="relative">
                   <select
                     value={reportType}
                     onChange={(e) => setReportType(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 focus:bg-white text-gray-800 appearance-none cursor-pointer"
                   >
                     <option value="members">Members</option>
                     <option value="loans">Loans</option>
                     <option value="groups">Groups</option>
                   </select>
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                          </svg>
                 </div>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Date Field */}
+                    <div className="mb-6">
+                      <label className="text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                        <svg className="w-4 h-4 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
                     Date (for Members/Loans)
                   </label>
+                      <div className="relative">
                   <input
                     type="date"
                     value={reportDate}
                     onChange={(e) => setReportDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-gray-50 focus:bg-white text-gray-800"
                   />
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
                 </div>
-                <div className="mb-4 p-3 bg-gray-50 rounded-md">
-                  <p className="text-sm text-gray-600">
-                    <strong>Report Summary:</strong>
-                    <br />• Type:{" "}
-                    {reportType.charAt(0).toUpperCase() + reportType.slice(1)}
-                    <br />• Date: {reportDate}
-                    <br />• Records:{" "}
-                    {reportType === "members"
-                      ? members.length
-                      : reportType === "loans"
-                      ? loans.length
-                      : groups.length}
-                  </p>
                 </div>
-                <div className="flex justify-end space-x-3">
+                    </div>
+                    
+                    {/* Report Summary */}
+                    <div className="mb-8 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl">
+                      <div className="flex items-start">
+                        <svg className="w-5 h-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        <div>
+                          <p className="text-sm font-semibold text-blue-800 mb-2">Report Summary:</p>
+                          <ul className="text-sm text-blue-700 space-y-1">
+                            <li><span className="font-medium">Type:</span> {reportType.charAt(0).toUpperCase() + reportType.slice(1)}</li>
+                            <li><span className="font-medium">Date:</span> {reportDate}</li>
+                            <li><span className="font-medium">Records:</span> {reportType === "members" ? members.length : reportType === "loans" ? loans.length : groups.length}</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Action Buttons */}
+                    <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3">
                   <button
                     type="button"
                     onClick={refreshReportsData}
                     disabled={isRefreshingReports}
-                    className={`px-4 py-2 text-sm font-medium rounded-md ${
+                        className={`w-full sm:w-auto px-4 py-3 text-sm font-semibold rounded-xl flex items-center justify-center transition-all duration-200 ${
                       isRefreshingReports
-                        ? "bg-gray-400 cursor-not-allowed"
-                        : "bg-gray-200 hover:bg-gray-300"
-                    } text-gray-700`}
+                            ? "bg-gray-400 cursor-not-allowed text-gray-600"
+                            : "bg-gray-200 hover:bg-gray-300 text-gray-700 cursor-pointer"
+                        }`}
                   >
                     {isRefreshingReports ? (
                       <>
@@ -1606,7 +2151,7 @@ function AdminDashboard({ user, onLogout }) {
                   <button
                     type="button"
                     onClick={() => setShowReportsModal(false)}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
+                        className="w-full sm:w-auto px-6 py-3 text-sm font-semibold text-gray-700 bg-gray-200 rounded-xl hover:bg-gray-300 cursor-pointer transition-all duration-200"
                   >
                     Cancel
                   </button>
@@ -1614,17 +2159,19 @@ function AdminDashboard({ user, onLogout }) {
                     type="button"
                     onClick={generateReport}
                     disabled={isGeneratingReport}
-                    className={`px-4 py-2 text-sm font-medium rounded-md flex items-center ${
+                        className={`w-full sm:w-auto px-6 py-3 text-sm font-semibold rounded-xl flex items-center justify-center transition-all duration-200 ${
                       isGeneratingReport
-                        ? "bg-gray-400 cursor-not-allowed"
-                        : "bg-green-600 hover:bg-green-700"
-                    } text-white`}
+                            ? "bg-gray-400 cursor-not-allowed text-gray-600"
+                            : "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white cursor-pointer shadow-lg hover:shadow-xl"
+                        }`}
                   >
                     {isGeneratingReport && (
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                     )}
                     {isGeneratingReport ? "Generating..." : "Generate Report"}
                   </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1643,7 +2190,7 @@ function AdminDashboard({ user, onLogout }) {
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
                     <button
                       onClick={handlePrintMembers}
-                      className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-sm sm:text-base font-bold rounded-xl text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 w-full sm:w-auto"
+                      className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-sm sm:text-base font-bold rounded-xl text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 w-full sm:w-auto cursor-pointer"
                     >
                       <svg
                         className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3"
@@ -1663,7 +2210,7 @@ function AdminDashboard({ user, onLogout }) {
                     </button>
                     <button
                       onClick={() => setShowMembersModal(false)}
-                      className="text-gray-400 hover:text-gray-600 transition-colors p-2 sm:p-1 self-end sm:self-auto"
+                      className="text-gray-400 hover:text-gray-600 transition-colors p-2 sm:p-1 self-end sm:self-auto cursor-pointer"
                     >
                       <FaTimes className="h-6 w-6 sm:h-5 sm:w-5" />
                     </button>
@@ -1671,8 +2218,8 @@ function AdminDashboard({ user, onLogout }) {
                 </div>
 
                 {/* Enhanced Filter Section */}
-                <div className="mb-8">
-                  <div className="filter-section animate-fade-in">
+                <div className="mb-12">
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 shadow-sm border border-blue-100 animate-fade-in">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                       {/* Search Filter */}
                       <div className="sm:col-span-2 lg:col-span-1">
@@ -1819,7 +2366,7 @@ function AdminDashboard({ user, onLogout }) {
                           setStatusFilter("");
                           setLocationFilter("");
                         }}
-                        className="px-6 py-3 text-sm font-medium text-gray-700 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md flex items-center"
+                        className="px-6 py-3 text-sm font-medium text-gray-700 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md flex items-center cursor-pointer"
                       >
                         <svg
                           className="w-4 h-4 mr-2"
@@ -1842,6 +2389,10 @@ function AdminDashboard({ user, onLogout }) {
                       </p>
                     </div>
                   </div>
+                  
+                  {/* Spacing between filter and table */}
+                  <div className="mt-8"></div>
+                  
                   {/* Desktop Table View */}
                   <div className="hidden lg:block overflow-x-auto shadow-sm border border-gray-200 rounded-lg">
                     <table className="min-w-full divide-y divide-gray-200">
@@ -2023,7 +2574,7 @@ function AdminDashboard({ user, onLogout }) {
                         {filteredMembers.map((member, index) => (
                           <div
                             key={member.id}
-                            className="member-card animate-slide-up"
+                            className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden group animate-slide-up"
                             style={{ animationDelay: `${index * 0.1}s` }}
                           >
                             {/* Card Header */}
@@ -2050,19 +2601,19 @@ function AdminDashboard({ user, onLogout }) {
                                   )}
                                 </div>
                                 <span
-                                  className={`status-badge ${
+                                  className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-bold shadow-sm ${
                                     member.status?.toLowerCase() === "active"
-                                      ? "active"
+                                      ? "bg-green-500 text-white"
                                       : member.status?.toLowerCase() ===
                                         "pending"
-                                      ? "pending"
+                                      ? "bg-yellow-500 text-white"
                                       : member.status?.toLowerCase() ===
                                         "suspended"
-                                      ? "suspended"
+                                      ? "bg-orange-500 text-white"
                                       : member.status?.toLowerCase() ===
                                         "rejected"
-                                      ? "rejected"
-                                      : "inactive"
+                                      ? "bg-red-500 text-white"
+                                      : "bg-gray-500 text-white"
                                   }`}
                                 >
                                   {member.status}
@@ -2076,7 +2627,7 @@ function AdminDashboard({ user, onLogout }) {
                                 {/* Group Info */}
                                 <div className="flex items-start space-x-3">
                                   <div className="flex-shrink-0">
-                                    <div className="info-icon blue">
+                                    <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-blue-100">
                                       <svg
                                         className="w-5 h-5 text-blue-600"
                                         fill="none"
@@ -2105,7 +2656,7 @@ function AdminDashboard({ user, onLogout }) {
                                 {/* Location Info */}
                                 <div className="flex items-start space-x-3">
                                   <div className="flex-shrink-0">
-                                    <div className="info-icon green">
+                                    <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-green-100">
                                       <svg
                                         className="w-5 h-5 text-green-600"
                                         fill="none"
@@ -2140,7 +2691,7 @@ function AdminDashboard({ user, onLogout }) {
                                 {/* Active Loans Info */}
                                 <div className="flex items-start space-x-3">
                                   <div className="flex-shrink-0">
-                                    <div className="info-icon purple">
+                                    <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-purple-100">
                                       <svg
                                         className="w-5 h-5 text-purple-600"
                                         fill="none"
@@ -2177,7 +2728,7 @@ function AdminDashboard({ user, onLogout }) {
                                 {/* Joined Date Info */}
                                 <div className="flex items-start space-x-3">
                                   <div className="flex-shrink-0">
-                                    <div className="info-icon orange">
+                                    <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-orange-100">
                                       <svg
                                         className="w-5 h-5 text-orange-600"
                                         fill="none"
@@ -2232,19 +2783,37 @@ function AdminDashboard({ user, onLogout }) {
       {/* Payable Management Modal */}
       {showPayableManagement && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-4 mx-auto p-5 border w-11/12 max-w-7xl shadow-lg rounded-md bg-white">
-            <div className="mt-3">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium text-gray-900">
+          <div className="relative top-4 mx-auto p-0 border w-11/12 max-w-7xl shadow-2xl rounded-xl bg-white overflow-hidden">
+            {/* Enhanced Modal Header */}
+            <div className="bg-gradient-to-r from-purple-600 to-indigo-700 px-6 py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-white/20 rounded-lg">
+                    <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-white">
                   Payable Management
                 </h3>
+                    <p className="text-purple-100 text-sm">
+                      Manage member bonuses, incentives, and payable amounts
+                    </p>
+                  </div>
+                </div>
                 <button
                   onClick={() => setShowPayableManagement(false)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="p-2 hover:bg-white/20 rounded-lg transition-colors duration-200 cursor-pointer"
+                  title="Close Payable Management"
                 >
-                  <FaTimes className="h-6 w-6" />
+                  <FaTimes className="h-6 w-6 text-white" />
                 </button>
               </div>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6">
               <PayableManagement />
             </div>
           </div>
@@ -2364,13 +2933,13 @@ function AdminDashboard({ user, onLogout }) {
                 <div className="flex justify-center space-x-3">
                   <button
                     onClick={cancelPrint}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={confirmPrint}
-                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors cursor-pointer"
                   >
                     Yes, Print
                   </button>
@@ -2381,6 +2950,7 @@ function AdminDashboard({ user, onLogout }) {
         </div>
       )}
     </div>
+    </>
   );
 }
 
