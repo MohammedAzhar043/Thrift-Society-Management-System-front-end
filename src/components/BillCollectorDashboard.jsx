@@ -1186,20 +1186,28 @@ function BillCollectorDashboard({ user, onLogout }) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <div>
-            <h1 className="text-xl font-semibold text-gray-900">Bill Collector Dashboard</h1>
-            <p className="text-sm text-gray-600">Welcome, {user.name}</p>
+      <header className="bg-white shadow-lg border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3 sm:space-x-4">
+              <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl p-2 sm:p-3 shadow-lg">
+                <FaMoneyBillWave className="text-white text-xl sm:text-2xl" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h1 className="text-lg sm:text-2xl lg:text-3xl font-bold text-gray-900 truncate">Bill Collector Dashboard</h1>
+                <p className="text-xs sm:text-sm lg:text-base text-gray-600 mt-1 truncate">Welcome back, <span className="font-semibold text-blue-600">{user.name}</span></p>
+              </div>
           </div>
           <button
             onClick={onLogout}
-            className="flex items-center text-gray-700 hover:text-gray-900 cursor-pointer"
+              className="flex items-center px-4 py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer group"
           >
-            <FaSignOutAlt className="mr-1" /> Logout
+              <FaSignOutAlt className="mr-2 group-hover:scale-110 transition-transform duration-200" /> 
+              <span className="font-medium">Logout</span>
           </button>
+          </div>
         </div>
       </header>
 
@@ -1247,104 +1255,126 @@ function BillCollectorDashboard({ user, onLogout }) {
         </div>
       )}
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="px-3 py-4 sm:px-4 sm:py-5 lg:p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
+          <div className="bg-gradient-to-br from-white to-blue-50 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-100 group">
+            <div className="px-3 py-4 sm:px-4 sm:py-5 lg:px-6 lg:py-6">
               <div className="flex items-center">
-                <div className="flex-shrink-0 bg-blue-500 rounded-md p-2 sm:p-3">
-                  <FaUsers className="text-white h-5 w-5 sm:h-6 sm:w-6" />
+                <div className="flex-shrink-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg sm:rounded-xl p-2 sm:p-3 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <FaUsers className="text-white h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" />
                 </div>
-                <div className="ml-3 sm:ml-5 w-0 flex-1 min-w-0">
+                <div className="ml-3 sm:ml-4 w-0 flex-1 min-w-0">
                   <dl>
-                    <dt className="text-xs sm:text-sm font-medium text-gray-500 truncate">Total Groups</dt>
+                    <dt className="text-xs sm:text-sm font-medium text-gray-600 truncate">Total Groups</dt>
                     <dd className="flex items-baseline">
-                      <div className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900">{stats.assigned_groups}</div>
+                      <div className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-gray-900">{stats.assigned_groups}</div>
                     </dd>
                   </dl>
                 </div>
               </div>
+              <div className="mt-3 sm:mt-4 h-1 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full"></div>
             </div>
           </div>
 
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="px-3 py-4 sm:px-4 sm:py-5 lg:p-6">
+          <div className="bg-gradient-to-br from-white to-green-50 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-green-100 group">
+            <div className="px-3 py-4 sm:px-4 sm:py-5 lg:px-6 lg:py-6">
               <div className="flex items-center">
-                <div className="flex-shrink-0 bg-green-500 rounded-md p-2 sm:p-3">
-                  <FaMoneyBillWave className="text-white h-5 w-5 sm:h-6 sm:w-6" />
+                <div className="flex-shrink-0 bg-gradient-to-r from-green-500 to-green-600 rounded-lg sm:rounded-xl p-2 sm:p-3 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <FaMoneyBillWave className="text-white h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" />
                 </div>
-                <div className="ml-3 sm:ml-5 w-0 flex-1 min-w-0">
+                <div className="ml-3 sm:ml-4 w-0 flex-1 min-w-0">
                   <dl>
-                    <dt className="text-xs sm:text-sm font-medium text-gray-500 truncate">Today's Collection</dt>
+                    <dt className="text-xs sm:text-sm font-medium text-gray-600 truncate">Today's Collection</dt>
                     <dd className="flex items-baseline">
-                      <div className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900 truncate">{formatIndianCurrency(stats.today_total)}</div>
+                      <div className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-gray-900 break-words">{formatIndianCurrency(stats.today_total)}</div>
                     </dd>
                   </dl>
                 </div>
               </div>
+              <div className="mt-3 sm:mt-4 h-1 bg-gradient-to-r from-green-500 to-green-600 rounded-full"></div>
             </div>
           </div>
 
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="px-3 py-4 sm:px-4 sm:py-5 lg:p-6">
+          <div className="bg-gradient-to-br from-white to-yellow-50 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-yellow-100 group">
+            <div className="px-3 py-4 sm:px-4 sm:py-5 lg:px-6 lg:py-6">
               <div className="flex items-center">
-                <div className="flex-shrink-0 bg-yellow-500 rounded-md p-2 sm:p-3">
-                  <FaHandHoldingUsd className="text-white h-5 w-5 sm:h-6 sm:w-6" />
+                <div className="flex-shrink-0 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-lg sm:rounded-xl p-2 sm:p-3 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <FaHandHoldingUsd className="text-white h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" />
                 </div>
-                <div className="ml-3 sm:ml-5 w-0 flex-1 min-w-0">
+                <div className="ml-3 sm:ml-4 w-0 flex-1 min-w-0">
                   <dl>
-                    <dt className="text-xs sm:text-sm font-medium text-gray-500 truncate">Month Total</dt>
+                    <dt className="text-xs sm:text-sm font-medium text-gray-600 truncate">Month Total</dt>
                     <dd className="flex items-baseline">
-                      <div className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900 truncate">{formatIndianCurrency(stats.month_total)}</div>
+                      <div className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-gray-900 break-words">{formatIndianCurrency(stats.month_total)}</div>
                     </dd>
                   </dl>
                 </div>
               </div>
+              <div className="mt-3 sm:mt-4 h-1 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-full"></div>
             </div>
           </div>
 
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="px-3 py-4 sm:px-4 sm:py-5 lg:p-6">
+          <div className="bg-gradient-to-br from-white to-purple-50 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-purple-100 group">
+            <div className="px-3 py-4 sm:px-4 sm:py-5 lg:px-6 lg:py-6">
               <div className="flex items-center">
-                <div className="flex-shrink-0 bg-purple-500 rounded-md p-2 sm:p-3">
-                  <FaCheckCircle className="text-white h-5 w-5 sm:h-6 sm:w-6" />
+                <div className="flex-shrink-0 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg sm:rounded-xl p-2 sm:p-3 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <FaCheckCircle className="text-white h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" />
                 </div>
-                <div className="ml-3 sm:ml-5 w-0 flex-1 min-w-0">
+                <div className="ml-3 sm:ml-4 w-0 flex-1 min-w-0">
                   <dl>
-                    <dt className="text-xs sm:text-sm font-medium text-gray-500 truncate">Pending Verifications</dt>
+                    <dt className="text-xs sm:text-sm font-medium text-gray-600 truncate">Pending Verifications</dt>
                     <dd className="flex items-baseline">
-                      <div className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900">{stats.pending_verifications}</div>
+                      <div className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-gray-900">{stats.pending_verifications}</div>
                     </dd>
                   </dl>
                 </div>
               </div>
+              <div className="mt-3 sm:mt-4 h-1 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full"></div>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Groups Section */}
           <div className="lg:col-span-2">
-            <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-              <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
-                <h3 className="text-lg leading-6 font-medium text-gray-900">Assigned Groups</h3>
-                <p className="mt-1 max-w-2xl text-sm text-gray-500">Groups you manage and collect from</p>
+            <div className="bg-white shadow-lg rounded-xl overflow-hidden border border-gray-200">
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-200">
+                <div className="flex items-center">
+                  <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg p-2 mr-3">
+                    <FaUsers className="text-white h-4 w-4 sm:h-5 sm:w-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 truncate">Assigned Groups</h3>
+                    <p className="mt-1 text-xs sm:text-sm text-gray-600 truncate">Groups you manage and collect from</p>
+                  </div>
+                </div>
               </div>
               {stats.groups.length > 0 ? (
-                <ul className="divide-y divide-gray-200">
+                <ul className="divide-y divide-gray-100">
                   {stats.groups.map((group) => (
-                    <li key={group.id}>
-                      <div className="px-4 py-4 sm:px-6">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-sm font-medium text-blue-600 truncate">{group.name}</p>
-                            <p className="mt-2 flex items-center text-sm text-gray-500">
-                              <FaUsers className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
-                              {group.member_count} members
+                    <li key={group.id} className="hover:bg-gray-50 transition-colors duration-200">
+                      <div className="px-4 sm:px-6 py-4 sm:py-5">
+                        <div className="flex flex-col space-y-4">
+                          {/* Group Info */}
+                          <div className="flex items-start space-x-3">
+                            <div className="bg-gradient-to-r from-blue-100 to-indigo-100 rounded-lg p-2 flex-shrink-0">
+                              <FaUsers className="h-4 w-4 text-blue-600" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-base sm:text-lg font-semibold text-gray-900 truncate">{group.name}</p>
+                              <p className="text-xs sm:text-sm text-gray-600 flex items-center mt-1">
+                                <span className="w-2 h-2 bg-green-500 rounded-full mr-2 flex-shrink-0"></span>
+                                <span className="truncate">{group.member_count} active members</span>
+                              </p>
+                              <p className="text-xs sm:text-sm text-gray-500 mt-1 truncate">
+                                📍 {group.location}
                             </p>
                           </div>
-                          <div className="ml-2 flex-shrink-0 flex space-x-2">
+                          </div>
+                          
+                          {/* Action Buttons */}
+                          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                             <button 
                               onClick={async () => {
                                 setSelectedGroup(group);
@@ -1353,8 +1383,9 @@ function BillCollectorDashboard({ user, onLogout }) {
                                 // Load group members when opening collection modal
                                 await loadGroupMembers(group.id, false);
                               }}
-                              className="px-3 py-1 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                              className="flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer group"
                             >
+                              <FaMoneyBillWave className="mr-2 group-hover:scale-110 transition-transform duration-200" />
                               Collect
                             </button>
                             <button 
@@ -1364,15 +1395,11 @@ function BillCollectorDashboard({ user, onLogout }) {
                                 // Load group members for transaction history display
                                 await loadGroupMembers(group.id, false);
                               }}
-                              className="px-3 py-1 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                              className="flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 text-sm font-semibold rounded-lg hover:from-gray-200 hover:to-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer group"
                             >
+                              <FaHistory className="mr-2 group-hover:scale-110 transition-transform duration-200" />
                               History
                             </button>
-                          </div>
-                        </div>
-                        <div className="mt-2">
-                          <div className="text-sm text-gray-500">
-                            <span className="text-gray-600">Location: {group.location}</span>
                           </div>
                         </div>
                       </div>
@@ -1380,8 +1407,12 @@ function BillCollectorDashboard({ user, onLogout }) {
                   ))}
                 </ul>
               ) : (
-                <div className="px-4 py-8 text-center text-gray-500">
-                  No groups assigned yet.
+                <div className="px-6 py-12 text-center">
+                  <div className="bg-gradient-to-r from-gray-100 to-gray-200 rounded-full p-4 w-16 h-16 mx-auto mb-4">
+                    <FaUsers className="h-8 w-8 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No groups assigned</h3>
+                  <p className="text-sm text-gray-500">You haven't been assigned to any groups yet.</p>
                 </div>
               )}
             </div>
@@ -1389,13 +1420,20 @@ function BillCollectorDashboard({ user, onLogout }) {
 
           {/* Quick Actions Section */}
           <div>
-            <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-              <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
-                <h3 className="text-lg leading-6 font-medium text-gray-900">Quick Actions</h3>
-                <p className="mt-1 max-w-2xl text-sm text-gray-500">Common tasks</p>
+            <div className="bg-white shadow-lg rounded-xl overflow-hidden border border-gray-200">
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-200">
+                <div className="flex items-center">
+                  <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg p-2 mr-3">
+                    <FaHandHoldingUsd className="text-white h-4 w-4 sm:h-5 sm:w-5" />
               </div>
-              <div className="px-4 py-5 sm:p-6">
-                <div className="grid gap-4">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 truncate">Quick Actions</h3>
+                    <p className="mt-1 text-xs sm:text-sm text-gray-600 truncate">Common tasks and operations</p>
+                  </div>
+                </div>
+              </div>
+              <div className="p-4 sm:p-6">
+                <div className="space-y-3 sm:space-y-4">
                   <button 
                     onClick={() => {
                       setError(null); // Clear any previous errors
@@ -1410,9 +1448,10 @@ function BillCollectorDashboard({ user, onLogout }) {
                       setGroupMembers([]);
                       setShowCollectionModal(true);
                     }}
-                    className="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    className="w-full flex items-center justify-center px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm sm:text-base font-semibold rounded-xl shadow-lg hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 hover:shadow-xl cursor-pointer group"
                   >
-                    <FaMoneyBillWave className="mr-2" /> Collect Money
+                    <FaMoneyBillWave className="mr-2 sm:mr-3 text-lg sm:text-xl group-hover:scale-110 transition-transform duration-200" /> 
+                    <span className="truncate">Collect Money</span>
                   </button>
                   <button 
                     onClick={() => {
@@ -1421,62 +1460,87 @@ function BillCollectorDashboard({ user, onLogout }) {
                       setGroupMembers([]); // Clear group members
                       setShowTransactionModal(true);
                     }}
-                    className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    className="w-full flex items-center justify-center px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 text-sm sm:text-base font-semibold rounded-xl shadow-md hover:from-gray-200 hover:to-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200 hover:shadow-lg cursor-pointer group"
                   >
-                    <FaHistory className="mr-2" /> View Transaction History
+                    <FaHistory className="mr-2 sm:mr-3 text-lg sm:text-xl group-hover:scale-110 transition-transform duration-200" /> 
+                    <span className="truncate">View Transaction History</span>
                   </button>
                   <button 
                     onClick={() => {
                       setError(null); // Clear any previous errors
                       setShowLoanModal(true);
                     }}
-                    className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    className="w-full flex items-center justify-center px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-purple-100 to-purple-200 text-purple-700 text-sm sm:text-base font-semibold rounded-xl shadow-md hover:from-purple-200 hover:to-purple-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all duration-200 hover:shadow-lg cursor-pointer group"
                   >
-                    <FaHandHoldingUsd className="mr-2" /> Raise Loan Request
+                    <FaHandHoldingUsd className="mr-2 sm:mr-3 text-lg sm:text-xl group-hover:scale-110 transition-transform duration-200" /> 
+                    <span className="truncate">Raise Loan Request</span>
                   </button>
                 </div>
               </div>
             </div>
 
             {/* Recent Collections */}
-            <div className="mt-6 bg-white shadow overflow-hidden sm:rounded-lg">
-              <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
-                <h3 className="text-lg leading-6 font-medium text-gray-900">Recent Collections</h3>
-                <p className="mt-1 max-w-2xl text-sm text-gray-500">Latest collection records</p>
+            <div className="mt-4 sm:mt-6 bg-white shadow-lg rounded-xl overflow-hidden border border-gray-200">
+              <div className="bg-gradient-to-r from-orange-50 to-amber-50 px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-200">
+                <div className="flex items-center">
+                  <div className="bg-gradient-to-r from-orange-500 to-amber-600 rounded-lg p-2 mr-3">
+                    <FaHistory className="text-white h-4 w-4 sm:h-5 sm:w-5" />
               </div>
-              <div className="px-4 py-5 sm:p-6">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 truncate">Recent Collections</h3>
+                    <p className="mt-1 text-xs sm:text-sm text-gray-600 truncate">Latest collection records</p>
+                  </div>
+                </div>
+              </div>
+              <div className="p-4 sm:p-6">
                 {collections.slice(0, 3).length > 0 ? (
-                  <div className="space-y-3">
+                  <div className="space-y-3 sm:space-y-4">
                     {collections.slice(0, 3).map((collection) => (
-                      <div key={collection.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">
+                      <div key={collection.id} className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-3 sm:p-4 border border-gray-200 hover:shadow-md transition-all duration-200">
+                        <div className="flex flex-col space-y-3">
+                          <div className="flex items-start space-x-3">
+                            <div className="bg-gradient-to-r from-blue-100 to-indigo-100 rounded-lg p-2 flex-shrink-0">
+                              <FaMoneyBillWave className="h-4 w-4 text-blue-600" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm sm:text-base font-semibold text-gray-900 truncate">
                             {collection.group?.name || 'Unknown Group'}
                           </p>
-                          <p className="text-xs text-gray-500">
-                            {new Date(collection.collection_date).toLocaleDateString()}
+                              <p className="text-xs sm:text-sm text-gray-600 flex items-center mt-1">
+                                <span className="mr-2">📅</span>
+                                <span className="truncate">{new Date(collection.collection_date).toLocaleDateString()}</span>
                           </p>
                         </div>
-                        <div className="text-right">
-                          <p className="text-sm font-medium text-green-600">
+                          </div>
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+                            <div className="flex-1">
+                              <p className="text-lg sm:text-xl font-bold text-green-600 break-words">
                             {formatIndianCurrency(collection.grand_total)}
                           </p>
-                          <p className="text-xs text-gray-500">
+                              <p className="text-xs text-gray-500 truncate">
                             Receipt: {collection.receipt_number || 'N/A'}
                           </p>
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                            </div>
+                            <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-semibold w-fit ${
                             collection.is_verified 
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-yellow-100 text-yellow-800'
+                                ? 'bg-green-100 text-green-800 border border-green-200' 
+                                : 'bg-yellow-100 text-yellow-800 border border-yellow-200'
                           }`}>
-                            {collection.is_verified ? 'Verified' : 'Pending'}
+                              {collection.is_verified ? '✅ Verified' : '⏳ Pending'}
                           </span>
+                          </div>
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-center text-gray-500 text-sm">No recent collections</p>
+                  <div className="text-center py-8">
+                    <div className="bg-gradient-to-r from-gray-100 to-gray-200 rounded-full p-4 w-16 h-16 mx-auto mb-4">
+                      <FaHistory className="h-8 w-8 text-gray-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No recent collections</h3>
+                    <p className="text-sm text-gray-500">Start collecting to see your recent activity here.</p>
+                  </div>
                 )}
               </div>
             </div>
@@ -1486,75 +1550,83 @@ function BillCollectorDashboard({ user, onLogout }) {
 
       {/* Collection Modal */}
       {showCollectionModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-10 mx-auto p-6 border-0 w-11/12 md:w-4/5 lg:w-3/4 xl:w-2/3 shadow-2xl rounded-2xl bg-white">
-            <div className="mb-6">
+        <div className="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+          <div className="relative w-full max-w-6xl bg-white rounded-2xl shadow-2xl border border-gray-200">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-200 rounded-t-2xl">
               <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-2xl font-bold text-gray-900">Create Collection Record</h3>
-                  <p className="text-gray-600 mt-1">Record payments collected from group members</p>
+                <div className="flex items-center space-x-3">
+                  <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg p-2">
+                    <FaMoneyBillWave className="text-white h-5 w-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 truncate">Create Collection Record</h3>
+                    <p className="text-xs sm:text-sm text-gray-600 mt-1 truncate">Record payments collected from group members</p>
+                  </div>
                 </div>
                 <button
                   onClick={() => setShowCollectionModal(false)}
-                  className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer flex-shrink-0"
                 >
-                  <FaTimesCircle className="text-2xl" />
+                  <FaTimesCircle className="h-5 w-5 sm:h-6 sm:w-6" />
                 </button>
               </div>
             </div>
-            <form onSubmit={handleCollectionSubmit} className="space-y-8">
+            {/* Form Content */}
+            <div className="p-4 sm:p-6 max-h-96 overflow-y-auto">
+              <form onSubmit={handleCollectionSubmit} className="space-y-6 sm:space-y-8">
                 {/* Basic Information */}
-                <div className="bg-gray-50 rounded-xl p-6">
-                  <h4 className="text-lg font-semibold text-gray-800 mb-4">Basic Information</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-gray-50 rounded-xl p-4 sm:p-6">
+                  <h4 className="text-base sm:text-lg font-semibold text-gray-800 mb-4">Basic Information</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">Select Group</label>
-                    <select
-                      value={collectionForm.group_id}
-                      onChange={(e) => {
-                        const groupId = e.target.value;
-                        setCollectionForm(prev => ({ ...prev, group_id: groupId }));
-                        if (groupId) {
-                          loadGroupMembers(groupId, false); // false for collections
-                        } else {
-                          setGroupMembers([]);
-                        }
-                      }}
-                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700 font-medium"
-                      required
-                    >
+                      <select
+                        value={collectionForm.group_id}
+                        onChange={(e) => {
+                          const groupId = e.target.value;
+                          setCollectionForm(prev => ({ ...prev, group_id: groupId }));
+                          if (groupId) {
+                            loadGroupMembers(groupId, false); // false for collections
+                          } else {
+                            setGroupMembers([]);
+                          }
+                        }}
+                        className="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700 font-medium cursor-pointer text-sm sm:text-base"
+                        required
+                      >
                         <option value="">🏢 Select Group</option>
-                      {stats.groups.map(group => (
-                        <option key={group.id} value={group.id}>{group.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
+                        {stats.groups.map(group => (
+                          <option key={group.id} value={group.id}>{group.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">Collection Date</label>
-                    <input
-                      type="date"
-                      value={collectionForm.collection_date}
-                      onChange={(e) => setCollectionForm(prev => ({ ...prev, collection_date: e.target.value }))}
-                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700 font-medium"
-                      required
-                    />
+                      <input
+                        type="date"
+                        value={collectionForm.collection_date}
+                        onChange={(e) => setCollectionForm(prev => ({ ...prev, collection_date: e.target.value }))}
+                        className="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700 font-medium cursor-pointer text-sm sm:text-base"
+                        required
+                      />
                     </div>
                   </div>
                 </div>
 
 
                 <div>
-                  <div className="flex items-center justify-between mb-6">
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-800">Collection Items</h3>
-                      <p className="text-sm text-gray-600 mt-1">Add members and specify their payment amounts</p>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 space-y-3 sm:space-y-0">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-lg sm:text-xl font-bold text-gray-800">Collection Items</h3>
+                      <p className="text-xs sm:text-sm text-gray-600 mt-1">Add members and specify their payment amounts</p>
                     </div>
                     <button
                       type="button"
                       onClick={addCollectionItem}
-                      className="w-full sm:w-auto inline-flex items-center justify-center px-3 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm sm:text-base font-semibold rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer"
+                      className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 sm:py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm font-semibold rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer"
                     >
-                      <FaPlus className="mr-1 sm:mr-2 w-4 h-4" /> 
+                      <FaPlus className="mr-2 w-4 h-4" /> 
                       <span className="hidden sm:inline">Add Collection Item</span>
                       <span className="sm:hidden">Add Item</span>
                     </button>
@@ -1570,20 +1642,20 @@ function BillCollectorDashboard({ user, onLogout }) {
                     const emiBreakdown = selectedMember && selectedMember.loan_info ? calculateEMIBreakdown(selectedMember, selectedMember.loan_info) : null;
                     
                     return (
-                      <div key={index} className="bg-white border-2 border-gray-200 rounded-xl p-6 mb-6 shadow-lg hover:shadow-xl transition-all duration-200">
+                      <div key={index} className="bg-white border-2 border-gray-200 rounded-xl p-4 sm:p-6 mb-4 sm:mb-6 shadow-lg hover:shadow-xl transition-all duration-200">
                         {/* Header with Member Selection and Remove Button */}
-                        <div className="flex items-center justify-between mb-6">
-                          <div className="flex-1">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 space-y-3 sm:space-y-0">
+                          <div className="flex-1 min-w-0">
                             <label className="block text-sm font-semibold text-gray-800 mb-2">
                               Collection Item #{index + 1}
                             </label>
-                          <select
-                            value={item.member_id}
-                            onChange={(e) => updateCollectionItem(index, 'member_id', e.target.value)}
-                              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700 font-medium"
-                            required
-                            disabled={loadingMembers}
-                          >
+                            <select
+                              value={item.member_id}
+                              onChange={(e) => updateCollectionItem(index, 'member_id', e.target.value)}
+                              className="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700 font-medium cursor-pointer text-sm sm:text-base"
+                              required
+                              disabled={loadingMembers}
+                            >
                             <option value="">
                                 {loadingMembers ? 'Loading members...' : '👤 Select Member'}
                             </option>
@@ -1601,31 +1673,32 @@ function BillCollectorDashboard({ user, onLogout }) {
                               </option>
                               );
                             })}
-                          </select>
+                            </select>
                           </div>
-                            <button
-                              type="button"
-                              onClick={() => removeCollectionItem(index)}
-                            className="ml-4 p-3 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                          <button
+                            type="button"
+                            onClick={() => removeCollectionItem(index)}
+                            className="w-full sm:w-auto sm:ml-4 p-2 sm:p-3 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors cursor-pointer flex items-center justify-center sm:justify-start"
                             title="Remove this collection item"
-                            >
-                            <FaTimesCircle className="text-xl" />
-                            </button>
+                          >
+                            <FaTimesCircle className="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-0" />
+                            <span className="sm:hidden text-sm font-medium">Remove Item</span>
+                          </button>
                         </div>
 
                         {/* Member Information Card */}
                         {selectedMember && (
-                          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5 mb-6 border border-blue-200">
-                            <div className="flex items-center justify-between mb-4">
-                              <div>
-                                <h3 className="text-xl font-bold text-gray-800">
+                          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 sm:p-5 mb-4 sm:mb-6 border border-blue-200">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 space-y-3 sm:space-y-0">
+                              <div className="min-w-0 flex-1">
+                                <h3 className="text-lg sm:text-xl font-bold text-gray-800 truncate">
                                   {selectedMember.user?.full_name || selectedMember.member_code}
                                 </h3>
-                                <p className="text-gray-600">Member Code: {selectedMember.member_code}</p>
+                                <p className="text-sm text-gray-600">Member Code: {selectedMember.member_code}</p>
                               </div>
-                              <div className="text-right">
-                                <div className="text-sm text-gray-500">Interest Rate</div>
-                                <div className="text-lg font-bold text-blue-600">
+                              <div className="text-left sm:text-right">
+                                <div className="text-xs sm:text-sm text-gray-500">Interest Rate</div>
+                                <div className="text-base sm:text-lg font-bold text-blue-600">
                                   {selectedMember.loan_info?.interest_rate || 12.0}% p.a.
                                 </div>
                               </div>
@@ -2207,7 +2280,7 @@ function BillCollectorDashboard({ user, onLogout }) {
                                     disabled={!canPay}
                                     className={`p-2 rounded-full transition-colors ${
                                       canPay 
-                                        ? 'text-blue-600 hover:bg-blue-50' 
+                                        ? 'text-blue-600 hover:bg-blue-50 cursor-pointer' 
                                         : 'text-gray-400 cursor-not-allowed'
                                     }`}
                                   >
@@ -2288,22 +2361,22 @@ function BillCollectorDashboard({ user, onLogout }) {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+                <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-4 sm:pt-6 border-t border-gray-200">
                   <button
                     type="button"
                     onClick={() => setShowCollectionModal(false)}
-                    className="px-8 py-3 border-2 border-gray-300 rounded-lg text-gray-700 font-semibold hover:bg-gray-50 transition-colors cursor-pointer"
+                    className="w-full sm:w-auto px-6 py-3 border-2 border-gray-300 rounded-lg text-gray-700 font-semibold hover:bg-gray-50 transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmittingCollection || collectionForm.collection_items.length === 0}
-                    className="px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer"
+                    className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer"
                   >
                     {isSubmittingCollection ? (
-                      <span className="flex items-center">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      <span className="flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                         Creating Collection...
                       </span>
                     ) : (
@@ -2311,81 +2384,113 @@ function BillCollectorDashboard({ user, onLogout }) {
                     )}
                   </button>
                 </div>
-            </form>
+              </form>
+            </div>
           </div>
         </div>
       )}
 
       {/* Transaction History Modal */}
       {showTransactionModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
-            <div className="mt-3">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium text-gray-900">
+        <div className="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+          <div className="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl border border-gray-200">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-5 border-b border-gray-200 rounded-t-2xl">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg p-2">
+                    <FaHistory className="text-white h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-900">
                   Transaction History
                   {selectedGroup && ` - ${selectedGroup.name}`}
                 </h3>
+                    <p className="text-sm text-gray-600 mt-1">View all collection transactions</p>
+                  </div>
+                </div>
                 <button
                   onClick={() => setShowTransactionModal(false)}
-                  className="text-gray-400 hover:text-gray-600 cursor-pointer"
+                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer"
                 >
                   <FaTimesCircle className="h-6 w-6" />
                 </button>
               </div>
+              </div>
               
-              <div className="max-h-96 overflow-y-auto">
+            {/* Content */}
+            <div className="p-6 max-h-96 overflow-y-auto">
                 {loadingMembers ? (
-                  <div className="text-center text-gray-500 py-8">
-                    Loading transaction history...
+                <div className="text-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                  <p className="text-gray-500 text-lg">Loading transaction history...</p>
                   </div>
                 ) : collections.length > 0 ? (
-                  <div className="space-y-3">
+                <div className="space-y-4">
                     {collections
                       .filter(c => !selectedGroup || c.group_id === selectedGroup.id)
                       .map((collection) => (
-                        <div key={collection.id} className="border rounded-lg p-4">
-                          <div className="flex justify-between items-start">
+                      <div key={collection.id} className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-all duration-200">
+                        <div className="flex flex-col lg:flex-row lg:items-start justify-between space-y-4 lg:space-y-0">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-3 mb-3">
+                              <div className="bg-gradient-to-r from-blue-100 to-indigo-100 rounded-lg p-2">
+                                <FaMoneyBillWave className="h-4 w-4 text-blue-600" />
+                              </div>
                             <div>
-                              <p className="font-medium text-gray-900">
+                                <p className="text-lg font-semibold text-gray-900">
                                 {collection.group?.name || 'Unknown Group'}
                               </p>
-                              <p className="text-sm text-gray-500">
+                                <p className="text-sm text-gray-600 flex items-center mt-1">
+                                  <span className="mr-2">📅</span>
                                 {new Date(collection.collection_date).toLocaleDateString()}
                               </p>
+                              </div>
+                            </div>
                               {collection.notes && (
-                                <p className="text-sm text-gray-600 mt-1">{collection.notes}</p>
+                              <div className="bg-white rounded-lg p-3 border border-gray-200">
+                                <p className="text-sm text-gray-700">
+                                  <span className="font-medium">Notes:</span> {collection.notes}
+                                </p>
+                              </div>
                               )}
                             </div>
+                          <div className="flex flex-col lg:items-end space-y-3">
                             <div className="text-right">
-                              <p className="text-lg font-semibold text-green-600">
+                              <p className="text-2xl font-bold text-green-600">
                                 {formatIndianCurrency(collection.grand_total)}
                               </p>
                               <p className="text-sm text-gray-500">
                                 Receipt: {collection.receipt_number || 'N/A'}
                               </p>
-                              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                            </div>
+                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
                                 collection.is_verified 
-                                  ? 'bg-green-100 text-green-800' 
-                                  : 'bg-yellow-100 text-yellow-800'
+                                ? 'bg-green-100 text-green-800 border border-green-200' 
+                                : 'bg-yellow-100 text-yellow-800 border border-yellow-200'
                               }`}>
-                                {collection.is_verified ? 'Verified' : 'Pending'}
+                              {collection.is_verified ? '✅ Verified' : '⏳ Pending'}
                               </span>
                             </div>
                           </div>
                           
                           {collection.collection_items && collection.collection_items.length > 0 && (
-                            <div className="mt-3 pt-3 border-t border-gray-200">
-                              <p className="text-sm font-medium text-gray-700 mb-2">Collection Items:</p>
-                              <div className="space-y-1">
+                          <div className="mt-4 pt-4 border-t border-gray-200">
+                            <div className="bg-white rounded-lg p-4 border border-gray-200">
+                              <p className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                                <span className="mr-2">📋</span>
+                                Collection Items ({collection.collection_items.length})
+                              </p>
+                              <div className="space-y-2">
                                 {collection.collection_items.map((item, index) => (
-                                  <div key={index} className="flex justify-between text-sm">
-                                    <span className="text-gray-600">
+                                  <div key={index} className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded-lg">
+                                    <span className="text-sm font-medium text-gray-700">
                                       {item.member?.user?.full_name || item.member?.member_code || `Member ${item.member_id}`}
                                     </span>
-                                    <span className="font-medium">{formatIndianCurrency(item.amount)}</span>
+                                    <span className="text-sm font-bold text-green-600">{formatIndianCurrency(item.amount)}</span>
                                   </div>
                                 ))}
+                              </div>
                               </div>
                             </div>
                           )}
@@ -2393,9 +2498,14 @@ function BillCollectorDashboard({ user, onLogout }) {
                       ))}
                   </div>
                 ) : (
-                  <p className="text-center text-gray-500">No transaction history available</p>
-                )}
+                <div className="text-center py-12">
+                  <div className="bg-gradient-to-r from-gray-100 to-gray-200 rounded-full p-4 w-16 h-16 mx-auto mb-4">
+                    <FaHistory className="h-8 w-8 text-gray-400" />
               </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No transaction history</h3>
+                  <p className="text-sm text-gray-500">No collections found for this group.</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -2403,14 +2513,40 @@ function BillCollectorDashboard({ user, onLogout }) {
 
       {/* Loan Request Modal */}
       {showLoanModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
-            <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Create Loan Request</h3>
-              <form onSubmit={handleLoanRequestSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+          <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-gray-200">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 px-6 py-5 border-b border-gray-200 rounded-t-2xl">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-lg p-2">
+                    <FaHandHoldingUsd className="text-white h-5 w-5" />
+                  </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Group</label>
+                    <h3 className="text-2xl font-bold text-gray-900">Create Loan Request</h3>
+                    <p className="text-sm text-gray-600 mt-1">Submit a new loan request for a member</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowLoanModal(false);
+                    resetLoanRequestForm();
+                  }}
+                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer"
+                >
+                  <FaTimesCircle className="h-6 w-6" />
+                </button>
+              </div>
+            </div>
+            {/* Form Content */}
+            <div className="p-6">
+              <form onSubmit={handleLoanRequestSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
+                      <span className="mr-2">🏢</span>
+                      Group
+                    </label>
                     <select
                       value={collectionForm.group_id}
                       onChange={(e) => {
@@ -2422,26 +2558,29 @@ function BillCollectorDashboard({ user, onLogout }) {
                           setGroupMembers([]);
                         }
                       }}
-                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-gray-700 font-medium cursor-pointer transition-all duration-200"
                       required
                     >
-                      <option value="">Select Group</option>
+                      <option value="">🏢 Select Group</option>
                       {stats.groups.map(group => (
                         <option key={group.id} value={group.id}>{group.name}</option>
                       ))}
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Member</label>
+                    <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
+                      <span className="mr-2">👤</span>
+                      Member
+                    </label>
                     <select
                       value={collectionForm.member_id}
                       onChange={(e) => setCollectionForm(prev => ({ ...prev, member_id: e.target.value }))}
-                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-gray-700 font-medium cursor-pointer transition-all duration-200"
                       required
                       disabled={loadingMembers}
                     >
                       <option value="">
-                        {loadingMembers ? 'Loading members...' : 'Select Member'}
+                        {loadingMembers ? '⏳ Loading members...' : '👤 Select Member'}
                       </option>
                       {groupMembers.map(member => (
                         <option key={member.id} value={member.id}>
@@ -2452,67 +2591,81 @@ function BillCollectorDashboard({ user, onLogout }) {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Requested Amount</label>
+                    <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
+                      <span className="mr-2">💰</span>
+                      Requested Amount
+                    </label>
                     <input
                       type="number"
                       value={collectionForm.requested_amount}
                       onChange={(e) => setCollectionForm(prev => ({ ...prev, requested_amount: e.target.value }))}
-                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-gray-700 font-medium transition-all duration-200"
                       step="0.01"
+                      placeholder="Enter loan amount"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Term (Months)</label>
+                    <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
+                      <span className="mr-2">📅</span>
+                      Term (Months)
+                    </label>
                     <input
                       type="number"
                       value={collectionForm.term_months}
                       onChange={(e) => setCollectionForm(prev => ({ ...prev, term_months: e.target.value }))}
-                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-gray-700 font-medium transition-all duration-200"
                       min="1"
                       max="120"
+                      placeholder="Loan term in months"
                       required
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Purpose</label>
+                  <label className="flex items-center text-sm font-semibold text-gray-700 mb-2">
+                    <span className="mr-2">📝</span>
+                    Purpose
+                  </label>
                   <textarea
                     value={collectionForm.purpose}
                     onChange={(e) => setCollectionForm(prev => ({ ...prev, purpose: e.target.value }))}
-                    rows={3}
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Purpose of the loan (optional)"
+                    rows={4}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-gray-700 font-medium transition-all duration-200 resize-none"
+                    placeholder="Describe the purpose of the loan (optional)"
                   />
                 </div>
 
-                <div className="flex justify-end space-x-3 pt-4">
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-6 border-t border-gray-200">
                   <button
                     type="button"
                     onClick={() => {
                       setShowLoanModal(false);
                       resetLoanRequestForm();
                     }}
-                    className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                    className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 text-base font-semibold rounded-xl hover:from-gray-200 hover:to-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmittingLoan}
-                    className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white flex items-center ${
+                    className={`w-full sm:w-auto px-6 py-3 text-base font-semibold rounded-xl flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl ${
                       isSubmittingLoan 
-                        ? 'bg-blue-400 cursor-not-allowed' 
-                        : 'bg-blue-600 hover:bg-blue-700'
+                        ? 'bg-gradient-to-r from-purple-400 to-indigo-400 cursor-not-allowed' 
+                        : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 cursor-pointer'
                     }`}
                   >
                     {isSubmittingLoan && (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
                     )}
-                    {isSubmittingLoan ? 'Creating...' : 'Create Loan Request'}
+                    <span className="text-white">
+                      {isSubmittingLoan ? 'Creating Request...' : 'Create Loan Request'}
+                    </span>
                   </button>
                 </div>
               </form>

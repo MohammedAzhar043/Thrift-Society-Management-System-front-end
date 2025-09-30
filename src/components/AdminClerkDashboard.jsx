@@ -24,6 +24,7 @@ import { toast, Toaster } from 'react-hot-toast';
 import apiService from '../services/api';
 import { formatCurrency, formatDate } from '../utils/formatters';
 import * as XLSX from 'xlsx';
+import MemberStatementModal from './admin/MemberStatementModal';
 
 function AdminClerkDashboard({ user, onLogout }) {
   const [loading, setLoading] = useState(true);
@@ -48,6 +49,18 @@ function AdminClerkDashboard({ user, onLogout }) {
   const [transactionHistory, setTransactionHistory] = useState([]);
   const [auditLogs, setAuditLogs] = useState([]);
   const [collectionMonitoring, setCollectionMonitoring] = useState([]);
+  
+  // Member statement modal states
+  const [showMemberStatement, setShowMemberStatement] = useState(false);
+  const [selectedMemberForStatement, setSelectedMemberForStatement] = useState(null);
+  const [members, setMembers] = useState([]);
+  const [membersLoading, setMembersLoading] = useState(false);
+  
+  // Member filter states
+  const [memberSearchTerm, setMemberSearchTerm] = useState('');
+  const [selectedGroupFilter, setSelectedGroupFilter] = useState('');
+  const [selectedStatusFilter, setSelectedStatusFilter] = useState('');
+  const [groups, setGroups] = useState([]);
   
   // UI states
   const [activeTab, setActiveTab] = useState('overview');
@@ -182,6 +195,55 @@ function AdminClerkDashboard({ user, onLogout }) {
     }
 
     setLoading(false);
+  };
+
+  const loadMembers = async () => {
+    setMembersLoading(true);
+    try {
+      const membersData = await apiService.getClerkMembers();
+      setMembers(membersData);
+    } catch (error) {
+      console.error('Error loading members:', error);
+      toast.error('Failed to load members data');
+    } finally {
+      setMembersLoading(false);
+    }
+  };
+
+  const loadGroups = async () => {
+    try {
+      const groupsData = await apiService.getClerkGroups();
+      setGroups(groupsData);
+    } catch (error) {
+      console.error('Error loading groups:', error);
+      // Don't show error toast for groups as it's not critical
+    }
+  };
+
+  const handleViewMemberStatement = (member) => {
+    setSelectedMemberForStatement(member);
+    setShowMemberStatement(true);
+  };
+
+  // Filter members based on search term and filters
+  const filteredMembers = members.filter(member => {
+    const matchesSearch = memberSearchTerm === '' || 
+      (member.user?.full_name?.toLowerCase().includes(memberSearchTerm.toLowerCase()) ||
+       member.member_code?.toLowerCase().includes(memberSearchTerm.toLowerCase()));
+    
+    const matchesGroup = selectedGroupFilter === '' || 
+      member.group?.id?.toString() === selectedGroupFilter;
+    
+    const matchesStatus = selectedStatusFilter === '' || 
+      member.status?.toLowerCase() === selectedStatusFilter.toLowerCase();
+    
+    return matchesSearch && matchesGroup && matchesStatus;
+  });
+
+  const clearFilters = () => {
+    setMemberSearchTerm('');
+    setSelectedGroupFilter('');
+    setSelectedStatusFilter('');
   };
 
   const handleLogout = async () => {
@@ -765,7 +827,7 @@ function AdminClerkDashboard({ user, onLogout }) {
                 className={`inline-flex items-center px-1.5 sm:px-2 py-1.5 sm:py-2 rounded text-xs sm:text-sm font-medium transition-colors duration-200 ${
                 isRefreshingData 
                   ? 'bg-gray-400 cursor-not-allowed text-white' 
-                    : 'bg-blue-600 hover:bg-blue-700 text-white focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-blue-500'
+                    : 'bg-blue-600 hover:bg-blue-700 text-white focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-blue-500 cursor-pointer'
               }`}
             >
                 <FaSync className={`w-3 h-3 sm:w-4 sm:h-4 sm:mr-1 ${isRefreshingData ? 'animate-spin' : ''}`} />
@@ -960,6 +1022,22 @@ function AdminClerkDashboard({ user, onLogout }) {
                 <span className="sm:hidden">Collections</span>
               </button>
               <button
+                onClick={() => {
+                  setActiveTab('members');
+                  loadMembers();
+                  loadGroups();
+                }}
+                className={`py-3 sm:py-4 px-2 sm:px-3 border-b-2 font-semibold text-xs sm:text-sm whitespace-nowrap transition-all duration-200 rounded-t-lg cursor-pointer ${
+                  activeTab === 'members'
+                    ? 'border-blue-500 text-blue-600 bg-blue-50'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                <FaUsers className="inline mr-1 sm:mr-2 w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Members</span>
+                <span className="sm:hidden">Members</span>
+              </button>
+              <button
                 onClick={() => setActiveTab('reports')}
                 className={`py-3 sm:py-4 px-2 sm:px-3 border-b-2 font-semibold text-xs sm:text-sm whitespace-nowrap transition-all duration-200 rounded-t-lg cursor-pointer ${
                   activeTab === 'reports'
@@ -1009,7 +1087,7 @@ function AdminClerkDashboard({ user, onLogout }) {
                       <button
                         onClick={() => loadDashboardData()}
                         disabled={loading}
-                        className="p-2 sm:p-3 text-gray-400 hover:text-blue-600 disabled:opacity-50 rounded-lg hover:bg-blue-50 transition-all duration-200"
+                        className="p-2 sm:p-3 text-gray-400 hover:text-blue-600 disabled:opacity-50 rounded-lg hover:bg-blue-50 transition-all duration-200 cursor-pointer"
                         title="Refresh activities"
                       >
                         <FaSync className={`h-4 w-4 sm:h-5 sm:w-5 ${loading ? 'animate-spin' : ''}`} />
@@ -1489,6 +1567,183 @@ function AdminClerkDashboard({ user, onLogout }) {
               </div>
             )}
 
+            {/* Members Tab */}
+            {activeTab === 'members' && (
+              <div>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Members Management</h3>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={loadMembers}
+                      disabled={membersLoading}
+                      className="px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm cursor-pointer"
+                    >
+                      <FaSync className={`h-4 w-4 ${membersLoading ? 'animate-spin' : ''}`} />
+                      Refresh
+                    </button>
+                  </div>
+                </div>
+
+                {/* Filters */}
+                <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    {/* Search Filter */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
+                      <input
+                        type="text"
+                        placeholder="Search by name or code..."
+                        value={memberSearchTerm}
+                        onChange={(e) => setMemberSearchTerm(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+
+                    {/* Group Filter */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Group</label>
+                      <select
+                        value={selectedGroupFilter}
+                        onChange={(e) => setSelectedGroupFilter(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
+                      >
+                        <option value="">All Groups</option>
+                        {groups.map((group) => (
+                          <option key={group.id} value={group.id}>
+                            {group.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Status Filter */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                      <select
+                        value={selectedStatusFilter}
+                        onChange={(e) => setSelectedStatusFilter(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
+                      >
+                        <option value="">All Status</option>
+                        <option value="ACTIVE">Active</option>
+                        <option value="INACTIVE">Inactive</option>
+                        <option value="SUSPENDED">Suspended</option>
+                      </select>
+                    </div>
+
+                    {/* Clear Filters */}
+                    <div className="flex items-end">
+                      <button
+                        onClick={clearFilters}
+                        className="w-full px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors duration-200 cursor-pointer"
+                      >
+                        Clear Filters
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Results Count */}
+                <div className="mb-4 text-sm text-gray-600">
+                  Showing {filteredMembers.length} of {members.length} members
+                </div>
+
+                {membersLoading ? (
+                  <div className="flex justify-center items-center py-12">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                  </div>
+                ) : filteredMembers.length > 0 ? (
+                  <div className="bg-white shadow-lg rounded-xl overflow-hidden">
+                    {/* Desktop Table View */}
+                    <div className="hidden lg:block overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Member Code</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Name</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Group</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Join Date</th>
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {filteredMembers.map((member) => (
+                            <tr key={member.id} className="hover:bg-gray-50">
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                {member.member_code || 'N/A'}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {member.user?.full_name || 'N/A'}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {member.group?.name || 'N/A'}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {member.joined_date ? formatDate(member.joined_date) : 'N/A'}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <button
+                                  onClick={() => handleViewMemberStatement(member)}
+                                  className="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded-md text-xs font-medium transition-colors duration-200 cursor-pointer"
+                                >
+                                  View Statement
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Mobile Card View */}
+                    <div className="lg:hidden space-y-4 p-4">
+                      {filteredMembers.map((member) => (
+                        <div key={member.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                          <div className="mb-3">
+                            <h4 className="text-sm font-semibold text-gray-900">{member.user?.full_name || 'N/A'}</h4>
+                            <p className="text-xs text-gray-600">{member.member_code || 'N/A'}</p>
+                          </div>
+                          <div className="space-y-1 text-xs text-gray-600 mb-3">
+                            <p><span className="font-medium">Group:</span> {member.group?.name || 'N/A'}</p>
+                            <p><span className="font-medium">Join Date:</span> {member.joined_date ? formatDate(member.joined_date) : 'N/A'}</p>
+                          </div>
+                          <button
+                            onClick={() => handleViewMemberStatement(member)}
+                            className="w-full bg-blue-600 text-white py-2 px-3 rounded-md text-xs font-medium hover:bg-blue-700 transition-colors duration-200 cursor-pointer"
+                          >
+                            View Statement
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <FaUsers className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
+                    </div>
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
+                      {members.length === 0 ? 'No members found' : 'No members match your filters'}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      {members.length === 0 
+                        ? 'No members are available at the moment.' 
+                        : 'Try adjusting your search criteria or clear the filters.'
+                      }
+                    </p>
+                    {members.length > 0 && (
+                      <button
+                        onClick={clearFilters}
+                        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 cursor-pointer"
+                      >
+                        Clear Filters
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Reports Tab */}
             {activeTab === 'reports' && (
               <div>
@@ -1500,7 +1755,7 @@ function AdminClerkDashboard({ user, onLogout }) {
                       <select
                         value={reportType}
                         onChange={(e) => setReportType(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
                       >
                         <option value="daily">Daily Report</option>
                         <option value="weekly">Weekly Report</option>
@@ -1515,7 +1770,7 @@ function AdminClerkDashboard({ user, onLogout }) {
                           type="date"
                           value={reportDate}
                           onChange={(e) => setReportDate(e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
                         />
                       </div>
                     )}
@@ -1528,7 +1783,7 @@ function AdminClerkDashboard({ user, onLogout }) {
                             type="date"
                             value={reportStartDate}
                             onChange={(e) => setReportStartDate(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
                           />
                         </div>
                         <div>
@@ -1537,7 +1792,7 @@ function AdminClerkDashboard({ user, onLogout }) {
                             type="date"
                             value={reportEndDate}
                             onChange={(e) => setReportEndDate(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
                           />
                         </div>
                       </>
@@ -1550,7 +1805,7 @@ function AdminClerkDashboard({ user, onLogout }) {
                           type="month"
                           value={reportDate}
                           onChange={(e) => setReportDate(e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
                         />
                       </div>
                     )}
@@ -1563,7 +1818,7 @@ function AdminClerkDashboard({ user, onLogout }) {
                       className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
                         isGeneratingReport 
                           ? 'bg-blue-400 cursor-not-allowed' 
-                          : 'bg-blue-600 hover:bg-blue-700'
+                          : 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
                       }`}
                     >
                       {isGeneratingReport ? 'Generating...' : 'Generate Report'}
@@ -1581,7 +1836,7 @@ function AdminClerkDashboard({ user, onLogout }) {
                   <button
                     onClick={() => loadDashboardData()}
                     disabled={loading}
-                    className="p-2 text-gray-400 hover:text-gray-600 disabled:opacity-50"
+                    className="p-2 text-gray-400 hover:text-gray-600 disabled:opacity-50 cursor-pointer"
                     title="Refresh monitoring data"
                   >
                     <FaSync className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
@@ -1691,7 +1946,7 @@ function AdminClerkDashboard({ user, onLogout }) {
                   <button
                     onClick={() => loadDashboardData()}
                     disabled={loading}
-                    className="p-2 sm:p-3 text-gray-400 hover:text-blue-600 disabled:opacity-50 rounded-lg hover:bg-blue-50 transition-all duration-200"
+                    className="p-2 sm:p-3 text-gray-400 hover:text-blue-600 disabled:opacity-50 rounded-lg hover:bg-blue-50 transition-all duration-200 cursor-pointer"
                     title="Refresh transaction data"
                   >
                     <FaSync className={`h-4 w-4 sm:h-5 sm:w-5 ${loading ? 'animate-spin' : ''}`} />
@@ -1985,7 +2240,7 @@ function AdminClerkDashboard({ user, onLogout }) {
                     verifyCollectionRecord(selectedCollection.id);
                     setShowCollectionDetailsModal(false);
                   }}
-                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 cursor-pointer"
                 >
                   <FaCheckCircle className="inline mr-2" />
                   Verify
@@ -2064,7 +2319,7 @@ function AdminClerkDashboard({ user, onLogout }) {
                           type="date"
                           value={reportStartDate}
                           onChange={(e) => setReportStartDate(e.target.value)}
-                          className="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-gray-50 focus:bg-white text-gray-800"
+                          className="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-gray-50 focus:bg-white text-gray-800 cursor-pointer"
                           placeholder="Start Date"
                         />
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -2078,7 +2333,7 @@ function AdminClerkDashboard({ user, onLogout }) {
                           type="date"
                           value={reportEndDate}
                           onChange={(e) => setReportEndDate(e.target.value)}
-                          className="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-gray-50 focus:bg-white text-gray-800"
+                          className="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-gray-50 focus:bg-white text-gray-800 cursor-pointer"
                           placeholder="End Date"
                         />
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -2179,7 +2434,7 @@ function AdminClerkDashboard({ user, onLogout }) {
                               verifyCollectionRecord(collection.id);
                               setShowVerificationModal(false);
                             }}
-                            className="text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700"
+                            className="text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700 cursor-pointer"
                           >
                             Verify
                           </button>
@@ -2198,7 +2453,7 @@ function AdminClerkDashboard({ user, onLogout }) {
                 <button
                   type="button"
                   onClick={() => setShowVerificationModal(false)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 cursor-pointer"
                 >
                   Close
                 </button>
@@ -2208,7 +2463,7 @@ function AdminClerkDashboard({ user, onLogout }) {
                     setActiveTab('collections');
                     setShowVerificationModal(false);
                   }}
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 cursor-pointer"
                 >
                   View All
                 </button>
@@ -2217,6 +2472,15 @@ function AdminClerkDashboard({ user, onLogout }) {
           </div>
         </div>
       )}
+
+      {/* Member Statement Modal */}
+      <MemberStatementModal
+        isOpen={showMemberStatement}
+        onClose={() => setShowMemberStatement(false)}
+        memberId={selectedMemberForStatement?.id}
+        memberData={selectedMemberForStatement}
+        isClerkView={true}
+      />
     </div>
   );
 }

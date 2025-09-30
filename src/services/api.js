@@ -220,6 +220,27 @@ class ApiService {
     return await this.request('/clerk/dashboard/pending-approvals');
   }
 
+  async getClerkMembers(groupId = null) {
+    const params = groupId ? `?group_id=${groupId}` : '';
+    return await this.request(`/clerk/members${params}`);
+  }
+
+  async getClerkMemberDetails(memberId) {
+    return await this.request(`/clerk/members/${memberId}`);
+  }
+
+  async getClerkMemberLoans(memberId) {
+    return await this.request(`/clerk/members/${memberId}/loans`);
+  }
+
+  async getClerkMemberTransactions(memberId) {
+    return await this.request(`/clerk/members/${memberId}/transactions`);
+  }
+
+  async getClerkGroups() {
+    return await this.request('/clerk/groups');
+  }
+
   async getDailyCollectionReport(date) {
     return await this.request(`/clerk/reports/collections/daily?report_date=${date}`);
   }
@@ -623,6 +644,78 @@ class ApiService {
     return await response.json();
   }
 
+  async uploadMemberPhoto(memberId, file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const response = await fetch(`${this.baseURL}/admin/members/${memberId}/upload-photo`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${this.token}`
+      },
+      body: formData
+    });
+    
+    if (response.status === 401) {
+      this.clearToken();
+      window.location.href = '/login';
+      return;
+    }
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      
+      // Handle validation errors (422) with detailed field errors
+      if (response.status === 422 && errorData.errors) {
+        const validationErrors = errorData.errors.map(error => {
+          const field = error.loc ? error.loc.slice(1).join('.') : 'field';
+          return `${field}: ${error.msg}`;
+        }).join(', ');
+        throw new Error(validationErrors);
+      }
+      
+      throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  }
+
+  async uploadMemberPhotoTeamLeader(groupId, memberId, file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const response = await fetch(`${this.baseURL}/teamleader/groups/${groupId}/members/${memberId}/upload-photo`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${this.token}`
+      },
+      body: formData
+    });
+    
+    if (response.status === 401) {
+      this.clearToken();
+      window.location.href = '/login';
+      return;
+    }
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      
+      // Handle validation errors (422) with detailed field errors
+      if (response.status === 422 && errorData.errors) {
+        const validationErrors = errorData.errors.map(error => {
+          const field = error.loc ? error.loc.slice(1).join('.') : 'field';
+          return `${field}: ${error.msg}`;
+        }).join(', ');
+        throw new Error(validationErrors);
+      }
+      
+      throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  }
+
   // Payable Management APIs
   async createMemberBonus(payableData) {
     return await this.request('/admin/payablees', {
@@ -675,6 +768,15 @@ class ApiService {
   async getBonusSummary(memberId = null) {
     const params = memberId ? `?member_id=${memberId}` : '';
     return await this.request(`/admin/payablees/summary${params}`);
+  }
+
+  // Member Statement API methods
+  async getMemberDetails(memberId) {
+    return await this.request(`/admin/members/${memberId}`);
+  }
+
+  async getMemberTransactions(memberId) {
+    return await this.request(`/admin/members/${memberId}/transactions`);
   }
 
 

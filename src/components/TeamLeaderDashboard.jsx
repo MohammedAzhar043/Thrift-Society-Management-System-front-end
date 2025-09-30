@@ -72,6 +72,13 @@ function TeamLeaderDashboard({ user, onLogout }) {
     aadhar_document_path: "",
     bank_passbook_file: null,
     bank_passbook_path: "",
+    // New enhanced member fields
+    age: "",
+    profession: "",
+    father_husband_name: "",
+    caste: "",
+    photo: null,
+    photo_url: "",
   });
 
   // Add state for password visibility, field errors, and form steps
@@ -325,6 +332,13 @@ function TeamLeaderDashboard({ user, onLogout }) {
       aadhar_document_path: "",
       bank_passbook_file: null,
       bank_passbook_path: "",
+      // Enhanced member fields
+      age: "",
+      profession: "",
+      father_husband_name: "",
+      caste: "",
+      photo: null,
+      photo_url: "",
     });
     // Clear refs for validation
     aadharFileStateRef.current = null;
@@ -431,6 +445,12 @@ function TeamLeaderDashboard({ user, onLogout }) {
           bank_name: newMember.bank_name?.trim() || null,
           bank_branch: newMember.bank_branch?.trim() || null,
           ifsc_code: newMember.ifsc_code?.trim() || null,
+          // Enhanced member fields
+          age: newMember.age ? parseInt(newMember.age) : null,
+          profession: newMember.profession?.trim() || null,
+          father_husband_name: newMember.father_husband_name?.trim() || null,
+          caste: newMember.caste?.trim() || null,
+          photo_url: newMember.photo_url?.trim() || null,
           // File paths - set to null initially, will be updated after upload
           bank_passbook_path: null,
           aadhar_document_path: null,
@@ -472,6 +492,23 @@ function TeamLeaderDashboard({ user, onLogout }) {
           } catch (error) {
             throw new Error(
               "Bank passbook upload failed. Please upload manually."
+            );
+          }
+        }
+
+        // Upload member photo if provided
+        if (newMember.photo) {
+          totalDocuments++;
+          try {
+            await apiService.uploadMemberPhotoTeamLeader(
+              assignedGroups[0]?.id,
+              result.id,
+              newMember.photo
+            );
+            documentsUploaded++;
+          } catch (error) {
+            throw new Error(
+              "Member photo upload failed. Please upload manually."
             );
           }
         }
@@ -2005,67 +2042,99 @@ function TeamLeaderDashboard({ user, onLogout }) {
               </div>
               <form onSubmit={handleAddMember} className="space-y-4">
                 {/* User Information Section */}
-                <div className="border-b border-gray-200 pb-4">
-                  <h4 className="text-md font-medium text-gray-900 mb-3">
-                    User Information
-                  </h4>
+                <div className="border-b border-gray-200 pb-6 mb-6">
+                  <div className="flex items-center mb-4">
+                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                      <svg className="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    </div>
+                    <h4 className="text-lg font-semibold text-gray-900">
+                      User Information
+                    </h4>
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         Username *
                       </label>
-                      <input
-                        type="text"
-                        value={newMember.username}
-                        onChange={(e) =>
-                          setNewMember({
-                            ...newMember,
-                            username: e.target.value,
-                          })
-                        }
-                        className={`mt-1 block w-full border rounded-md px-3 py-2 ${
-                          fieldErrors.username
-                            ? "border-red-500"
-                            : "border-gray-300"
-                        }`}
-                        placeholder="Enter username"
-                        required
-                      />
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                        </div>
+                        <input
+                          type="text"
+                          value={newMember.username}
+                          onChange={(e) =>
+                            setNewMember({
+                              ...newMember,
+                              username: e.target.value,
+                            })
+                          }
+                          className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 focus:bg-white ${
+                            fieldErrors.username
+                              ? "border-red-300 bg-red-50"
+                              : "border-gray-300"
+                          }`}
+                          placeholder="Enter username"
+                          required
+                        />
+                      </div>
                       {fieldErrors.username && (
-                        <div className="mt-1 text-xs text-red-600">
+                        <div className="mt-2 flex items-center text-sm text-red-600">
+                          <svg className="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                          </svg>
                           {fieldErrors.username}
                         </div>
                       )}
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         Email *
                       </label>
-                      <input
-                        type="email"
-                        value={newMember.email}
-                        onChange={(e) =>
-                          setNewMember({ ...newMember, email: e.target.value })
-                        }
-                        className={`mt-1 block w-full border rounded-md px-3 py-2 ${
-                          fieldErrors.email
-                            ? "border-red-500"
-                            : "border-gray-300"
-                        }`}
-                        placeholder="Enter email"
-                        required
-                      />
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                        <input
+                          type="email"
+                          value={newMember.email}
+                          onChange={(e) =>
+                            setNewMember({ ...newMember, email: e.target.value })
+                          }
+                          className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 focus:bg-white ${
+                            fieldErrors.email
+                              ? "border-red-300 bg-red-50"
+                              : "border-gray-300"
+                          }`}
+                          placeholder="Enter email"
+                          required
+                        />
+                      </div>
                       {fieldErrors.email && (
-                        <div className="mt-1 text-xs text-red-600">
+                        <div className="mt-2 flex items-center text-sm text-red-600">
+                          <svg className="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                          </svg>
                           {fieldErrors.email}
                         </div>
                       )}
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         Password *
                       </label>
                       <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                          </svg>
+                        </div>
                         <input
                           type={showPassword ? "text" : "password"}
                           value={newMember.password}
@@ -2075,9 +2144,9 @@ function TeamLeaderDashboard({ user, onLogout }) {
                               password: e.target.value,
                             })
                           }
-                          className={`mt-1 block w-full pr-10 border rounded-md px-3 py-2 ${
+                          className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 focus:bg-white ${
                             fieldErrors.password
-                              ? "border-red-500"
+                              ? "border-red-300 bg-red-50"
                               : "border-gray-300"
                           }`}
                           placeholder="Enter password"
@@ -2086,13 +2155,25 @@ function TeamLeaderDashboard({ user, onLogout }) {
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors duration-200 cursor-pointer"
                         >
-                          {showPassword ? "🙈" : "👁️"}
+                          {showPassword ? (
+                            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                            </svg>
+                          ) : (
+                            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                          )}
                         </button>
                       </div>
                       {fieldErrors.password && (
-                        <div className="mt-1 text-xs text-red-600">
+                        <div className="mt-2 flex items-center text-sm text-red-600">
+                          <svg className="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                          </svg>
                           {fieldErrors.password}
                         </div>
                       )}
@@ -2144,10 +2225,15 @@ function TeamLeaderDashboard({ user, onLogout }) {
                       )}
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         Confirm Password *
                       </label>
                       <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                          </svg>
+                        </div>
                         <input
                           type={showConfirmPassword ? "text" : "password"}
                           value={newMember.confirm_password}
@@ -2157,9 +2243,9 @@ function TeamLeaderDashboard({ user, onLogout }) {
                               confirm_password: e.target.value,
                             })
                           }
-                          className={`mt-1 block w-full pr-10 border rounded-md px-3 py-2 ${
+                          className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 focus:bg-white ${
                             fieldErrors.confirm_password
-                              ? "border-red-500"
+                              ? "border-red-300 bg-red-50"
                               : "border-gray-300"
                           }`}
                           placeholder="Confirm password"
@@ -2170,13 +2256,25 @@ function TeamLeaderDashboard({ user, onLogout }) {
                           onClick={() =>
                             setShowConfirmPassword(!showConfirmPassword)
                           }
-                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors duration-200 cursor-pointer"
                         >
-                          {showConfirmPassword ? "🙈" : "👁️"}
+                          {showConfirmPassword ? (
+                            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                            </svg>
+                          ) : (
+                            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                          )}
                         </button>
                       </div>
                       {fieldErrors.confirm_password && (
-                        <div className="mt-1 text-xs text-red-600">
+                        <div className="mt-2 flex items-center text-sm text-red-600">
+                          <svg className="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                          </svg>
                           {fieldErrors.confirm_password}
                         </div>
                       )}
@@ -2195,205 +2293,248 @@ function TeamLeaderDashboard({ user, onLogout }) {
                       )}
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         Full Name
                       </label>
-                      <input
-                        type="text"
-                        value={newMember.full_name}
-                        onChange={(e) =>
-                          setNewMember({
-                            ...newMember,
-                            full_name: e.target.value,
-                          })
-                        }
-                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                        placeholder="Enter full name"
-                      />
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                        </div>
+                        <input
+                          type="text"
+                          value={newMember.full_name}
+                          onChange={(e) =>
+                            setNewMember({
+                              ...newMember,
+                              full_name: e.target.value,
+                            })
+                          }
+                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 focus:bg-white"
+                          placeholder="Enter full name"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Documentation Section */}
-                <div className="border-b border-gray-200 pb-4">
-                  <h4 className="text-md font-medium text-gray-900 mb-3">
-                    Documentation
-                  </h4>
+                <div className="border-b border-gray-200 pb-6 mb-6">
+                  <div className="flex items-center mb-4">
+                    <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                      <svg className="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <h4 className="text-lg font-semibold text-gray-900">
+                      Documentation
+                    </h4>
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         Aadhar ID
                       </label>
-                      <input
-                        type="text"
-                        value={newMember.aadhar_id}
-                        onChange={(e) =>
-                          setNewMember({
-                            ...newMember,
-                            aadhar_id: e.target.value,
-                          })
-                        }
-                        className={`mt-1 block w-full border rounded-md px-3 py-2 ${
-                          fieldErrors.aadhar_id
-                            ? "border-red-500"
-                            : "border-gray-300"
-                        }`}
-                        placeholder="12-digit Aadhar number"
-                        maxLength="12"
-                      />
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                          </svg>
+                        </div>
+                        <input
+                          type="text"
+                          value={newMember.aadhar_id}
+                          onChange={(e) =>
+                            setNewMember({
+                              ...newMember,
+                              aadhar_id: e.target.value,
+                            })
+                          }
+                          className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 focus:bg-white ${
+                            fieldErrors.aadhar_id
+                              ? "border-red-300 bg-red-50"
+                              : "border-gray-300"
+                          }`}
+                          placeholder="12-digit Aadhar number"
+                          maxLength="12"
+                        />
+                      </div>
                       {fieldErrors.aadhar_id && (
-                        <div className="mt-1 text-xs text-red-600">
+                        <div className="mt-2 flex items-center text-sm text-red-600">
+                          <svg className="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                          </svg>
                           {fieldErrors.aadhar_id}
                         </div>
                       )}
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         Aadhar Document *
                       </label>
-                      <input
-                        type="file"
-                        ref={aadharFileRef}
-                        onChange={(e) => {
-                          const file = e.target.files[0];
-                          if (file) {
-                            setNewMember({
-                              ...newMember,
-                              aadhar_document_path: file.name,
-                              aadhar_document_file: file,
-                            });
-                            // Update ref for validation
-                            aadharFileStateRef.current = file;
-                            // Clear error when file is selected
-                            if (fieldErrors.aadhar_document) {
-                              setFieldErrors({
-                                ...fieldErrors,
-                                aadhar_document: null,
-                              });
-                            }
-                          } else {
-                            // If no file selected, clear both file and path
-                            setNewMember({
-                              ...newMember,
-                              aadhar_document_path: "",
-                              aadhar_document_file: null,
-                            });
-                            // Update ref for validation
-                            aadharFileStateRef.current = null;
-                          }
-                        }}
-                        className={`mt-1 block w-full border rounded-md px-3 py-2 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 ${
-                          fieldErrors.aadhar_document
-                            ? "border-red-500"
-                            : "border-gray-300"
-                        }`}
-                        accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                        required
-                      />
-                      {newMember.aadhar_document_file && (
-                        <div className="mt-2 flex items-center gap-2">
-                          <div className="text-xs text-green-600">
-                            ✓ File selected:{" "}
-                            {newMember.aadhar_document_file.name}
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => {
+                      <div className="relative">
+                        <input
+                          type="file"
+                          ref={aadharFileRef}
+                          onChange={(e) => {
+                            const file = e.target.files[0];
+                            if (file) {
                               setNewMember({
                                 ...newMember,
-                                aadhar_document_file: null,
-                                aadhar_document_path: "",
+                                aadhar_document_path: file.name,
+                                aadhar_document_file: file,
                               });
-                              // Clear ref for validation
-                              aadharFileStateRef.current = null;
-                              // Clear the file input
-                              if (aadharFileRef.current) {
-                                aadharFileRef.current.value = "";
+                              // Update ref for validation
+                              aadharFileStateRef.current = file;
+                              // Clear error when file is selected
+                              if (fieldErrors.aadhar_document) {
+                                setFieldErrors({
+                                  ...fieldErrors,
+                                  aadhar_document: null,
+                                });
                               }
-                            }}
-                            className="text-xs text-red-600 hover:text-red-800 underline"
-                          >
-                            Remove
-                          </button>
+                            } else {
+                              // If no file selected, clear both file and path
+                              setNewMember({
+                                ...newMember,
+                                aadhar_document_path: "",
+                                aadhar_document_file: null,
+                              });
+                              // Update ref for validation
+                              aadharFileStateRef.current = null;
+                            }
+                          }}
+                          className={`w-full py-3 px-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 focus:bg-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer ${
+                            fieldErrors.aadhar_document
+                              ? "border-red-300 bg-red-50"
+                              : "border-gray-300"
+                          }`}
+                          accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                          required
+                        />
+                      </div>
+                      {newMember.aadhar_document_file && (
+                        <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center text-green-700">
+                              <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              <span className="text-sm font-medium">File selected: {newMember.aadhar_document_file.name}</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setNewMember({
+                                  ...newMember,
+                                  aadhar_document_file: null,
+                                  aadhar_document_path: "",
+                                });
+                                // Clear ref for validation
+                                aadharFileStateRef.current = null;
+                                // Clear the file input
+                                if (aadharFileRef.current) {
+                                  aadharFileRef.current.value = "";
+                                }
+                              }}
+                              className="text-sm text-red-600 hover:text-red-800 font-medium px-2 py-1 rounded hover:bg-red-50 transition-colors duration-200 cursor-pointer"
+                            >
+                              Remove
+                            </button>
+                          </div>
                         </div>
                       )}
                       {fieldErrors.aadhar_document && (
-                        <div className="mt-1 text-xs text-red-600">
+                        <div className="mt-2 flex items-center text-sm text-red-600">
+                          <svg className="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                          </svg>
                           {fieldErrors.aadhar_document}
                         </div>
                       )}
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         Bank Passbook *
                       </label>
-                      <input
-                        type="file"
-                        ref={bankPassbookFileRef}
-                        onChange={(e) => {
-                          const file = e.target.files[0];
-                          if (file) {
-                            setNewMember({
-                              ...newMember,
-                              bank_passbook_path: file.name,
-                              bank_passbook_file: file,
-                            });
-                            // Update ref for validation
-                            bankPassbookFileStateRef.current = file;
-                            // Clear error when file is selected
-                            if (fieldErrors.bank_passbook) {
-                              setFieldErrors({
-                                ...fieldErrors,
-                                bank_passbook: null,
-                              });
-                            }
-                          } else {
-                            // If no file selected, clear both file and path
-                            setNewMember({
-                              ...newMember,
-                              bank_passbook_path: "",
-                              bank_passbook_file: null,
-                            });
-                            // Update ref for validation
-                            bankPassbookFileStateRef.current = null;
-                          }
-                        }}
-                        className={`mt-1 block w-full border rounded-md px-3 py-2 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 ${
-                          fieldErrors.bank_passbook
-                            ? "border-red-500"
-                            : "border-gray-300"
-                        }`}
-                        accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                        required
-                      />
-                      {newMember.bank_passbook_file && (
-                        <div className="mt-2 flex items-center gap-2">
-                          <div className="text-xs text-green-600">
-                            ✓ File selected: {newMember.bank_passbook_file.name}
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => {
+                      <div className="relative">
+                        <input
+                          type="file"
+                          ref={bankPassbookFileRef}
+                          onChange={(e) => {
+                            const file = e.target.files[0];
+                            if (file) {
                               setNewMember({
                                 ...newMember,
-                                bank_passbook_file: null,
-                                bank_passbook_path: "",
+                                bank_passbook_path: file.name,
+                                bank_passbook_file: file,
                               });
-                              // Clear ref for validation
-                              bankPassbookFileStateRef.current = null;
-                              // Clear the file input
-                              if (bankPassbookFileRef.current) {
-                                bankPassbookFileRef.current.value = "";
+                              // Update ref for validation
+                              bankPassbookFileStateRef.current = file;
+                              // Clear error when file is selected
+                              if (fieldErrors.bank_passbook) {
+                                setFieldErrors({
+                                  ...fieldErrors,
+                                  bank_passbook: null,
+                                });
                               }
-                            }}
-                            className="text-xs text-red-600 hover:text-red-800 underline"
-                          >
-                            Remove
-                          </button>
+                            } else {
+                              // If no file selected, clear both file and path
+                              setNewMember({
+                                ...newMember,
+                                bank_passbook_path: "",
+                                bank_passbook_file: null,
+                              });
+                              // Update ref for validation
+                              bankPassbookFileStateRef.current = null;
+                            }
+                          }}
+                          className={`w-full py-3 px-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 focus:bg-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer ${
+                            fieldErrors.bank_passbook
+                              ? "border-red-300 bg-red-50"
+                              : "border-gray-300"
+                          }`}
+                          accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                          required
+                        />
+                      </div>
+                      {newMember.bank_passbook_file && (
+                        <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center text-green-700">
+                              <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              <span className="text-sm font-medium">File selected: {newMember.bank_passbook_file.name}</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setNewMember({
+                                  ...newMember,
+                                  bank_passbook_file: null,
+                                  bank_passbook_path: "",
+                                });
+                                // Clear ref for validation
+                                bankPassbookFileStateRef.current = null;
+                                // Clear the file input
+                                if (bankPassbookFileRef.current) {
+                                  bankPassbookFileRef.current.value = "";
+                                }
+                              }}
+                              className="text-sm text-red-600 hover:text-red-800 font-medium px-2 py-1 rounded hover:bg-red-50 transition-colors duration-200 cursor-pointer"
+                            >
+                              Remove
+                            </button>
+                          </div>
                         </div>
                       )}
                       {fieldErrors.bank_passbook && (
-                        <div className="mt-1 text-xs text-red-600">
+                        <div className="mt-2 flex items-center text-sm text-red-600">
+                          <svg className="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                          </svg>
                           {fieldErrors.bank_passbook}
                         </div>
                       )}
@@ -2402,84 +2543,123 @@ function TeamLeaderDashboard({ user, onLogout }) {
                 </div>
 
                 {/* Banking Information Section */}
-                <div className="border-b border-gray-200 pb-4">
-                  <h4 className="text-md font-medium text-gray-900 mb-3">
-                    Banking Information
-                  </h4>
+                <div className="border-b border-gray-200 pb-6 mb-6">
+                  <div className="flex items-center mb-4">
+                    <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center mr-3">
+                      <svg className="h-5 w-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                      </svg>
+                    </div>
+                    <h4 className="text-lg font-semibold text-gray-900">
+                      Banking Information
+                    </h4>
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         Bank Account Number
                       </label>
-                      <input
-                        type="text"
-                        value={newMember.bank_account_number}
-                        onChange={(e) =>
-                          setNewMember({
-                            ...newMember,
-                            bank_account_number: e.target.value,
-                          })
-                        }
-                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                        placeholder="Bank account number"
-                      />
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                          </svg>
+                        </div>
+                        <input
+                          type="text"
+                          value={newMember.bank_account_number}
+                          onChange={(e) =>
+                            setNewMember({
+                              ...newMember,
+                              bank_account_number: e.target.value,
+                            })
+                          }
+                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 focus:bg-white"
+                          placeholder="Bank account number"
+                        />
+                      </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         Bank Name
                       </label>
-                      <input
-                        type="text"
-                        value={newMember.bank_name}
-                        onChange={(e) =>
-                          setNewMember({
-                            ...newMember,
-                            bank_name: e.target.value,
-                          })
-                        }
-                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                        placeholder="Bank name"
-                      />
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                          </svg>
+                        </div>
+                        <input
+                          type="text"
+                          value={newMember.bank_name}
+                          onChange={(e) =>
+                            setNewMember({
+                              ...newMember,
+                              bank_name: e.target.value,
+                            })
+                          }
+                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 focus:bg-white"
+                          placeholder="Bank name"
+                        />
+                      </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         Bank Branch
                       </label>
-                      <input
-                        type="text"
-                        value={newMember.bank_branch}
-                        onChange={(e) =>
-                          setNewMember({
-                            ...newMember,
-                            bank_branch: e.target.value,
-                          })
-                        }
-                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                        placeholder="Bank branch"
-                      />
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                        </div>
+                        <input
+                          type="text"
+                          value={newMember.bank_branch}
+                          onChange={(e) =>
+                            setNewMember({
+                              ...newMember,
+                              bank_branch: e.target.value,
+                            })
+                          }
+                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 focus:bg-white"
+                          placeholder="Bank branch"
+                        />
+                      </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         IFSC Code
                       </label>
-                      <input
-                        type="text"
-                        value={newMember.ifsc_code}
-                        onChange={(e) =>
-                          setNewMember({
-                            ...newMember,
-                            ifsc_code: e.target.value,
-                          })
-                        }
-                        className={`mt-1 block w-full border rounded-md px-3 py-2 ${
-                          fieldErrors.ifsc_code
-                            ? "border-red-500"
-                            : "border-gray-300"
-                        }`}
-                        placeholder="IFSC code"
-                      />
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                        </div>
+                        <input
+                          type="text"
+                          value={newMember.ifsc_code}
+                          onChange={(e) =>
+                            setNewMember({
+                              ...newMember,
+                              ifsc_code: e.target.value,
+                            })
+                          }
+                          className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 focus:bg-white ${
+                            fieldErrors.ifsc_code
+                              ? "border-red-300 bg-red-50"
+                              : "border-gray-300"
+                          }`}
+                          placeholder="IFSC code"
+                        />
+                      </div>
                       {fieldErrors.ifsc_code && (
-                        <div className="mt-1 text-xs text-red-600">
+                        <div className="mt-2 flex items-center text-sm text-red-600">
+                          <svg className="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                          </svg>
                           {fieldErrors.ifsc_code}
                         </div>
                       )}
@@ -2506,7 +2686,7 @@ function TeamLeaderDashboard({ user, onLogout }) {
                             joined_date: e.target.value,
                           })
                         }
-                        className={`mt-1 block w-full border rounded-md px-3 py-2 ${
+                        className={`mt-1 block w-full border rounded-md px-3 py-2 cursor-pointer ${
                           fieldErrors.joined_date
                             ? "border-red-500"
                             : "border-gray-300"
@@ -2591,7 +2771,7 @@ function TeamLeaderDashboard({ user, onLogout }) {
                             nominee_relation: e.target.value,
                           })
                         }
-                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 cursor-pointer"
                       >
                         <option value="">Select relationship</option>
                         <option value="spouse">Spouse</option>
@@ -2600,6 +2780,173 @@ function TeamLeaderDashboard({ user, onLogout }) {
                         <option value="child">Child</option>
                         <option value="other">Other</option>
                       </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Enhanced Member Information Section */}
+                <div className="border-b border-gray-200 pb-6 mb-6">
+                  <div className="flex items-center mb-4">
+                    <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center mr-3">
+                      <svg className="h-5 w-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                    </div>
+                    <h4 className="text-lg font-semibold text-gray-900">
+                      Additional Member Information
+                    </h4>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Age
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                        <input
+                          type="number"
+                          min="18"
+                          max="100"
+                          value={newMember.age}
+                          onChange={(e) =>
+                            setNewMember({
+                              ...newMember,
+                              age: e.target.value,
+                            })
+                          }
+                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 focus:bg-white"
+                          placeholder="Enter age"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Profession
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2V6" />
+                          </svg>
+                        </div>
+                        <input
+                          type="text"
+                          value={newMember.profession}
+                          onChange={(e) =>
+                            setNewMember({
+                              ...newMember,
+                              profession: e.target.value,
+                            })
+                          }
+                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 focus:bg-white"
+                          placeholder="Enter profession"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Father/Husband Name
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                        </div>
+                        <input
+                          type="text"
+                          value={newMember.father_husband_name}
+                          onChange={(e) =>
+                            setNewMember({
+                              ...newMember,
+                              father_husband_name: e.target.value,
+                            })
+                          }
+                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 focus:bg-white"
+                          placeholder="Enter father/husband name"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Caste
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                          </svg>
+                        </div>
+                        <input
+                          type="text"
+                          value={newMember.caste}
+                          onChange={(e) =>
+                            setNewMember({
+                              ...newMember,
+                              caste: e.target.value,
+                            })
+                          }
+                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 focus:bg-white"
+                          placeholder="Enter caste"
+                        />
+                      </div>
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Member Photo
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="file"
+                          onChange={(e) => {
+                            const file = e.target.files[0];
+                            if (file) {
+                              setNewMember({
+                                ...newMember,
+                                photo_url: file.name,
+                                photo: file,
+                              });
+                            } else {
+                              setNewMember({
+                                ...newMember,
+                                photo_url: "",
+                                photo: null,
+                              });
+                            }
+                          }}
+                          className="w-full py-3 px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 focus:bg-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
+                          accept=".jpg,.jpeg,.png"
+                        />
+                      </div>
+                      {newMember.photo && (
+                        <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center text-green-700">
+                              <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              <span className="text-sm font-medium">Photo selected: {newMember.photo.name}</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setNewMember({
+                                  ...newMember,
+                                  photo: null,
+                                  photo_url: "",
+                                });
+                              }}
+                              className="text-sm text-red-600 hover:text-red-800 font-medium px-2 py-1 rounded hover:bg-red-50 transition-colors duration-200 cursor-pointer"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -2641,9 +2988,16 @@ function TeamLeaderDashboard({ user, onLogout }) {
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
           <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-md shadow-lg rounded-md bg-white">
             <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">
-                Create Loan Request
-              </h3>
+              <div className="flex items-center mb-6">
+                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                  <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900">
+                  Create Loan Request
+                </h3>
+              </div>
               <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
                 <p className="text-sm text-green-800">
                   <strong>Note:</strong> Loan requests will be created with
@@ -2652,20 +3006,26 @@ function TeamLeaderDashboard({ user, onLogout }) {
               </div>
               <form onSubmit={handleCreateLoanRequest} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Member
                   </label>
-                  <select
-                    value={newLoanRequest.member_id}
-                    onChange={(e) =>
-                      setNewLoanRequest({
-                        ...newLoanRequest,
-                        member_id: e.target.value,
-                      })
-                    }
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                    required
-                  >
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    </div>
+                    <select
+                      value={newLoanRequest.member_id}
+                      onChange={(e) =>
+                        setNewLoanRequest({
+                          ...newLoanRequest,
+                          member_id: e.target.value,
+                        })
+                      }
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 focus:bg-white appearance-none bg-white cursor-pointer"
+                      required
+                    >
                     <option value="">Select Member</option>
                     {groupMembers.map((member) => (
                       <option key={member.id} value={member.id}>
@@ -2673,77 +3033,99 @@ function TeamLeaderDashboard({ user, onLogout }) {
                       </option>
                     ))}
                   </select>
+                  </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Requested Amount
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Requested Amount (₹)
                   </label>
-                  <input
-                    type="number"
-                    value={newLoanRequest.requested_amount}
-                    onChange={(e) =>
-                      setNewLoanRequest({
-                        ...newLoanRequest,
-                        requested_amount: e.target.value,
-                      })
-                    }
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                    placeholder="0"
-                    required
-                  />
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                      </svg>
+                    </div>
+                    <input
+                      type="number"
+                      value={newLoanRequest.requested_amount}
+                      onChange={(e) =>
+                        setNewLoanRequest({
+                          ...newLoanRequest,
+                          requested_amount: e.target.value,
+                        })
+                      }
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 focus:bg-white"
+                      placeholder="Enter loan amount"
+                      required
+                    />
+                  </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Purpose
                   </label>
-                  <input
-                    type="text"
-                    value={newLoanRequest.purpose}
-                    onChange={(e) =>
-                      setNewLoanRequest({
-                        ...newLoanRequest,
-                        purpose: e.target.value,
-                      })
-                    }
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                    placeholder="Purpose of the loan (optional)"
-                  />
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <input
+                      type="text"
+                      value={newLoanRequest.purpose}
+                      onChange={(e) =>
+                        setNewLoanRequest({
+                          ...newLoanRequest,
+                          purpose: e.target.value,
+                        })
+                      }
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 focus:bg-white"
+                      placeholder="Purpose of the loan (optional)"
+                    />
+                  </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Term (months)
                   </label>
-                  <input
-                    type="number"
-                    value={newLoanRequest.term_months}
-                    onChange={(e) =>
-                      setNewLoanRequest({
-                        ...newLoanRequest,
-                        term_months: e.target.value,
-                      })
-                    }
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
-                    placeholder="12"
-                    min="1"
-                    max="120"
-                    required
-                  />
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <input
+                      type="number"
+                      value={newLoanRequest.term_months}
+                      onChange={(e) =>
+                        setNewLoanRequest({
+                          ...newLoanRequest,
+                          term_months: e.target.value,
+                        })
+                      }
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 focus:bg-white"
+                      placeholder="12"
+                      min="1"
+                      max="120"
+                      required
+                    />
+                  </div>
                 </div>
-                <div className="flex justify-end space-x-3">
+                <div className="flex justify-end space-x-3 pt-4">
                   <button
                     type="button"
                     onClick={() => setShowLoanRequestModal(false)}
-                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 cursor-pointer"
+                    className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 cursor-pointer transition-all duration-200 font-medium shadow-sm hover:shadow-md"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isCreatingLoan}
-                    className={`px-4 py-2 text-white rounded-md flex items-center ${
+                    className={`px-6 py-3 text-white rounded-lg flex items-center font-medium transition-all duration-200 shadow-lg hover:shadow-xl ${
                       isCreatingLoan
                         ? "bg-green-400 cursor-not-allowed"
-                        : "bg-green-600 hover:bg-green-700 cursor-pointer"
+                        : "bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 cursor-pointer transform hover:scale-105"
                     }`}
                   >
                     {isCreatingLoan && (

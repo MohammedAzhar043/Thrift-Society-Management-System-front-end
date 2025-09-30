@@ -29,11 +29,11 @@ function Login({ onLogin }) {
       return;
     }
     
-    // Temporarily disable reCAPTCHA for testing
-    // if (!isCaptchaValid) {
-    //   setError('Please complete the security verification correctly');
-    //   return;
-    // }
+    // Validate reCAPTCHA
+    if (!isCaptchaValid) {
+      setError('Please complete the security verification correctly');
+      return;
+    }
     
     setIsLoading(true);
     setError('');

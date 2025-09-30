@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { toast, Toaster } from "react-hot-toast";
-import { FaCheck, FaTimes, FaEdit, FaTrash, FaEye, FaUsers, FaPlus, FaMapMarkerAlt,FaInfoCircle, FaUserTie } from "react-icons/fa";
+import { FaCheck, FaFileAlt,FaTimes, FaEdit, FaTrash, FaEye, FaUsers, FaPlus, FaMapMarkerAlt,FaInfoCircle, FaUserTie } from "react-icons/fa";
 import apiService from "../services/api";
 import { useDashboardData } from "../hooks/useDashboardData";
 import { formatIndianCurrency } from "../utils/formatters";
@@ -21,6 +21,7 @@ import {
   generateFilename,
 } from "./admin";
 import PayableManagement from "./admin/PayableManagement";
+import MemberStatementModal from "./admin/MemberStatementModal";
 
 function AdminDashboard({ user, onLogout }) {
   const [pendingApprovals, setPendingApprovals] = useState([]);
@@ -73,6 +74,8 @@ function AdminDashboard({ user, onLogout }) {
   const [selectedLoanForApproval, setSelectedLoanForApproval] = useState(null);
   const [interestRate, setInterestRate] = useState("");
   const [showInterestRateModal, setShowInterestRateModal] = useState(false);
+  const [showMemberStatement, setShowMemberStatement] = useState(false);
+  const [selectedMemberForStatement, setSelectedMemberForStatement] = useState(null);
   const [showPrintConfirmation, setShowPrintConfirmation] = useState(false);
 
   // Form states
@@ -352,23 +355,25 @@ function AdminDashboard({ user, onLogout }) {
       refreshDashboard();
 
       // Show success message using toast
+      const recordType = approvalType === "member" ? "Member" : "Loan request";
       toast.success(
-        `${action === "approve" ? "Approved" : "Rejected"} successfully!`
+        `${recordType} ${action === "approve" ? "approved" : "rejected"} successfully!`
       );
     } catch (error) {
-      let errorMessage = `Failed to ${action}. Please try again.`;
+      const recordType = approvalType === "member" ? "member" : "loan request";
+      let errorMessage = `Failed to ${action} ${recordType}. Please try again.`;
       
       if (error.message) {
         if (error.message.includes('not found')) {
-          errorMessage = `The ${action === 'approve' ? 'loan' : 'record'} was not found. Please refresh and try again.`;
+          errorMessage = `The ${recordType} was not found. Please refresh and try again.`;
         } else if (error.message.includes('Already')) {
-          errorMessage = `This ${action === 'approve' ? 'loan' : 'record'} has already been ${action}d.`;
+          errorMessage = `This ${recordType} has already been ${action}d.`;
         } else if (error.message.includes('Permission denied')) {
-          errorMessage = `You do not have permission to ${action} this ${action === 'approve' ? 'loan' : 'record'}.`;
+          errorMessage = `You do not have permission to ${action} this ${recordType}.`;
         } else if (error.message.includes('Member status')) {
           errorMessage = `Cannot ${action}: The member's account status does not allow this action.`;
         } else {
-          errorMessage = `Unable to ${action} at this time. Please try again later or contact support if the issue persists.`;
+          errorMessage = `Unable to ${action} ${recordType} at this time. Please try again later or contact support if the issue persists.`;
         }
       }
       
@@ -713,6 +718,11 @@ function AdminDashboard({ user, onLogout }) {
 
   const handleManagePayables = () => {
     setShowPayableManagement(true);
+  };
+
+  const handleViewMemberStatement = (member) => {
+    setSelectedMemberForStatement(member);
+    setShowMemberStatement(true);
   };
 
   const refreshReportsData = async () => {
@@ -2269,7 +2279,7 @@ function AdminDashboard({ user, onLogout }) {
                         <select
                           value={groupFilter}
                           onChange={(e) => setGroupFilter(e.target.value)}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer"
                         >
                           <option value="">All Groups</option>
                           {groups.map((group) => (
@@ -2301,7 +2311,7 @@ function AdminDashboard({ user, onLogout }) {
                         <select
                           value={statusFilter}
                           onChange={(e) => setStatusFilter(e.target.value)}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer"
                         >
                           <option value="">All Status</option>
                           <option value="ACTIVE">Active</option>
@@ -2339,7 +2349,7 @@ function AdminDashboard({ user, onLogout }) {
                         <select
                           value={locationFilter}
                           onChange={(e) => setLocationFilter(e.target.value)}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer"
                         >
                           <option value="">All Locations</option>
                           {[
@@ -2422,13 +2432,16 @@ function AdminDashboard({ user, onLogout }) {
                           <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Joined
                           </th>
+                          <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                          </th>
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
                         {filteredMembers.length === 0 ? (
                           <tr>
                             <td
-                              colSpan="8"
+                              colSpan="9"
                               className="px-4 py-8 text-center text-sm text-gray-500"
                             >
                               <div className="flex flex-col items-center">
@@ -2531,6 +2544,15 @@ function AdminDashboard({ user, onLogout }) {
                                       member.joined_date
                                     ).toLocaleDateString()
                                   : "N/A"}
+                              </td>
+                              <td className="px-4 py-4 text-center">
+                                <button
+                                  onClick={() => handleViewMemberStatement(member)}
+                                  className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 cursor-pointer"
+                                  title="View Financial Statement"
+                                >
+                                  <FaFileAlt className="h-4 w-4" />
+                                </button>
                               </td>
                             </tr>
                           ))
@@ -2759,6 +2781,17 @@ function AdminDashboard({ user, onLogout }) {
                                 </div>
                               </div>
                             </div>
+
+                            {/* Card Actions */}
+                            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
+                              <button
+                                onClick={() => handleViewMemberStatement(member)}
+                                className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 cursor-pointer"
+                              >
+                                <FaFileAlt className="h-4 w-4 mr-2" />
+                                View Financial Statement
+                              </button>
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -2949,6 +2982,14 @@ function AdminDashboard({ user, onLogout }) {
           </div>
         </div>
       )}
+
+      {/* Member Statement Modal */}
+      <MemberStatementModal
+        isOpen={showMemberStatement}
+        onClose={() => setShowMemberStatement(false)}
+        memberId={selectedMemberForStatement?.id}
+        memberData={selectedMemberForStatement}
+      />
     </div>
     </>
   );

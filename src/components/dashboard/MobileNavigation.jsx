@@ -23,7 +23,7 @@ const MobileNavigation = ({ activeTab, setActiveTab }) => {
   ];
 
   return (
-    <div className="sticky top-24 z-40 bg-white shadow-lg rounded-xl mb-8 border border-gray-100 backdrop-blur-sm bg-white/95">
+    <div className="sticky top-24 z-40 shadow-lg rounded-xl mb-8 border border-gray-100 backdrop-blur-sm bg-white/95">
       <div className="border-b border-gray-200">
         <nav className="-mb-px flex space-x-0 sm:space-x-2 lg:space-x-4 px-1 sm:px-4 lg:px-6 overflow-x-auto scrollbar-hide">
           {tabs.map((tab) => {
@@ -32,7 +32,7 @@ const MobileNavigation = ({ activeTab, setActiveTab }) => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`group relative py-4 px-3 sm:px-4 border-b-2 font-semibold text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center min-w-[80px] sm:min-w-auto whitespace-nowrap transition-all duration-300 rounded-t-lg touch-manipulation ${
+                className={`group relative py-4 px-3 sm:px-4 border-b-2 font-semibold text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center min-w-[80px] sm:min-w-auto whitespace-nowrap transition-all duration-300 rounded-t-lg touch-manipulation cursor-pointer ${
                   activeTab === tab.id
                     ? "border-blue-500 text-blue-600 bg-gradient-to-b from-blue-50 to-blue-100 shadow-sm"
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50 active:bg-gray-100"

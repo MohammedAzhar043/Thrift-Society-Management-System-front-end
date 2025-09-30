@@ -423,7 +423,7 @@ function IndividualMemberDashboard({ user, onLogout }) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading dashboard...</p>
         </div>
       </div>
@@ -439,7 +439,7 @@ function IndividualMemberDashboard({ user, onLogout }) {
           </div>
           <button 
             onClick={loadDashboardData}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer"
           >
             Retry
           </button>
@@ -449,7 +449,50 @@ function IndividualMemberDashboard({ user, onLogout }) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+      {/* Custom CSS for animations */}
+      <style jsx>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-fade-in {
+          animation: fadeIn 0.6s ease-out forwards;
+        }
+        
+        .stats-card:hover {
+          transform: translateY(-4px);
+        }
+        
+        .member-loan-card:hover,
+        .member-request-card:hover,
+        .member-payment-card:hover,
+        .member-transaction-card:hover {
+          transform: translateY(-2px);
+        }
+        
+        .tab-button {
+          position: relative;
+          overflow: hidden;
+        }
+        
+        .tab-button::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+          transition: left 0.5s;
+        }
+        
+        .tab-button:hover::before {
+          left: 100%;
+        }
+      `}</style>
+      
       {/* Toaster for notifications */}
       <Toaster 
         position="top-center"
@@ -487,48 +530,58 @@ function IndividualMemberDashboard({ user, onLogout }) {
         }}
       />
       
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between py-4 gap-4">
+      {/* Enhanced Header - Mobile Optimized */}
+      <header className="bg-white shadow-xl border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
+          <div className="flex items-center justify-between py-4 sm:py-6 gap-2 sm:gap-4">
+            {/* Left side - Title and User info */}
             <div className="flex-1 min-w-0 overflow-hidden">
-              <h1 className="text-lg sm:text-xl font-semibold text-gray-900 truncate">Member Dashboard</h1>
-              <p className="text-sm text-gray-600 truncate">Welcome, {user?.full_name || user?.username}</p>
-          </div>
-            <div className="flex-shrink-0 flex items-center space-x-1 sm:space-x-2">
-            <button
-              onClick={() => setShowProfileModal(true)}
-                className="inline-flex items-center px-2 sm:px-3 py-1.5 sm:py-2 border border-transparent text-xs sm:text-sm font-medium rounded text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-blue-500 transition-colors duration-200"
-            >
+              <div className="flex items-center space-x-2 sm:space-x-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
+                  <FaUser className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 truncate">Member Dashboard</h1>
+                  <p className="text-xs sm:text-sm text-gray-600 truncate">Welcome back, {user?.full_name || user?.username}</p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Right side - Action buttons */}
+            <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
+              <button
+                onClick={() => setShowProfileModal(true)}
+                className="inline-flex items-center px-2 sm:px-3 py-2 sm:py-2.5 border border-transparent text-xs sm:text-sm font-semibold rounded-lg sm:rounded-xl text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500 transition-all duration-200 transform hover:scale-105 cursor-pointer shadow-lg hover:shadow-xl"
+              >
                 <FaUser className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
                 <span className="hidden sm:inline">Profile</span>
-            </button>
-          <button
-              onClick={handleLogout}
-                className="inline-flex items-center px-2 sm:px-3 py-1.5 sm:py-2 border border-transparent text-xs sm:text-sm font-medium rounded text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-red-500 transition-colors duration-200 cursor-pointer"
-          >
+              </button>
+              <button
+                onClick={handleLogout}
+                className="inline-flex items-center px-2 sm:px-3 py-2 sm:py-2.5 border border-transparent text-xs sm:text-sm font-semibold rounded-lg sm:rounded-xl text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-red-500 transition-all duration-200 transform hover:scale-105 cursor-pointer shadow-lg hover:shadow-xl"
+              >
                 <FaSignOutAlt className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-1" />
                 <span className="hidden sm:inline">Logout</span>
-          </button>
+              </button>
             </div>
           </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
-          {/* Stats Cards */}
+          {/* Enhanced Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
+          <div className="stats-card bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+            <div className="px-6 py-6">
               <div className="flex items-center">
-                <div className="flex-shrink-0 bg-blue-500 rounded-md p-3">
+                <div className="flex-shrink-0 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 shadow-lg">
                   <FaMoneyBillWave className="text-white h-6 w-6" />
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Current Loan</dt>
+                    <dt className="text-sm font-semibold text-blue-700 truncate mb-1">Current Loan</dt>
                     <dd className="flex items-baseline">
-                      <div className="text-2xl font-semibold text-gray-900">
+                      <div className="text-2xl font-bold text-gray-900">
                         {formatCurrency(dashboardStats.current_loan_amount)}
                       </div>
                     </dd>
@@ -538,17 +591,17 @@ function IndividualMemberDashboard({ user, onLogout }) {
             </div>
           </div>
 
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
+          <div className="stats-card bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+            <div className="px-6 py-6">
               <div className="flex items-center">
-                <div className="flex-shrink-0 bg-green-500 rounded-md p-3">
+                <div className="flex-shrink-0 bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-4 shadow-lg">
                   <FaCreditCard className="text-white h-6 w-6" />
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Loan Eligibility</dt>
+                    <dt className="text-sm font-semibold text-green-700 truncate mb-1">Loan Eligibility</dt>
                     <dd className="flex items-baseline">
-                      <div className="text-2xl font-semibold text-gray-900">
+                      <div className="text-2xl font-bold text-gray-900">
                         {formatCurrency(dashboardStats.loan_eligibility)}
                       </div>
                     </dd>
@@ -558,17 +611,17 @@ function IndividualMemberDashboard({ user, onLogout }) {
             </div>
           </div>
 
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
+          <div className="stats-card bg-gradient-to-br from-yellow-50 to-yellow-100 border border-yellow-200 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+            <div className="px-6 py-6">
               <div className="flex items-center">
-                <div className="flex-shrink-0 bg-yellow-500 rounded-md p-3">
+                <div className="flex-shrink-0 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl p-4 shadow-lg">
                   <FaClock className="text-white h-6 w-6" />
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Next Payment</dt>
+                    <dt className="text-sm font-semibold text-yellow-700 truncate mb-1">Next Payment</dt>
                     <dd className="flex items-baseline">
-                      <div className="text-2xl font-semibold text-gray-900">
+                      <div className="text-2xl font-bold text-gray-900">
                         {dashboardStats.next_payment_due ? formatDate(dashboardStats.next_payment_due) : 'N/A'}
                       </div>
                     </dd>
@@ -578,17 +631,17 @@ function IndividualMemberDashboard({ user, onLogout }) {
             </div>
           </div>
 
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
+          <div className="stats-card bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+            <div className="px-6 py-6">
               <div className="flex items-center">
-                <div className="flex-shrink-0 bg-purple-500 rounded-md p-3">
+                <div className="flex-shrink-0 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-4 shadow-lg">
                   <FaHistory className="text-white h-6 w-6" />
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">Total Payments</dt>
+                    <dt className="text-sm font-semibold text-purple-700 truncate mb-1">Total Payments</dt>
                     <dd className="flex items-baseline">
-                      <div className="text-2xl font-semibold text-gray-900">
+                      <div className="text-2xl font-bold text-gray-900">
                         {formatCurrency(dashboardStats.total_payments_made)}
                       </div>
                     </dd>
@@ -599,30 +652,32 @@ function IndividualMemberDashboard({ user, onLogout }) {
           </div>
         </div>
 
-        {/* Navigation Tabs */}
-        <div className="bg-white shadow rounded-lg mb-8">
-          <div className="border-b border-gray-200">
-            <nav className="-mb-px flex space-x-2 sm:space-x-4 lg:space-x-8 px-2 sm:px-4 lg:px-6 overflow-x-auto">
+        {/* Enhanced Navigation Tabs */}
+        <div className="bg-white shadow-xl rounded-xl mb-8 overflow-hidden">
+          <div className="bg-gradient-to-r from-gray-50 to-blue-50 border-b border-gray-200">
+            <nav className="-mb-px flex space-x-1 sm:space-x-2 lg:space-x-4 px-2 sm:px-4 lg:px-6 overflow-x-auto">
               {[
-                { id: 'overview', name: 'Overview', icon: FaUser },
-                { id: 'loans', name: 'My Loans', icon: FaCreditCard },
-                { id: 'requests', name: 'Loan Requests', icon: FaFileAlt },
-                { id: 'payments', name: 'Payment History', icon: FaMoneyBillWave },
-                { id: 'transactions', name: 'Transactions', icon: FaHistory }
+                { id: 'overview', name: 'Overview', icon: FaUser, color: 'blue' },
+                { id: 'loans', name: 'My Loans', icon: FaCreditCard, color: 'green' },
+                { id: 'requests', name: 'Loan Requests', icon: FaFileAlt, color: 'orange' },
+                { id: 'payments', name: 'Payment History', icon: FaMoneyBillWave, color: 'purple' },
+                { id: 'transactions', name: 'Transactions', icon: FaHistory, color: 'indigo' }
               ].map(tab => {
                 const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
                 return (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center whitespace-nowrap ${
-                      activeTab === tab.id
-                        ? 'border-blue-500 text-blue-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    className={`py-4 px-3 sm:px-4 border-b-2 font-semibold text-sm flex items-center whitespace-nowrap cursor-pointer transition-all duration-200 rounded-t-lg ${
+                      isActive
+                        ? `border-${tab.color}-500 text-${tab.color}-600 bg-${tab.color}-50 shadow-sm`
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50'
                     }`}
                   >
-                    <Icon className="mr-2 h-5 w-5" />
-                    {tab.name}
+                    <Icon className={`mr-2 h-4 w-4 sm:h-5 sm:w-5 ${isActive ? `text-${tab.color}-600` : 'text-gray-400'}`} />
+                    <span className="hidden sm:inline">{tab.name}</span>
+                    <span className="sm:hidden">{tab.name.split(' ')[0]}</span>
                   </button>
                 );
               })}
@@ -677,20 +732,20 @@ function IndividualMemberDashboard({ user, onLogout }) {
                     <div className="space-y-4">
                       <button
                         onClick={() => setShowLoanApplicationModal(true)}
-                        className="w-full flex items-center justify-center px-4 py-3 border border-transparent text-sm font-semibold rounded-xl shadow-md text-white bg-blue-600 hover:bg-blue-700 hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02]"
+                        className="w-full flex items-center justify-center px-4 py-3 border border-transparent text-sm font-semibold rounded-xl shadow-md text-white bg-blue-600 hover:bg-blue-700 hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02] cursor-pointer"
                       >
                         <FaPlus className="w-4 h-4 mr-2" /> 
                         Apply for New Loan
                       </button>
                       <button
                         onClick={() => setActiveTab('loans')}
-                        className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 text-sm font-semibold rounded-xl shadow-sm text-gray-700 bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200"
+                        className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 text-sm font-semibold rounded-xl shadow-sm text-gray-700 bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200 cursor-pointer"
                       >
                         <FaEye className="w-4 h-4 mr-2" /> View Loan Details
                       </button>
                       <button
                         onClick={() => setActiveTab('payments')}
-                        className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 text-sm font-semibold rounded-xl shadow-sm text-gray-700 bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200"
+                        className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 text-sm font-semibold rounded-xl shadow-sm text-gray-700 bg-white hover:bg-gray-50 hover:shadow-md transition-all duration-200 cursor-pointer"
                       >
                         <FaHistory className="w-4 h-4 mr-2" /> Payment History
                       </button>
@@ -707,7 +762,7 @@ function IndividualMemberDashboard({ user, onLogout }) {
                   <h3 className="text-lg sm:text-xl font-semibold text-gray-900">My Loans</h3>
                   <button
                     onClick={() => setShowLoanApplicationModal(true)}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-semibold rounded-xl shadow-md text-white bg-blue-600 hover:bg-blue-700 hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02]"
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-semibold rounded-xl shadow-md text-white bg-blue-600 hover:bg-blue-700 hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02] cursor-pointer"
                   >
                     <FaPlus className="w-4 h-4 mr-2" /> 
                     Apply for New Loan
@@ -749,7 +804,7 @@ function IndividualMemberDashboard({ user, onLogout }) {
                             <td className="px-6 py-4 text-sm font-semibold text-gray-900">
                               {loan.id}
                             </td>
-                            <td className="px-6 py-4 text-sm font-bold text-green-600 text-lg">
+                            <td className="px-6 py-4 text-lg font-bold text-green-600">
                               {formatCurrency(loan.loan_amount)}
                             </td>
                             <td className="px-6 py-4 text-sm font-semibold text-gray-900">
@@ -770,7 +825,7 @@ function IndividualMemberDashboard({ user, onLogout }) {
                                   setSelectedLoan(loan);
                                   setShowLoanDetailsModal(true);
                                 }}
-                                className="text-blue-600 hover:text-blue-900 p-2 rounded-lg hover:bg-blue-50 transition-colors duration-200"
+                                className="text-blue-600 hover:text-blue-900 p-2 rounded-lg hover:bg-blue-50 transition-colors duration-200 cursor-pointer"
                                 title="View Details"
                               >
                                 <FaEye className="w-4 h-4" />
@@ -786,17 +841,19 @@ function IndividualMemberDashboard({ user, onLogout }) {
                 {/* Enhanced Mobile Loans Cards */}
                 <div className="lg:hidden space-y-4">
                   {currentLoans.length === 0 ? (
-                    <div className="empty-state">
-                      <div className="empty-state-icon">
-                        <FaMoneyBillWave className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
+                    <div className="empty-state text-center py-12 px-6">
+                      <div className="empty-state-icon mb-6">
+                        <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center mx-auto shadow-lg">
+                          <FaMoneyBillWave className="h-10 w-10 text-blue-500" />
+                        </div>
                       </div>
-                      <h3 className="empty-state-title">No active loans found</h3>
-                      <p className="empty-state-description">Apply for a new loan to get started.</p>
+                      <h3 className="empty-state-title text-xl font-bold text-gray-900 mb-3">No active loans found</h3>
+                      <p className="empty-state-description text-gray-600 mb-8 max-w-md mx-auto">Start your financial journey by applying for a loan. Our flexible terms and competitive rates make it easy to achieve your goals.</p>
                       <button
                         onClick={() => setShowLoanApplicationModal(true)}
-                        className="mt-6 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors duration-200 font-semibold shadow-lg hover:shadow-xl"
+                        className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 cursor-pointer"
                       >
-                        <FaPlus className="w-4 h-4 mr-2 inline" />
+                        <FaPlus className="w-5 h-5 mr-2" />
                         Apply for New Loan
                       </button>
                     </div>
@@ -824,7 +881,7 @@ function IndividualMemberDashboard({ user, onLogout }) {
                               setSelectedLoan(loan);
                               setShowLoanDetailsModal(true);
                             }}
-                            className="text-blue-600 hover:text-blue-900 p-2 rounded-lg hover:bg-blue-50 transition-colors duration-200"
+                            className="text-blue-600 hover:text-blue-900 p-2 rounded-lg hover:bg-blue-50 transition-colors duration-200 cursor-pointer"
                             title="View Details"
                           >
                             <FaEye className="w-5 h-5" />
@@ -861,7 +918,7 @@ function IndividualMemberDashboard({ user, onLogout }) {
                   <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Loan Requests</h3>
                   <button
                     onClick={() => setShowLoanApplicationModal(true)}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-semibold rounded-xl shadow-md text-white bg-blue-600 hover:bg-blue-700 hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02]"
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-semibold rounded-xl shadow-md text-white bg-blue-600 hover:bg-blue-700 hover:shadow-lg transition-all duration-200 transform hover:scale-[1.02] cursor-pointer"
                   >
                     <FaPlus className="w-4 h-4 mr-2" /> 
                     New Request
@@ -908,7 +965,7 @@ function IndividualMemberDashboard({ user, onLogout }) {
                             <td className="px-6 py-4 text-sm font-semibold text-gray-900">
                               #{request.id}
                             </td>
-                            <td className="px-6 py-4 text-sm font-bold text-green-600 text-lg">
+                            <td className="px-6 py-4 text-lg font-bold text-green-600">
                               {formatCurrency(request.loan_amount)}
                             </td>
                             <td className="px-6 py-4 text-sm font-semibold text-gray-900">
@@ -936,12 +993,14 @@ function IndividualMemberDashboard({ user, onLogout }) {
                 {/* Enhanced Mobile Loan Requests Cards */}
                 <div className="lg:hidden space-y-4">
                   {loanRequests.length === 0 ? (
-                    <div className="empty-state">
-                      <div className="empty-state-icon">
-                        <FaClock className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
+                    <div className="empty-state text-center py-12 px-6">
+                      <div className="empty-state-icon mb-6">
+                        <div className="w-20 h-20 bg-gradient-to-br from-orange-100 to-orange-200 rounded-full flex items-center justify-center mx-auto shadow-lg">
+                          <FaClock className="h-10 w-10 text-orange-500" />
+                        </div>
                       </div>
-                      <h3 className="empty-state-title">No loan requests found</h3>
-                      <p className="empty-state-description">Use the "New Request" button above to submit a loan application.</p>
+                      <h3 className="empty-state-title text-xl font-bold text-gray-900 mb-3">No loan requests found</h3>
+                      <p className="empty-state-description text-gray-600 mb-8 max-w-md mx-auto">You haven't submitted any loan applications yet. Use the "New Request" button above to get started.</p>
                     </div>
                   ) : (
                     loanRequests.map((request, index) => (
@@ -1025,7 +1084,7 @@ function IndividualMemberDashboard({ user, onLogout }) {
                             <td className="px-6 py-4 text-sm font-semibold text-gray-900">
                               {formatDate(payment.transaction_date)}
                             </td>
-                            <td className="px-6 py-4 text-sm font-bold text-green-600 text-lg">
+                            <td className="px-6 py-4 text-lg font-bold text-green-600">
                               {formatCurrency(payment.amount)}
                             </td>
                             <td className="px-6 py-4 text-sm font-semibold text-gray-900">
@@ -1050,12 +1109,14 @@ function IndividualMemberDashboard({ user, onLogout }) {
                 {/* Enhanced Mobile Payment History Cards */}
                 <div className="lg:hidden space-y-4">
                   {paymentHistory.length === 0 ? (
-                    <div className="empty-state">
-                      <div className="empty-state-icon">
-                        <FaCreditCard className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
+                    <div className="empty-state text-center py-12 px-6">
+                      <div className="empty-state-icon mb-6">
+                        <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center mx-auto shadow-lg">
+                          <FaCreditCard className="h-10 w-10 text-purple-500" />
+                        </div>
                       </div>
-                      <h3 className="empty-state-title">No payment history found</h3>
-                      <p className="empty-state-description">Payment history will appear here once payments are made.</p>
+                      <h3 className="empty-state-title text-xl font-bold text-gray-900 mb-3">No payment history found</h3>
+                      <p className="empty-state-description text-gray-600 mb-8 max-w-md mx-auto">Your payment history will appear here once you start making payments on your loans.</p>
                     </div>
                   ) : (
                     paymentHistory.map((payment, index) => (
@@ -1129,7 +1190,7 @@ function IndividualMemberDashboard({ user, onLogout }) {
                             <td className="px-6 py-4 text-sm text-gray-600">
                               {getDisplayValue(transaction.type, 'N/A')}
                             </td>
-                            <td className="px-6 py-4 text-sm font-bold text-green-600 text-lg">
+                            <td className="px-6 py-4 text-lg font-bold text-green-600">
                               {formatCurrency(transaction.amount)}
                             </td>
                             <td className="px-6 py-4">
@@ -1148,12 +1209,14 @@ function IndividualMemberDashboard({ user, onLogout }) {
                 {/* Enhanced Mobile Transaction History Cards */}
                 <div className="lg:hidden space-y-4">
                   {transactionHistory.length === 0 ? (
-                    <div className="empty-state">
-                      <div className="empty-state-icon">
-                        <FaHistory className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
+                    <div className="empty-state text-center py-12 px-6">
+                      <div className="empty-state-icon mb-6">
+                        <div className="w-20 h-20 bg-gradient-to-br from-indigo-100 to-indigo-200 rounded-full flex items-center justify-center mx-auto shadow-lg">
+                          <FaHistory className="h-10 w-10 text-indigo-500" />
+                        </div>
                       </div>
-                      <h3 className="empty-state-title">No transactions found</h3>
-                      <p className="empty-state-description">Transaction history will appear here once activities are recorded.</p>
+                      <h3 className="empty-state-title text-xl font-bold text-gray-900 mb-3">No transactions found</h3>
+                      <p className="empty-state-description text-gray-600 mb-8 max-w-md mx-auto">Your transaction history will appear here once you start using our services.</p>
                     </div>
                   ) : (
                     transactionHistory.map((transaction, index) => (
@@ -1197,58 +1260,90 @@ function IndividualMemberDashboard({ user, onLogout }) {
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
           <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-md shadow-lg rounded-md bg-white">
             <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Apply for New Loan</h3>
+              <div className="flex items-center mb-6">
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                  <svg className="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900">
+                  Apply for New Loan
+                </h3>
+              </div>
               <form onSubmit={handleLoanApplication} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Requested Amount *</label>
-                  <input
-                    type="number"
-                    value={loanApplication.requested_amount}
-                    onChange={(e) => setLoanApplication({...loanApplication, requested_amount: e.target.value})}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter amount"
-                    min="1000"
-                    step="1000"
-                    required
-                  />
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Requested Amount (₹) *</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                      </svg>
+                    </div>
+                    <input
+                      type="number"
+                      value={loanApplication.requested_amount}
+                      onChange={(e) => setLoanApplication({...loanApplication, requested_amount: e.target.value})}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 focus:bg-white"
+                      placeholder="Enter loan amount"
+                      min="1000"
+                      step="1000"
+                      required
+                    />
+                  </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Purpose</label>
-                  <textarea
-                    value={loanApplication.purpose}
-                    onChange={(e) => setLoanApplication({...loanApplication, purpose: e.target.value})}
-                    rows={3}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Describe the purpose of the loan (optional)"
-                  />
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Purpose</label>
+                  <div className="relative">
+                    <div className="absolute top-3 left-3 flex items-start pointer-events-none">
+                      <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <textarea
+                      value={loanApplication.purpose}
+                      onChange={(e) => setLoanApplication({...loanApplication, purpose: e.target.value})}
+                      rows={3}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 focus:bg-white resize-none"
+                      placeholder="Describe the purpose of the loan (optional)"
+                    />
+                  </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Term (months)</label>
-                  <select
-                    value={loanApplication.term_months}
-                    onChange={(e) => setLoanApplication({...loanApplication, term_months: e.target.value})}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Term (months)</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <select
+                      value={loanApplication.term_months}
+                      onChange={(e) => setLoanApplication({...loanApplication, term_months: e.target.value})}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-400 focus:bg-white appearance-none bg-white cursor-pointer"
+                    >
                     <option value="6">6 months</option>
                     <option value="12">12 months</option>
                     <option value="18">18 months</option>
                     <option value="24">24 months</option>
                     <option value="36">36 months</option>
                   </select>
+                  </div>
                 </div>
-                <div className="flex justify-end space-x-3">
+                <div className="flex justify-end space-x-3 pt-4">
                   <button
                     type="button"
                     onClick={() => setShowLoanApplicationModal(false)}
-                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                    className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 cursor-pointer transition-all duration-200 font-medium shadow-sm hover:shadow-md"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmittingLoan}
-                    className={`px-4 py-2 text-white rounded-md flex items-center ${
-                      isSubmittingLoan ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+                    className={`px-6 py-3 text-white rounded-lg flex items-center font-medium transition-all duration-200 shadow-lg hover:shadow-xl ${
+                      isSubmittingLoan 
+                        ? 'bg-blue-400 cursor-not-allowed' 
+                        : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 cursor-pointer transform hover:scale-105'
                     }`}
                   >
                     {isSubmittingLoan && (
@@ -1272,7 +1367,7 @@ function IndividualMemberDashboard({ user, onLogout }) {
                 <h3 className="text-lg font-medium text-gray-900">Member Profile</h3>
                 <button
                   onClick={() => setShowProfileModal(false)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-gray-400 hover:text-gray-600 cursor-pointer"
                 >
                   <FaTimesCircle className="h-6 w-6" />
             </button>
@@ -1315,7 +1410,7 @@ function IndividualMemberDashboard({ user, onLogout }) {
                 <h3 className="text-lg font-medium text-gray-900">Loan Details</h3>
                 <button
                   onClick={() => setShowLoanDetailsModal(false)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-gray-400 hover:text-gray-600 cursor-pointer"
                 >
                   <FaTimesCircle className="h-6 w-6" />
               </button>
