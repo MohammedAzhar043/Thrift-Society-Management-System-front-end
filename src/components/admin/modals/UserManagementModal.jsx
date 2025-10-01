@@ -420,7 +420,13 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
         nominee_relation: userForm.relation?.trim() || null,
         bank_passbook_path: editingUser ? userForm.bank_passbook_path : (userForm.bank_passbook_path?.trim() || null), // Keep existing path for edit
         // Group assignment for members
-        group_id: userForm.group_id ? parseInt(userForm.group_id) : null
+        group_id: userForm.group_id ? parseInt(userForm.group_id) : null,
+        // Enhanced member fields - include in userData so they get passed to member creation
+        age: userForm.age ? parseInt(userForm.age) : null,
+        profession: userForm.profession?.trim() || null,
+        father_husband_name: userForm.father_husband_name?.trim() || null,
+        caste: userForm.caste?.trim() || null,
+        photo_url: editingUser ? userForm.photo_url : (userForm.photo_url?.trim() || null)
       };
 
       // Create member data - only include member-specific fields
@@ -530,9 +536,13 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
             await apiService.uploadMemberPhoto(editingUser.member.id, userForm.photo);
             documentsUploaded++;
           } catch (error) {
+            console.error('❌ Photo upload failed:', error);
+            console.error('❌ Error message:', error.message);
+            console.error('❌ Error stack:', error.stack);
+            
             toast((t) => (
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                <span>Member photo upload failed. Please upload manually.</span>
+                <span>Member photo upload failed: {error.message}. Please upload manually.</span>
                 <button
                   onClick={() => {
                     toast.dismiss(t.id);
@@ -748,12 +758,24 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
         if (userForm.photo) {
           totalDocuments++;
           try {
-            await apiService.uploadMemberPhoto(newUser.member.id, userForm.photo);
+            console.log('📸 Attempting photo upload...');
+            console.log('📸 newUser:', newUser);
+            console.log('📸 newUser.id:', newUser.id);
+            
+            if (!newUser || !newUser.id) {
+              throw new Error('User not found or user ID is missing');
+            }
+            
+            // Use the same approach as Aadhar and Bank Passbook - find member by user ID
+            await apiService.uploadMemberPhotoByUserId(newUser.id, userForm.photo);
             documentsUploaded++;
+            console.log('✅ Photo upload successful');
           } catch (error) {
+            console.error('❌ Photo upload failed:', error);
+            console.error('❌ Error message:', error.message);
             toast((t) => (
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                <span>Member photo upload failed. Please upload manually.</span>
+                <span>Member photo upload failed: {error.message}. Please upload manually.</span>
                 <button
                   onClick={() => {
                     toast.dismiss(t.id);
@@ -824,30 +846,9 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
           }
         }
         
-        // If user is created with member role and group is selected, create member record
-        if (userForm.role_id && userForm.group_id) {
-          const selectedRole = roles.find(role => role.id === parseInt(userForm.role_id));
-          if (selectedRole && selectedRole.name === 'member') {
-            // Use the memberData object we created earlier and add required fields
-            const memberCreateData = {
-              user_id: newUser.id,
-              group_id: parseInt(userForm.group_id),
-              member_code: `M${newUser.id.toString().padStart(4, '0')}`, // Generate member code
-              joined_date: new Date().toISOString().split('T')[0],
-              // Include member-specific fields from our memberData object
-              ...memberData,
-              // Also include user-level fields that are relevant for members
-              monthly_income: userForm.monthly_income ? parseFloat(userForm.monthly_income) : null,
-              nominee_name: userForm.nominee_name?.trim() || null,
-              nominee_phone: userForm.nominee_phone?.trim() || null,
-              nominee_relation: userForm.relation?.trim() || null
-            };
-            await apiService.createMember(memberCreateData);
-            if (onDataChanged) {
-              onDataChanged();
-            }
-          }
-        }
+        // Note: Member creation is now handled automatically by the backend
+        // when creating a user with member role and group_id, so we don't need
+        // to create a separate member record here anymore.
         
         // Show final success message
         const successMessage = documentsUploaded > 0 
@@ -1100,39 +1101,46 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
     });
   };
 
-  const handleEditUser = (user) => {
-    setEditingUser(user);
-    setUserForm({
-      username: user.username || "",
-      email: user.email || "",
-      full_name: user.full_name || "",
-      password: "", // Leave empty so user must enter new password
-      confirm_password: "", // Leave empty so user must enter new password
-      role_id: user.roles?.[0]?.id?.toString() || "",
-      group_id: user.member?.group_id?.toString() || "",
-      aadhar_id: user.aadhar_id || "",
-      aadhar_document_path: user.aadhar_document_path || "",
-      aadhar_document_file: null,
-      bank_account_number: user.bank_account_number || "",
-      bank_name: user.bank_name || "",
-      bank_branch: user.bank_branch || "",
-      ifsc_code: user.ifsc_code || "",
-      // Member-specific fields
-      monthly_income: user.monthly_income || "",
-      nominee_name: user.nominee_name || "",
-      nominee_phone: user.nominee_phone || "",
-      relation: user.member?.nominee_relation || "",
-      bank_passbook_path: user.bank_passbook_path || "",
-      bank_passbook_file: null,
-      // New enhanced member fields
-      age: user.member?.age || "",
-      profession: user.member?.profession || "",
-      father_husband_name: user.member?.father_husband_name || "",
-      caste: user.member?.caste || "",
-      photo: null,
-      photo_url: user.member?.photo_url || ""
-    });
-    setShowUserForm(true);
+  const handleEditUser = async (user) => {
+    try {
+      // Fetch complete user data to ensure we have all member information
+      const completeUser = await apiService.getUser(user.id);
+      setEditingUser(completeUser);
+      setUserForm({
+        username: completeUser.username || "",
+        email: completeUser.email || "",
+        full_name: completeUser.full_name || "",
+        password: "", // Leave empty so user must enter new password
+        confirm_password: "", // Leave empty so user must enter new password
+        role_id: completeUser.roles?.[0]?.id?.toString() || "",
+        group_id: completeUser.member?.group_id?.toString() || "",
+        aadhar_id: completeUser.aadhar_id || "",
+        aadhar_document_path: completeUser.aadhar_document_path || "",
+        aadhar_document_file: null,
+        bank_account_number: completeUser.bank_account_number || "",
+        bank_name: completeUser.bank_name || "",
+        bank_branch: completeUser.bank_branch || "",
+        ifsc_code: completeUser.ifsc_code || "",
+        // Member-specific fields
+        monthly_income: completeUser.monthly_income || "",
+        nominee_name: completeUser.nominee_name || "",
+        nominee_phone: completeUser.nominee_phone || "",
+        relation: completeUser.member?.nominee_relation || "",
+        bank_passbook_path: completeUser.bank_passbook_path || "",
+        bank_passbook_file: null,
+        // New enhanced member fields
+        age: completeUser.member?.age || "",
+        profession: completeUser.member?.profession || "",
+        father_husband_name: completeUser.member?.father_husband_name || "",
+        caste: completeUser.member?.caste || "",
+        photo: null,
+        photo_url: completeUser.member?.photo_url || ""
+      });
+      setShowUserForm(true);
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      toast.error('Failed to load user data for editing');
+    }
   };
 
   const handleDeleteUser = async (userId) => {
@@ -2221,6 +2229,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
                           </div>
                         </div>
                       )}
+                      
                       <div className="relative">
                         <input
                           type="file"

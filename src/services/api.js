@@ -40,6 +40,8 @@ class ApiService {
     const url = `${this.baseURL}${endpoint}`;
     const config = {
       headers: this.getHeaders(),
+      mode: 'cors', // Explicitly set CORS mode
+      credentials: 'include', // Include credentials for CORS
       ...options,
     };
 
@@ -677,6 +679,32 @@ class ApiService {
       throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
     }
 
+    return await response.json();
+  }
+
+  async uploadMemberPhotoByUserId(userId, file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const response = await fetch(`${this.baseURL}/users/${userId}/upload-photo`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${this.token}`
+      },
+      body: formData
+    });
+    
+    if (response.status === 401) {
+      this.clearToken();
+      window.location.href = '/login';
+      return;
+    }
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.detail || 'Photo upload failed');
+    }
+    
     return await response.json();
   }
 
