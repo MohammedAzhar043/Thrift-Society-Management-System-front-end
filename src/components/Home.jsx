@@ -14,7 +14,7 @@ function Home() {
       <header className="bg-blue-800 text-white shadow-md">
         <div className="container mx-auto px-4 py-6 flex justify-between items-center">
           <h1 className="text-xl sm:text-2xl font-bold">
-            Thrift Society Management System
+            Kranthimahila Society Management System
           </h1>
           <Link
             to="/login"
@@ -29,7 +29,7 @@ function Home() {
       <section className="bg-gradient-to-r from-blue-50 to-indigo-100 text-black py-12 sm:py-16">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">
-            Welcome to Thrift Society Management System
+            Welcome to Kranthimahila Society Management System
           </h2>
           <p className="text-lg sm:text-xl mb-6 sm:mb-8 max-w-2xl mx-auto text-gray-700">
             Efficiently manage groups, collections, loans, and members with our
