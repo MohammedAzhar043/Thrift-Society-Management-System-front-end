@@ -3,7 +3,7 @@
  */
   const API_BASE_URL = 'http://82.112.231.241:8000/api/v1';
 // const API_BASE_URL = 'http://localhost:8000/api/v1';
-// const API_BASE_URL = 'http://localhost:8000/api/v1';
+
 class ApiService {
   constructor() {
     this.baseURL = API_BASE_URL;
