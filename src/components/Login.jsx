@@ -29,6 +29,12 @@ function Login({ onLogin }) {
       return;
     }
     
+    // Validate password length (bcrypt has 72-byte limit)
+    if (password.length > 72) {
+      setError('Password cannot be longer than 72 characters');
+      return;
+    }
+    
     // Validate reCAPTCHA
     if (!isCaptchaValid) {
       setError('Please complete the security verification correctly');
@@ -131,7 +137,10 @@ function Login({ onLogin }) {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="py-2 sm:py-2 pl-8 sm:pr-10 block w-full border border-gray-300 rounded-md leading-5 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-sm"
+                  maxLength={72}
+                  className={`py-2 sm:py-2 pl-8 sm:pr-10 block w-full border rounded-md leading-5 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-sm ${
+                    password.length > 60 ? 'border-yellow-300' : 'border-gray-300'
+                  }`}
                   placeholder="Enter your password"
                   disabled={isLoading}
                 />
@@ -150,6 +159,11 @@ function Login({ onLogin }) {
                   </button>
                 </div>
               </div>
+              {password.length > 60 && (
+                <p className="mt-1 text-xs text-yellow-600">
+                  Password length: {password.length}/72 characters
+                </p>
+              )}
             </div>
 
             {/* reCAPTCHA Component */}
