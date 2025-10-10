@@ -19,7 +19,7 @@ const QuickActions = ({
     },
     {
       icon: FaChartBar,
-      label: "Generate Reports",
+      label: "Reports & Analytics",
       onClick: onViewReports,
       variant: "warning"
     },

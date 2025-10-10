@@ -23,8 +23,8 @@ import {
 import { toast, Toaster } from 'react-hot-toast';
 import apiService from '../services/api';
 import { formatCurrency, formatDate } from '../utils/formatters';
-import * as XLSX from 'xlsx';
 import MemberStatementModal from './admin/MemberStatementModal';
+import ReportsModal from './admin/ReportsModal';
 
 function AdminClerkDashboard({ user, onLogout }) {
   const [loading, setLoading] = useState(true);
@@ -68,14 +68,6 @@ function AdminClerkDashboard({ user, onLogout }) {
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [showCollectionDetailsModal, setShowCollectionDetailsModal] = useState(false);
   const [selectedCollection, setSelectedCollection] = useState(null);
-  
-  // Report states
-  const [reportType, setReportType] = useState('collections');
-  const [reportDate, setReportDate] = useState(new Date().toISOString().split('T')[0]);
-  const [reportStartDate, setReportStartDate] = useState(new Date().toISOString().split('T')[0]);
-  const [reportEndDate, setReportEndDate] = useState(new Date().toISOString().split('T')[0]);
-  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
-  const [isRefreshingData, setIsRefreshingData] = useState(false);
 
   useEffect(() => {
     loadDashboardData();
@@ -314,433 +306,6 @@ function AdminClerkDashboard({ user, onLogout }) {
     }
   };
 
-  const generateReport = async () => {
-    // Validate based on report type
-    if (!reportType) {
-      toast((t) => (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-          <span>Please select a report type</span>
-          <button
-            onClick={() => {
-              toast.dismiss(t.id);
-            }}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'white',
-              cursor: 'pointer',
-              padding: '0',
-              marginLeft: '10px',
-              fontSize: '18px',
-              fontWeight: 'bold'
-            }}
-          >
-            ✕
-          </button>
-        </div>
-      ), {
-        duration: 6000,
-        position: "top-center",
-        style: {
-          background: '#EF4444',
-          color: '#fff',
-          padding: '12px 16px',
-          fontSize: '14px',
-        },
-      });
-      return;
-    }
-
-    if (reportType === 'weekly' && (!reportStartDate || !reportEndDate)) {
-      toast((t) => (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-          <span>Please fill in start and end dates for weekly report</span>
-          <button
-            onClick={() => {
-              toast.dismiss(t.id);
-            }}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'white',
-              cursor: 'pointer',
-              padding: '0',
-              marginLeft: '10px',
-              fontSize: '18px',
-              fontWeight: 'bold'
-            }}
-          >
-            ✕
-          </button>
-        </div>
-      ), {
-        duration: 6000,
-        position: "top-center",
-        style: {
-          background: '#EF4444',
-          color: '#fff',
-          padding: '12px 16px',
-          fontSize: '14px',
-        },
-      });
-      return;
-    }
-
-    if ((reportType === 'daily' || reportType === 'monthly') && !reportDate) {
-      toast((t) => (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-          <span>Please select a date for the report</span>
-          <button
-            onClick={() => {
-              toast.dismiss(t.id);
-            }}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'white',
-              cursor: 'pointer',
-              padding: '0',
-              marginLeft: '10px',
-              fontSize: '18px',
-              fontWeight: 'bold'
-            }}
-          >
-            ✕
-          </button>
-        </div>
-      ), {
-        duration: 6000,
-        position: "top-center",
-        style: {
-          background: '#EF4444',
-          color: '#fff',
-          padding: '12px 16px',
-          fontSize: '14px',
-        },
-      });
-      return;
-    }
-
-    setIsGeneratingReport(true);
-    console.log('Starting report generation:', { reportType, reportDate, reportStartDate, reportEndDate });
-    
-    try {
-      let reportData;
-      let reportTitle = "";
-      let worksheetData = [];
-      
-      switch (reportType) {
-        case "daily":
-          // Daily report
-          console.log('Fetching daily report for date:', reportDate);
-          reportData = await apiService.getDailyCollectionReport(reportDate);
-          console.log('Daily report data received:', reportData);
-          reportTitle = "Daily Collection Report";
-          // Format collections data for Excel
-          if (reportData && reportData.collections && reportData.collections.length > 0) {
-            worksheetData = [
-              ['Date', 'Group', 'Collector', 'Amount', 'Status', 'Notes'],
-              ...reportData.collections.map(collection => [
-                new Date(collection.collection_date).toLocaleDateString(),
-                collection.group?.name || 'N/A',
-                collection.collector?.username || 'N/A',
-                parseFloat(collection.grand_total || 0).toFixed(2),
-                collection.is_verified ? 'Verified' : 'Pending',
-                collection.notes || ''
-              ])
-            ];
-          } else {
-            worksheetData = [
-              ['Date', 'Group', 'Collector', 'Amount', 'Status', 'Notes'],
-              ['No collections found for the selected date']
-            ];
-          }
-          break;
-        case "weekly":
-          // Weekly report
-          console.log('Fetching weekly report for dates:', reportStartDate, 'to', reportEndDate);
-          reportData = await apiService.getWeeklyCollectionReport(reportStartDate, reportEndDate);
-          console.log('Weekly report data received:', reportData);
-          reportTitle = "Weekly Collection Report";
-          // Format collections data for Excel
-          if (reportData && reportData.collections && reportData.collections.length > 0) {
-            worksheetData = [
-              ['Date', 'Group', 'Collector', 'Amount', 'Status', 'Notes'],
-              ...reportData.collections.map(collection => [
-                new Date(collection.collection_date).toLocaleDateString(),
-                collection.group?.name || 'N/A',
-                collection.collector?.username || 'N/A',
-                parseFloat(collection.grand_total || 0).toFixed(2),
-                collection.is_verified ? 'Verified' : 'Pending',
-                collection.notes || ''
-              ])
-            ];
-          } else {
-            worksheetData = [
-              ['Date', 'Group', 'Collector', 'Amount', 'Status', 'Notes'],
-              ['No collections found for the selected period']
-            ];
-          }
-          break;
-        case "monthly":
-          // Monthly report
-          // reportDate is in format "YYYY-MM" from month input
-          const [year, month] = reportDate.split('-').map(Number);
-          console.log('Fetching monthly report for year:', year, 'month:', month);
-          reportData = await apiService.getMonthlyCollectionReport(year, month);
-          console.log('Monthly report data received:', reportData);
-          reportTitle = "Monthly Collection Report";
-          // Format collections data for Excel
-          if (reportData && reportData.collections && reportData.collections.length > 0) {
-            worksheetData = [
-              ['Date', 'Group', 'Collector', 'Amount', 'Status', 'Notes'],
-              ...reportData.collections.map(collection => [
-                new Date(collection.collection_date).toLocaleDateString(),
-                collection.group?.name || 'N/A',
-                collection.collector?.username || 'N/A',
-                parseFloat(collection.grand_total || 0).toFixed(2),
-                collection.is_verified ? 'Verified' : 'Pending',
-                collection.notes || ''
-              ])
-            ];
-          } else {
-            worksheetData = [
-              ['Date', 'Group', 'Collector', 'Amount', 'Status', 'Notes'],
-              ['No collections found for the selected month']
-            ];
-          }
-          break;
-        case "members":
-          // For now, use existing data
-          reportData = { count: pendingApprovals.filter(a => a.type === 'member').length };
-          reportTitle = "Members Report";
-          // Format members data for Excel
-          const memberApprovals = pendingApprovals.filter(a => a.type === 'member');
-          worksheetData = [
-            ['Name', 'Type', 'Amount', 'Location', 'Date', 'Status'],
-            ...memberApprovals.map(approval => [
-              approval.name || 'N/A',
-              approval.type,
-              approval.amount || 'N/A',
-              approval.location || 'N/A',
-              approval.date,
-              approval.status
-            ])
-          ];
-          break;
-        case "loans":
-          // For now, use existing data
-          reportData = { count: pendingApprovals.filter(a => a.type === 'loan').length };
-          reportTitle = "Loans Report";
-          // Format loans data for Excel
-          const loanApprovals = pendingApprovals.filter(a => a.type === 'loan');
-          worksheetData = [
-            ['Name', 'Type', 'Amount', 'Location', 'Date', 'Status'],
-            ...loanApprovals.map(approval => [
-              approval.name || 'N/A',
-              approval.type,
-              approval.amount || 'N/A',
-              approval.location || 'N/A',
-              approval.date,
-              approval.status
-            ])
-          ];
-          break;
-        case "groups":
-          // For now, use existing data
-          reportData = { count: dashboardStats.total_groups };
-          reportTitle = "Groups Report";
-          // Format groups data for Excel
-          worksheetData = [
-            ['Metric', 'Count', 'Description'],
-            ['Total Groups', dashboardStats.total_groups, 'Total number of groups in the system'],
-            ['Total Members', dashboardStats.total_members, 'Total number of members across all groups'],
-            ['Active Loans', dashboardStats.active_loans, 'Total number of active loans'],
-            ['Pending Approvals', dashboardStats.pending_approvals, 'Total pending approvals'],
-            ['Daily Collection', formatCurrency(dashboardStats.daily_collection), 'Today\'s total collections'],
-            ['Monthly Collection', formatCurrency(dashboardStats.monthly_collection), 'This month\'s total collections']
-          ];
-          break;
-        case "collections":
-          // Collections report - use today's data
-          console.log('Fetching collections report for today:', reportDate);
-          reportData = await apiService.getDailyCollectionReport(reportDate);
-          console.log('Collections report data received:', reportData);
-          reportTitle = "Collections Report";
-          // Format collections data for Excel
-          if (reportData && reportData.collections && reportData.collections.length > 0) {
-            worksheetData = [
-              ['Date', 'Group', 'Collector', 'Amount', 'Status', 'Notes'],
-              ...reportData.collections.map(collection => [
-                new Date(collection.collection_date).toLocaleDateString(),
-                collection.group?.name || 'N/A',
-                collection.collector?.username || 'N/A',
-                parseFloat(collection.grand_total || 0).toFixed(2),
-                collection.is_verified ? 'Verified' : 'Pending',
-                collection.notes || ''
-              ])
-            ];
-          } else {
-            worksheetData = [
-              ['Date', 'Group', 'Collector', 'Amount', 'Status', 'Notes'],
-              ['No collections found for the selected date']
-            ];
-          }
-          break;
-        default:
-          reportData = [];
-          reportTitle = "Report";
-          worksheetData = [['No data available']];
-      }
-      
-      // Validate worksheet data
-      if (!worksheetData || worksheetData.length === 0) {
-        throw new Error('No data available to generate report');
-      }
-
-      // Create Excel workbook and worksheet
-      const workbook = XLSX.utils.book_new();
-      const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
-      
-      // Auto-size columns
-      if (worksheetData.length > 0) {
-        const columnWidths = worksheetData[0].map((_, index) => {
-          const maxLength = Math.max(...worksheetData.map(row => String(row[index] || '').length));
-          return Math.min(Math.max(maxLength + 2, 10), 50); // Min 10, Max 50
-        });
-        worksheet['!cols'] = columnWidths.map(width => ({ width }));
-      }
-      
-      // Add worksheet to workbook
-      XLSX.utils.book_append_sheet(workbook, worksheet, reportTitle);
-      
-      // Generate Excel file
-      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-      const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      
-      // Generate filename based on report type
-      let filename;
-      if (reportType === 'daily') {
-        filename = `${reportType}_report_${reportDate}.xlsx`;
-      } else if (reportType === 'weekly') {
-        filename = `${reportType}_report_${reportStartDate}_to_${reportEndDate}.xlsx`;
-      } else if (reportType === 'monthly') {
-        // reportDate is in format "YYYY-MM"
-        const [year, month] = reportDate.split('-');
-        filename = `${reportType}_report_${year}_${month}.xlsx`;
-      } else {
-        filename = `${reportType}_report_${new Date().toISOString().split('T')[0]}.xlsx`;
-      }
-
-      // Download the file
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-
-      toast.success(`${reportTitle} generated and downloaded successfully as Excel file!`);
-      setShowReportsModal(false);
-    } catch (err) {
-      console.error('Report generation error:', err);
-      
-      let errorMessage = 'Failed to generate report';
-      if (err.message) {
-        errorMessage += `: ${err.message}`;
-      } else if (err.response?.data?.detail) {
-        errorMessage += `: ${err.response.data.detail}`;
-      } else if (err.response?.status) {
-        errorMessage += `: HTTP ${err.response.status}`;
-      }
-      
-      // Check for specific error types
-      if (err.message && err.message.includes('Network error')) {
-        errorMessage = 'Network error: Unable to connect to server. Please check if the backend is running.';
-      } else if (err.message && err.message.includes('Failed to fetch')) {
-        errorMessage = 'Connection error: Please check your internet connection and try again.';
-      }
-      
-      toast((t) => (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-          <span>{errorMessage}</span>
-          <button
-            onClick={() => {
-              toast.dismiss(t.id);
-            }}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'white',
-              cursor: 'pointer',
-              padding: '0',
-              marginLeft: '10px',
-              fontSize: '18px',
-              fontWeight: 'bold'
-            }}
-          >
-            ✕
-          </button>
-        </div>
-      ), {
-        duration: 6000,
-        position: "top-center",
-        style: {
-          background: '#EF4444',
-          color: '#fff',
-          padding: '12px 16px',
-          fontSize: '14px',
-        },
-      });
-    } finally {
-      setIsGeneratingReport(false);
-    }
-  };
-
-  const refreshData = async () => {
-    try {
-      setIsRefreshingData(true);
-      await loadDashboardData();
-      toast.success('Data refreshed successfully!');
-    } catch (err) {
-      toast((t) => (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-          <span>Failed to refresh data</span>
-          <button
-            onClick={() => {
-              toast.dismiss(t.id);
-            }}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'white',
-              cursor: 'pointer',
-              padding: '0',
-              marginLeft: '10px',
-              fontSize: '18px',
-              fontWeight: 'bold'
-            }}
-          >
-            ✕
-          </button>
-        </div>
-      ), {
-        duration: 6000,
-        position: "top-center",
-        style: {
-          background: '#EF4444',
-          color: '#fff',
-          padding: '12px 16px',
-          fontSize: '14px',
-        },
-      });
-    } finally {
-      setIsRefreshingData(false);
-    }
-  };
-
   // Using shared utility function from ../utils/formatters
 
   const formatTimeAgo = (dateString) => {
@@ -822,17 +387,17 @@ function AdminClerkDashboard({ user, onLogout }) {
             {/* Right side - Action buttons */}
             <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
             <button
-              onClick={refreshData}
-              disabled={isRefreshingData}
+              onClick={loadDashboardData}
+              disabled={loading}
                 className={`inline-flex items-center px-1.5 sm:px-2 py-1.5 sm:py-2 rounded text-xs sm:text-sm font-medium transition-colors duration-200 ${
-                isRefreshingData 
+                loading 
                   ? 'bg-gray-400 cursor-not-allowed text-white' 
                     : 'bg-blue-600 hover:bg-blue-700 text-white focus:outline-none focus:ring-1 focus:ring-offset-1 focus:ring-blue-500 cursor-pointer'
               }`}
             >
-                <FaSync className={`w-3 h-3 sm:w-4 sm:h-4 sm:mr-1 ${isRefreshingData ? 'animate-spin' : ''}`} />
+                <FaSync className={`w-3 h-3 sm:w-4 sm:h-4 sm:mr-1 ${loading ? 'animate-spin' : ''}`} />
                 <span className="hidden sm:inline">
-              {isRefreshingData ? 'Refreshing...' : 'Refresh'}
+              {loading ? 'Refreshing...' : 'Refresh'}
                 </span>
             </button>
             <button
@@ -1036,17 +601,6 @@ function AdminClerkDashboard({ user, onLogout }) {
                 <FaUsers className="inline mr-1 sm:mr-2 w-3 h-3 sm:w-4 sm:h-4" />
                 <span className="hidden sm:inline">Members</span>
                 <span className="sm:hidden">Members</span>
-              </button>
-              <button
-                onClick={() => setActiveTab('reports')}
-                className={`py-3 sm:py-4 px-2 sm:px-3 border-b-2 font-semibold text-xs sm:text-sm whitespace-nowrap transition-all duration-200 rounded-t-lg cursor-pointer ${
-                  activeTab === 'reports'
-                    ? 'border-blue-500 text-blue-600 bg-blue-50'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50'
-                }`}
-              >
-                <FaFileAlt className="inline mr-1 sm:mr-2 w-3 h-3 sm:w-4 sm:h-4" />
-                Reports
               </button>
               <button
                 onClick={() => setActiveTab('monitoring')}
@@ -1744,90 +1298,6 @@ function AdminClerkDashboard({ user, onLogout }) {
               </div>
             )}
 
-            {/* Reports Tab */}
-            {activeTab === 'reports' && (
-              <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Generate Reports</h3>
-                <div className="bg-gray-50 rounded-lg p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Report Type</label>
-                      <select
-                        value={reportType}
-                        onChange={(e) => setReportType(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
-                      >
-                        <option value="daily">Daily Report</option>
-                        <option value="weekly">Weekly Report</option>
-                        <option value="monthly">Monthly Report</option>
-                      </select>
-                    </div>
-
-                    {reportType === 'daily' && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
-                        <input
-                          type="date"
-                          value={reportDate}
-                          onChange={(e) => setReportDate(e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
-                        />
-                      </div>
-                    )}
-
-                    {reportType === 'weekly' && (
-                      <>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
-                          <input
-                            type="date"
-                            value={reportStartDate}
-                            onChange={(e) => setReportStartDate(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">End Date</label>
-                          <input
-                            type="date"
-                            value={reportEndDate}
-                            onChange={(e) => setReportEndDate(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
-                          />
-                        </div>
-                      </>
-                    )}
-
-                    {reportType === 'monthly' && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Month</label>
-                        <input
-                          type="month"
-                          value={reportDate}
-                          onChange={(e) => setReportDate(e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
-                        />
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="mt-6">
-                    <button
-                      onClick={generateReport}
-                      disabled={isGeneratingReport}
-                      className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
-                        isGeneratingReport 
-                          ? 'bg-blue-400 cursor-not-allowed' 
-                          : 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
-                      }`}
-                    >
-                      {isGeneratingReport ? 'Generating...' : 'Generate Report'}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* Monitoring Tab */}
             {activeTab === 'monitoring' && (
               <div>
@@ -2136,15 +1606,15 @@ function AdminClerkDashboard({ user, onLogout }) {
                     </div>
                   </div>
                 ) : (
-                  <div className="empty-state">
-                    <div className="empty-state-icon">
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                       <FaHistory className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
                     </div>
-                    <h3 className="empty-state-title">No transaction history</h3>
-                    <p className="empty-state-description">Transaction history will appear here.</p>
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">No transaction history</h3>
+                    <p className="text-sm text-gray-500 mb-6">Transaction history will appear here.</p>
                     <button
                       onClick={() => loadDashboardData()}
-                      className="mt-6 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors duration-200 font-semibold shadow-lg hover:shadow-xl cursor-pointer"
+                      className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors duration-200 font-semibold shadow-lg hover:shadow-xl cursor-pointer"
                     >
                       Refresh Data
                     </button>
@@ -2252,148 +1722,12 @@ function AdminClerkDashboard({ user, onLogout }) {
       )}
 
       {/* Reports Modal */}
-      {showReportsModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-md shadow-lg rounded-md bg-white">
-            <div className="mt-3">
-              <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-1">
-                <div className="bg-white rounded-xl p-6 sm:p-8">
-                  <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-bold text-gray-900 flex items-center">
-                      <svg className="w-6 h-6 mr-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      Generate Excel Report
-                    </h3>
-                    <button
-                      onClick={() => setShowReportsModal(false)}
-                      className="text-gray-400 hover:text-gray-600 cursor-pointer transition-colors duration-200 p-2 rounded-lg hover:bg-gray-100"
-                    >
-                      <FaTimes className="h-6 w-6" />
-                    </button>
-                  </div>
-                  
-                  {/* Report Type Field */}
-                  <div className="mb-6">
-                    <label className="block text-sm font-semibold text-gray-800 mb-3 flex items-center">
-                      <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                      </svg>
-                      Report Type *
-                    </label>
-                    <div className="relative">
-                      <select
-                        value={reportType}
-                        onChange={(e) => setReportType(e.target.value)}
-                        className="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 focus:bg-white text-gray-800 appearance-none cursor-pointer"
-                      >
-                        <option value="collections">Collections</option>
-                        <option value="members">Members</option>
-                        <option value="loans">Loans</option>
-                        <option value="groups">Groups</option>
-                      </select>
-                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                        </svg>
-                      </div>
-                      <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
-                        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Date Range Fields */}
-                  <div className="mb-6">
-                    <label className="block text-sm font-semibold text-gray-800 mb-3 flex items-center">
-                      <svg className="w-4 h-4 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                      Date Range
-                    </label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div className="relative">
-                        <input
-                          type="date"
-                          value={reportStartDate}
-                          onChange={(e) => setReportStartDate(e.target.value)}
-                          className="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-gray-50 focus:bg-white text-gray-800 cursor-pointer"
-                          placeholder="Start Date"
-                        />
-                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                        </div>
-                      </div>
-                      <div className="relative">
-                        <input
-                          type="date"
-                          value={reportEndDate}
-                          onChange={(e) => setReportEndDate(e.target.value)}
-                          className="w-full px-4 py-3 pl-12 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-gray-50 focus:bg-white text-gray-800 cursor-pointer"
-                          placeholder="End Date"
-                        />
-                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Report Summary */}
-                  <div className="mb-8 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl">
-                    <div className="flex items-start">
-                      <svg className="w-5 h-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                      </svg>
-                      <div>
-                        <p className="text-sm font-semibold text-blue-800 mb-2">Report Summary:</p>
-                        <ul className="text-sm text-blue-700 space-y-1">
-                          <li><span className="font-medium">Type:</span> {reportType.charAt(0).toUpperCase() + reportType.slice(1)}</li>
-                          <li><span className="font-medium">Period:</span> {reportStartDate} to {reportEndDate}</li>
-                          <li><span className="font-medium">Format:</span> Excel (.xlsx) with auto-sized columns</li>
-                          <li><span className="font-medium">Status:</span> Ready to generate</li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Action Buttons */}
-                  <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3">
-                    <button
-                      type="button"
-                      onClick={() => setShowReportsModal(false)}
-                      className="w-full sm:w-auto px-6 py-3 text-sm font-semibold text-gray-700 bg-gray-200 rounded-xl hover:bg-gray-300 cursor-pointer transition-all duration-200"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="button"
-                      onClick={generateReport}
-                      disabled={isGeneratingReport}
-                      className={`w-full sm:w-auto px-6 py-3 text-sm font-semibold rounded-xl flex items-center justify-center transition-all duration-200 ${
-                        isGeneratingReport
-                          ? "bg-gray-400 cursor-not-allowed text-gray-600"
-                          : "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white cursor-pointer shadow-lg hover:shadow-xl"
-                      }`}
-                    >
-                      {isGeneratingReport && (
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      )}
-                      {isGeneratingReport ? "Generating..." : "Generate Excel Report"}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <ReportsModal
+        isOpen={showReportsModal}
+        onClose={() => setShowReportsModal(false)}
+        groups={groups}
+        user={user}
+      />
 
       {/* Verification Modal */}
       {showVerificationModal && (

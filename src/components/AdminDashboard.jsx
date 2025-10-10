@@ -22,6 +22,7 @@ import {
 } from "./admin";
 import PayableManagement from "./admin/PayableManagement";
 import MemberStatementModal from "./admin/MemberStatementModal";
+import ReportsModal from "./admin/ReportsModal";
 
 function AdminDashboard({ user, onLogout }) {
   const [pendingApprovals, setPendingApprovals] = useState([]);
@@ -77,6 +78,7 @@ function AdminDashboard({ user, onLogout }) {
   const [showMemberStatement, setShowMemberStatement] = useState(false);
   const [selectedMemberForStatement, setSelectedMemberForStatement] = useState(null);
   const [showPrintConfirmation, setShowPrintConfirmation] = useState(false);
+ // const [showReportsModal, setShowReportsModal] = useState(false);
 
   // Form states
   const [groupForm, setGroupForm] = useState({
@@ -181,8 +183,8 @@ function AdminDashboard({ user, onLogout }) {
 
   const loadUsers = async () => {
     try {
-      // Load all users
-      const users = await apiService.getUsers();
+      // Load all users (increase limit to avoid pagination hiding newer users)
+      const users = await apiService.getUsers(0, 1000);
 
       // Filter users by specific roles
       const teamLeadersList = users.filter(
@@ -192,12 +194,15 @@ function AdminDashboard({ user, onLogout }) {
           user.roles.some((role) => role.name === "teamleader")
       );
 
-      const billCollectorsList = users.filter(
-        (user) =>
-          user.is_active &&
-          user.roles &&
-          user.roles.some((role) => role.name === "billcollector")
-      );
+      // Bill collectors: must have 'billcollector' role and must NOT be members
+      const billCollectorsList = users
+        .filter(
+          (user) =>
+            user.is_active &&
+            user.roles &&
+            user.roles.some((role) => role.name === "billcollector")
+        )
+        .filter((user) => !user.member);
 
       // Fallback: if no users with specific roles found, show all active users
       // This helps with debugging and development
@@ -208,12 +213,8 @@ function AdminDashboard({ user, onLogout }) {
         setTeamLeaders(teamLeadersList);
       }
 
-      if (billCollectorsList.length === 0) {
-        const activeUsers = users.filter((user) => user.is_active);
-        setBillCollectors(activeUsers);
-      } else {
-        setBillCollectors(billCollectorsList);
-      }
+      // Do not fallback to all active users; keep empty to avoid showing members
+      setBillCollectors(billCollectorsList);
     } catch (error) {
       // Don't set error state here as it's not critical for main functionality
     }
@@ -2982,6 +2983,14 @@ function AdminDashboard({ user, onLogout }) {
           </div>
         </div>
       )}
+
+      {/* Reports Modal */}
+      <ReportsModal
+        isOpen={showReportsModal}
+        onClose={() => setShowReportsModal(false)}
+        groups={groups}
+        user={user}
+      />
 
       {/* Member Statement Modal */}
       <MemberStatementModal

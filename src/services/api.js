@@ -481,6 +481,55 @@ class ApiService {
     return await this.request('/member/dashboard/summary');
   }
 
+  // Reports APIs
+  async getMemberMasterReport(filters = {}) {
+    const params = new URLSearchParams();
+    if (filters.group_id) params.append('group_id', filters.group_id);
+    if (filters.status) params.append('status', filters.status);
+    return await this.request(`/reports/members/master?${params.toString()}`);
+  }
+
+  async getMemberRegistrationReport(filters = {}) {
+    const params = new URLSearchParams();
+    if (filters.start_date) params.append('start_date', filters.start_date);
+    if (filters.end_date) params.append('end_date', filters.end_date);
+    if (filters.group_id) params.append('group_id', filters.group_id);
+    return await this.request(`/reports/members/registration?${params.toString()}`);
+  }
+
+  async getActiveInactiveMembersReport(filters = {}) {
+    const params = new URLSearchParams();
+    if (filters.group_id) params.append('group_id', filters.group_id);
+    return await this.request(`/reports/members/active-inactive?${params.toString()}`);
+  }
+
+  async getLoanDisbursementReport(filters = {}) {
+    const params = new URLSearchParams();
+    if (filters.start_date) params.append('start_date', filters.start_date);
+    if (filters.end_date) params.append('end_date', filters.end_date);
+    if (filters.group_id) params.append('group_id', filters.group_id);
+    if (filters.status) params.append('status', filters.status);
+    return await this.request(`/reports/loans/disbursement?${params.toString()}`);
+  }
+
+  async getLoanEMIReport(filters = {}) {
+    const params = new URLSearchParams();
+    if (filters.group_id) params.append('group_id', filters.group_id);
+    if (filters.status) params.append('status', filters.status);
+    return await this.request(`/reports/loans/emi?${params.toString()}`);
+  }
+
+  async getOverdueReport(filters = {}) {
+    const params = new URLSearchParams();
+    if (filters.group_id) params.append('group_id', filters.group_id);
+    if (filters.days_overdue) params.append('days_overdue', filters.days_overdue);
+    return await this.request(`/reports/loans/overdue?${params.toString()}`);
+  }
+
+  async getDashboardSummary() {
+    return await this.request('/reports/summary/dashboard');
+  }
+
   // User Management APIs
   async getUsers(skip = 0, limit = 100) {
     const data = await this.request(`/users?skip=${skip}&limit=${limit}`);
