@@ -55,8 +55,9 @@ function Login({ onLogin }) {
       // Get user info to determine role
       const userInfo = await apiService.getCurrentUser();
       
-      // Determine primary role (use the first role for now)
-      const primaryRole = userInfo.roles[0]?.name || 'member';
+      // Determine primary role (prioritize admin role)
+      const primaryRole = userInfo.roles.find(role => role.name === 'admin')?.name || 
+                         userInfo.roles[0]?.name || 'member';
       
       
       const userData = {
