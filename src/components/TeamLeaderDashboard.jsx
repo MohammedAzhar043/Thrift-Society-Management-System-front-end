@@ -670,7 +670,7 @@ function TeamLeaderDashboard({ user, onLogout }) {
 
   return (
     <>
-      <style jsx>{`
+      <style>{`
         .scrollbar-hide {
           -ms-overflow-style: none;
           scrollbar-width: none;

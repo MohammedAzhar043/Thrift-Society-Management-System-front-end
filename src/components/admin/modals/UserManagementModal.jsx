@@ -107,7 +107,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
           </button>
         </div>
       ), {
-        duration: 6000,
+        duration: 2000,
         position: "top-center",
         style: {
           background: '#EF4444',
@@ -148,7 +148,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
           </button>
         </div>
       ), {
-        duration: 6000,
+        duration: 2000,
         position: "top-center",
         style: {
           background: '#EF4444',
@@ -187,7 +187,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
           </button>
         </div>
       ), {
-        duration: 6000,
+        duration: 2000,
         position: "top-center",
         style: {
           background: '#EF4444',
@@ -345,7 +345,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
           </button>
         </div>
       ), {
-        duration: 6000,
+        duration: 2000,
         position: "top-center",
         style: {
           background: '#EF4444',
@@ -384,7 +384,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
             </button>
           </div>
         ), {
-          duration: 6000,
+          duration: 2000,
           position: "top-center",
           style: {
             background: '#EF4444',
@@ -477,7 +477,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
                 </button>
               </div>
             ), {
-              duration: 6000,
+              duration: 2000,
               position: "top-center",
               style: {
                 background: '#EF4444',
@@ -517,7 +517,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
                 </button>
               </div>
             ), {
-              duration: 6000,
+              duration: 2000,
               position: "top-center",
               style: {
                 background: '#EF4444',
@@ -562,7 +562,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
                 </button>
               </div>
             ), {
-              duration: 6000,
+              duration: 2000,
               position: "top-center",
               style: {
                 background: '#EF4444',
@@ -615,7 +615,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
                   </button>
                 </div>
               ), {
-                duration: 6000,
+                duration: 2000,
                 position: "top-center",
                 style: {
                   background: '#EF4444',
@@ -669,7 +669,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
                 </button>
               </div>
             ), {
-              duration: 6000,
+              duration: 2000,
               position: "top-center",
               style: {
                 background: '#EF4444',
@@ -702,7 +702,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
               </button>
             </div>
           ), {
-            duration: 6000,
+            duration: 2000,
             position: "top-center",
             style: {
               background: '#EF4444',
@@ -742,7 +742,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
                 </button>
               </div>
             ), {
-              duration: 6000,
+              duration: 2000,
               position: "top-center",
               style: {
                 background: '#EF4444',
@@ -795,7 +795,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
                 </button>
               </div>
             ), {
-              duration: 6000,
+              duration: 2000,
               position: "top-center",
               style: {
                 background: '#EF4444',
@@ -834,7 +834,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
                 </button>
               </div>
             ), {
-              duration: 6000,
+              duration: 2000,
               position: "top-center",
               style: {
                 background: '#EF4444',
@@ -923,7 +923,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
               </button>
             </div>
           ), {
-            duration: 6000,
+            duration: 2000,
             position: "top-center",
             style: {
               background: '#EF4444',
@@ -956,7 +956,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
               </button>
             </div>
           ), {
-            duration: 6000,
+            duration: 2000,
             position: "top-center",
             style: {
               background: '#EF4444',
@@ -989,7 +989,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
               </button>
             </div>
           ), {
-            duration: 6000,
+            duration: 2000,
             position: "top-center",
             style: {
               background: '#EF4444',
@@ -1022,7 +1022,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
               </button>
             </div>
           ), {
-            duration: 6000,
+            duration: 2000,
             position: "top-center",
             style: {
               background: '#EF4444',
@@ -1055,7 +1055,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
             </button>
           </div>
         ), {
-          duration: 6000,
+          duration: 2000,
           position: "top-center",
           style: {
             background: '#EF4444',
@@ -1087,7 +1087,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
               </button>
             </div>
           ), {
-            duration: 6000,
+            duration: 2000,
             position: "top-center",
             style: {
               background: '#EF4444',
@@ -1191,7 +1191,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
             </button>
           </div>
         ), {
-          duration: 8000,
+          duration: 2000,
           position: "top-center",
         });
       } else if (error.message && error.message.includes("foreign key constraint")) {
@@ -1206,7 +1206,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
             </button>
           </div>
         ), {
-          duration: 8000,
+          duration: 2000,
           position: "top-center",
         });
       } else if (error.message && error.message.includes("constraint")) {
@@ -1221,7 +1221,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
             </button>
           </div>
         ), {
-          duration: 8000,
+          duration: 2000,
           position: "top-center",
         });
       } else if (error.response?.status === 400) {
@@ -1236,7 +1236,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
             </button>
           </div>
         ), {
-          duration: 8000,
+          duration: 2000,
           position: "top-center",
         });
       } else if (error.response?.status === 404) {
@@ -1251,7 +1251,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
             </button>
           </div>
         ), {
-          duration: 8000,
+          duration: 2000,
           position: "top-center",
         });
       } else if (error.response?.status === 403) {
@@ -1266,7 +1266,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
             </button>
           </div>
         ), {
-          duration: 8000,
+          duration: 2000,
           position: "top-center",
         });
       } else {
@@ -1281,7 +1281,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
             </button>
           </div>
         ), {
-          duration: 8000,
+          duration: 2000,
           position: "top-center",
         });
       }
@@ -1323,7 +1323,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
           </button>
         </div>
       ), {
-        duration: 6000,
+        duration: 2000,
         position: "top-center",
         style: {
           background: '#EF4444',

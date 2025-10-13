@@ -649,7 +649,7 @@ function AdminDashboard({ user, onLogout }) {
 
         // Show success message after all operations are complete
         toast.success("Group deleted successfully!", {
-          duration: 3000,
+          duration: 2000,
           position: "top-center",
         });
       },
@@ -690,7 +690,7 @@ function AdminDashboard({ user, onLogout }) {
               </div>
             ),
             {
-              duration: 6000,
+              duration: 2000,
               position: "top-center",
               style: {
                 background: "#EF4444",
@@ -1041,7 +1041,7 @@ function AdminDashboard({ user, onLogout }) {
 
   return (
     <>
-      <style jsx>{`
+      <style>{`
         .scrollbar-hide {
           -ms-overflow-style: none;
           scrollbar-width: none;
@@ -1062,7 +1062,7 @@ function AdminDashboard({ user, onLogout }) {
       <Toaster
         position="top-center"
         toastOptions={{
-          duration: 4000,
+          duration: 2000,
           style: {
             background: "#363636",
             color: "#fff",
@@ -1073,7 +1073,7 @@ function AdminDashboard({ user, onLogout }) {
               "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
           },
           success: {
-            duration: 3000,
+            duration: 2000,
             iconTheme: {
               primary: "#10B981",
               secondary: "#fff",
@@ -1084,7 +1084,7 @@ function AdminDashboard({ user, onLogout }) {
             },
           },
           error: {
-            duration: 6000,
+            duration: 2000,
             iconTheme: {
               primary: "#EF4444",
               secondary: "#fff",
@@ -1096,7 +1096,7 @@ function AdminDashboard({ user, onLogout }) {
             },
           },
           info: {
-            duration: 4000,
+            duration: 2000,
             iconTheme: {
               primary: "#3B82F6",
               secondary: "#fff",

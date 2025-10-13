@@ -65,7 +65,7 @@ const BonusManagement = () => {
           </button>
         </div>
       ), {
-        duration: 6000,
+        duration: 2000,
         position: "top-center",
         style: {
           background: '#EF4444',
@@ -107,7 +107,7 @@ const BonusManagement = () => {
           </button>
         </div>
       ), {
-        duration: 6000,
+        duration: 2000,
         position: "top-center",
         style: {
           background: '#EF4444',
@@ -171,7 +171,7 @@ const BonusManagement = () => {
                     </button>
                   </div>
                 ), {
-                  duration: 6000,
+                  duration: 2000,
                   position: "top-center",
                   style: {
                     background: '#EF4444',
@@ -236,7 +236,7 @@ const BonusManagement = () => {
                     </button>
                   </div>
                 ), {
-                  duration: 6000,
+                  duration: 2000,
                   position: "top-center",
                   style: {
                     background: '#EF4444',
@@ -301,7 +301,7 @@ const BonusManagement = () => {
                     </button>
                   </div>
                 ), {
-                  duration: 6000,
+                  duration: 2000,
                   position: "top-center",
                   style: {
                     background: '#EF4444',

@@ -294,7 +294,7 @@ function AdminClerkDashboard({ user, onLogout }) {
           </button>
         </div>
       ), {
-        duration: 6000,
+        duration: 2000,
         position: "top-center",
         style: {
           background: '#EF4444',
@@ -337,7 +337,7 @@ function AdminClerkDashboard({ user, onLogout }) {
       <Toaster 
         position="top-center"
         toastOptions={{
-          duration: 4000,
+          duration: 2000,
           style: {
             background: '#363636',
             color: '#fff',
@@ -346,7 +346,7 @@ function AdminClerkDashboard({ user, onLogout }) {
             fontSize: '14px',
           },
           success: {
-            duration: 3000,
+            duration: 2000,
             iconTheme: {
               primary: '#10B981',
               secondary: '#fff',
@@ -357,7 +357,7 @@ function AdminClerkDashboard({ user, onLogout }) {
             },
           },
           error: {
-            duration: 4000,
+            duration: 2000,
             iconTheme: {
               primary: '#EF4444',
               secondary: '#fff',

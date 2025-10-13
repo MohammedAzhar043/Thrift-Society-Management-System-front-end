@@ -176,7 +176,7 @@ function IndividualMemberDashboard({ user, onLogout }) {
           </button>
         </div>
       ), {
-        duration: 6000,
+        duration: 2000,
         position: "top-center",
         style: {
           background: '#EF4444',
@@ -212,7 +212,7 @@ function IndividualMemberDashboard({ user, onLogout }) {
           </button>
         </div>
       ), {
-        duration: 6000,
+        duration: 2000,
         position: "top-center",
         style: {
           background: '#EF4444',
@@ -300,7 +300,7 @@ function IndividualMemberDashboard({ user, onLogout }) {
             </button>
           </div>
         ), {
-          duration: 6000,
+          duration: 2000,
           position: "top-center",
           style: {
             background: '#EF4444',
@@ -382,7 +382,7 @@ function IndividualMemberDashboard({ user, onLogout }) {
           </button>
         </div>
       ), {
-        duration: 6000,
+        duration: 2000,
         position: "top-center",
         style: {
           background: '#EF4444',
@@ -451,7 +451,7 @@ function IndividualMemberDashboard({ user, onLogout }) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       {/* Custom CSS for animations */}
-      <style jsx>{`
+      <style>{`
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(20px); }
           to { opacity: 1; transform: translateY(0); }
@@ -497,7 +497,7 @@ function IndividualMemberDashboard({ user, onLogout }) {
       <Toaster 
         position="top-center"
         toastOptions={{
-          duration: 4000,
+          duration: 2000,
           style: {
             background: '#363636',
             color: '#fff',
@@ -506,7 +506,7 @@ function IndividualMemberDashboard({ user, onLogout }) {
             fontSize: '14px',
           },
           success: {
-            duration: 3000,
+            duration: 2000,
             iconTheme: {
               primary: '#10B981',
               secondary: '#fff',
@@ -517,7 +517,7 @@ function IndividualMemberDashboard({ user, onLogout }) {
             },
           },
           error: {
-            duration: 4000,
+            duration: 2000,
             iconTheme: {
               primary: '#EF4444',
               secondary: '#fff',

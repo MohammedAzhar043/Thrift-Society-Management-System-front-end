@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { 
   FaTimes, FaChartBar, FaUsers, FaMoneyBillWave, 
   FaExclamationTriangle, FaChevronRight, FaCheckCircle,
-  FaTable, FaChartLine, FaClipboardList
+  FaTable, FaChartLine, FaClipboardList, FaCrown
 } from 'react-icons/fa';
 
 function ReportsModal({ isOpen, onClose, groups = [], user }) {
   const navigate = useNavigate();
+  const [showProfessionalReports, setShowProfessionalReports] = useState(false);
 
   const reportTypes = {
     members: [
@@ -91,7 +92,25 @@ function ReportsModal({ isOpen, onClose, groups = [], user }) {
     }
   };
 
+  const openProfessionalReports = () => {
+    setShowProfessionalReports(true);
+  };
+
   if (!isOpen) return null;
+
+  if (showProfessionalReports) {
+    // Import ProfessionalReportsDashboard dynamically
+    const ProfessionalReportsDashboard = React.lazy(() => import('../ProfessionalReportsDashboard'));
+    
+    return (
+      <React.Suspense fallback={<div className="flex items-center justify-center h-64"><div className="text-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div><p className="text-gray-600">Loading Professional Reports...</p></div></div>}>
+        <ProfessionalReportsDashboard 
+          user={user} 
+          onClose={() => setShowProfessionalReports(false)} 
+        />
+      </React.Suspense>
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
@@ -117,6 +136,21 @@ function ReportsModal({ isOpen, onClose, groups = [], user }) {
                 <FaTimes className="w-5 h-5" />
               </button>
             </div>
+          </div>
+
+          {/* Professional Reports Button */}
+          <div className="p-4 border-b border-gray-200">
+            <button
+              onClick={openProfessionalReports}
+              className="w-full flex items-center justify-center space-x-3 p-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-200 shadow-lg cursor-pointer"
+            >
+              <FaCrown className="w-5 h-5" />
+              <div className="text-left">
+                <div className="font-semibold">Professional Reports</div>
+                <div className="text-sm text-purple-100">Industry-standard analytics & insights</div>
+              </div>
+              <FaChevronRight className="w-4 h-4" />
+            </button>
           </div>
 
           {/* Report Categories */}
