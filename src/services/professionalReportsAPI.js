@@ -3,7 +3,7 @@
  * Handles all professional reporting endpoints and data management
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://82.112.231.241:8000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://kranthimahila.org/api/v1';
 
 class ProfessionalReportsAPI {
   constructor() {
