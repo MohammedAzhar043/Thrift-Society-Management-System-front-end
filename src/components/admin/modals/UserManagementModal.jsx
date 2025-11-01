@@ -82,7 +82,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
   const loadUsers = async () => {
     try {
       setIsLoading(true);
-      const data = await apiService.getUsers(0, 1000);
+      const data = await apiService.getUsers(0, 10000);
       setUsers(data);
     } catch (error) {
       toast((t) => (

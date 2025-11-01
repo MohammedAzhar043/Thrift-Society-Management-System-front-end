@@ -45,17 +45,25 @@ class ApiService {
       ...options,
     };
 
-    console.log('API Request - URL:', url);
-    console.log('API Request - Config:', config);
+    console.log(`API Request [${endpoint}] - URL:`, url);
+    console.log(`API Request [${endpoint}] - Method:`, config.method || 'GET');
+    console.log(`API Request [${endpoint}] - Headers:`, config.headers);
+    if (config.body) {
+      console.log(`API Request [${endpoint}] - Body:`, typeof config.body === 'string' ? config.body : JSON.stringify(config.body));
+    }
 
     try {
-      console.log('Making fetch request...');
+      console.log(`API Request [${endpoint}] - Making fetch request...`);
+      const startTime = Date.now();
       const response = await fetch(url, config);
-      console.log('API Response - Status:', response.status);
-      console.log('API Response - OK:', response.ok);
-      console.log('API Response - Headers:', Object.fromEntries(response.headers.entries()));
+      const endTime = Date.now();
+      console.log(`API Request [${endpoint}] - Request completed in ${endTime - startTime}ms`);
+      console.log(`API Response [${endpoint}] - Status:`, response.status);
+      console.log(`API Response [${endpoint}] - OK:`, response.ok);
+      console.log(`API Response [${endpoint}] - Headers:`, Object.fromEntries(response.headers.entries()));
       
       if (response.status === 401) {
+        console.error(`API Request [${endpoint}] - 401 Unauthorized`);
         // Token expired or invalid
         this.clearToken();
         window.location.href = '/login';
@@ -63,7 +71,9 @@ class ApiService {
       }
 
       if (!response.ok) {
+        console.error(`API Request [${endpoint}] - Request failed with status ${response.status}`);
         const errorData = await response.json().catch(() => ({}));
+        console.error(`API Request [${endpoint}] - Error data:`, errorData);
         
         // Handle validation errors (422) with detailed field errors
         if (response.status === 422 && errorData.errors) {
@@ -77,15 +87,18 @@ class ApiService {
         throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
       }
 
-      return await response.json();
+      const data = await response.json();
+      console.log(`API Request [${endpoint}] - Response data:`, data);
+      return data;
     } catch (error) {
-      console.error('API Request Error:', error);
-      console.error('Error type:', error.constructor.name);
-      console.error('Error message:', error.message);
+      console.error(`API Request [${endpoint}] - Error:`, error);
+      console.error(`API Request [${endpoint}] - Error type:`, error.constructor.name);
+      console.error(`API Request [${endpoint}] - Error message:`, error.message);
+      console.error(`API Request [${endpoint}] - Error stack:`, error.stack);
       
       // Handle specific error types
       if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-        console.error('Network error detected - possible causes:');
+        console.error(`API Request [${endpoint}] - Network error detected - possible causes:`);
         console.error('1. Backend server not running');
         console.error('2. CORS issues');
         console.error('3. Network connectivity problems');
@@ -100,18 +113,24 @@ class ApiService {
   // Authentication
   async login(credentials) {
     try {
-    const response = await this.request('/login', {
-      method: 'POST',
-      body: JSON.stringify(credentials),
-    });
-    
-    if (response.access_token) {
-      this.setToken(response.access_token);
-    }
-    
-    return response;
+      console.log('API Service - Login called with credentials:', { username: credentials.username });
+      const response = await this.request('/login', {
+        method: 'POST',
+        body: JSON.stringify(credentials),
+      });
+      
+      console.log('API Service - Login response received:', response);
+      
+      if (response.access_token) {
+        this.setToken(response.access_token);
+        console.log('API Service - Token set in localStorage');
+      } else {
+        console.warn('API Service - No access token in response');
+      }
+      
+      return response;
     } catch (error) {
-      console.error('API login error:', error);
+      console.error('API Service - Login error:', error);
       throw error;
     }
   }
@@ -126,7 +145,16 @@ class ApiService {
   }
 
   async getCurrentUser() {
-    return await this.request('/me');
+    console.log('getCurrentUser called - Token:', this.token ? 'Present' : 'Missing');
+    console.log('getCurrentUser called - Token from localStorage:', localStorage.getItem('token') ? 'Present' : 'Missing');
+    try {
+      const result = await this.request('/me');
+      console.log('getCurrentUser result:', result);
+      return result;
+    } catch (error) {
+      console.error('getCurrentUser error:', error);
+      throw error;
+    }
   }
 
   // Admin APIs
@@ -531,7 +559,7 @@ class ApiService {
   }
 
   // User Management APIs
-  async getUsers(skip = 0, limit = 100) {
+  async getUsers(skip = 0, limit = 10000) {
     const data = await this.request(`/users?skip=${skip}&limit=${limit}`);
     return data;
   }

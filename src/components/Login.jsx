@@ -52,13 +52,21 @@ function Login({ onLogin }) {
         captcha_token: captchaToken
       });
       
+      console.log('Login successful, response:', response);
+      
+      // Wait a moment for token to be set in localStorage
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       // Get user info to determine role
+      console.log('Fetching current user info...');
       const userInfo = await apiService.getCurrentUser();
+      console.log('User info retrieved:', userInfo);
       
       // Determine primary role (prioritize admin role)
-      const primaryRole = userInfo.roles.find(role => role.name === 'admin')?.name || 
-                         userInfo.roles[0]?.name || 'member';
+      const primaryRole = userInfo.roles?.find(role => role.name === 'admin')?.name || 
+                         userInfo.roles?.[0]?.name || 'member';
       
+      console.log('Primary role determined:', primaryRole);
       
       const userData = {
         username: userInfo.username,
@@ -68,10 +76,11 @@ function Login({ onLogin }) {
         email: userInfo.email
       };
       
-      
+      console.log('Calling onLogin with userData:', userData);
       onLogin(userData);
       
       // Redirect based on role
+      console.log('Navigating to role dashboard:', `/${primaryRole}`);
       navigate(`/${primaryRole}`);
       
     } catch (error) {
