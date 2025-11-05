@@ -201,8 +201,8 @@ function AdminDashboard({ user, onLogout }) {
       const groupsData = await apiService.getGroups();
       setGroups(groupsData);
 
-      // Load members
-      const membersData = await apiService.getMembers();
+      // Load members (use high limit to get all members for management)
+      const membersData = await apiService.getMembers(null, 10000);
       setMembers(membersData);
 
       // Load loans

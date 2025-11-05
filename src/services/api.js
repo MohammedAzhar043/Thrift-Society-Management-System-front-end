@@ -198,9 +198,12 @@ class ApiService {
     });
   }
 
-  async getMembers(groupId = null) {
-    const params = groupId ? `?group_id=${groupId}` : '';
-    return await this.request(`/admin/members${params}`);
+  async getMembers(groupId = null, limit = 10000) {
+    let params = [];
+    if (groupId) params.push(`group_id=${groupId}`);
+    if (limit) params.push(`limit=${limit}`);
+    const queryString = params.length > 0 ? `?${params.join('&')}` : '';
+    return await this.request(`/admin/members${queryString}`);
   }
 
   async getMemberLoans(memberId) {
@@ -251,9 +254,12 @@ class ApiService {
     return await this.request('/clerk/dashboard/pending-approvals');
   }
 
-  async getClerkMembers(groupId = null) {
-    const params = groupId ? `?group_id=${groupId}` : '';
-    return await this.request(`/clerk/members${params}`);
+  async getClerkMembers(groupId = null, limit = 10000) {
+    let params = [];
+    if (groupId) params.push(`group_id=${groupId}`);
+    if (limit) params.push(`limit=${limit}`);
+    const queryString = params.length > 0 ? `?${params.join('&')}` : '';
+    return await this.request(`/clerk/members${queryString}`);
   }
 
   async getClerkMemberDetails(memberId) {

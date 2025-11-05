@@ -218,7 +218,8 @@ function AdminClerkDashboard({ user, onLogout }) {
   const loadMembers = async () => {
     setMembersLoading(true);
     try {
-      const membersData = await apiService.getClerkMembers();
+      // Load all members (use high limit to get all members for management)
+      const membersData = await apiService.getClerkMembers(null, 10000);
       setMembers(membersData);
     } catch (error) {
       console.error('Error loading members:', error);
