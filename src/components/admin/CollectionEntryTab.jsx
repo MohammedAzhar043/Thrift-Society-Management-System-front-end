@@ -738,6 +738,30 @@ function CollectionEntryTab({
                           if (memberEntry.transaction_types?.includes(type.value)) {
                             return null;
                           }
+                          
+                          // Check if member has a loan
+                          const memberId = parseInt(memberEntry.member_id);
+                          // Check if loan info has been loaded (entry exists in map)
+                          const loanInfoLoaded = memberId in memberLoanMap;
+                          
+                          if (loanInfoLoaded) {
+                            // Loan info has been loaded - check if member has a loan
+                            const hasLoan = memberLoanMap[memberId] !== null && memberLoanMap[memberId] !== undefined;
+                            // If member doesn't have a loan, only show DEPOSIT and JOINING_FEE
+                            if (!hasLoan) {
+                              if (type.value !== 'DEPOSIT' && type.value !== 'JOINING_FEE') {
+                                return null; // Hide EMI and INTEREST for members without loans
+                              }
+                            }
+                            // If member has a loan, show all transaction types
+                          } else {
+                            // Loan info hasn't loaded yet - be conservative and only show DEPOSIT and JOINING_FEE
+                            // This prevents users from selecting loan-related transactions before loan info is confirmed
+                            if (type.value !== 'DEPOSIT' && type.value !== 'JOINING_FEE') {
+                              return null; // Hide EMI and INTEREST until loan info loads
+                            }
+                          }
+                          
                           return (
                             <option key={type.value} value={type.value}>{type.label}</option>
                           );
