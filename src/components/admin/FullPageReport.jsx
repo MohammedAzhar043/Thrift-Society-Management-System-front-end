@@ -69,14 +69,26 @@ function FullPageReport() {
   useEffect(() => {
     const loadGroups = async () => {
       try {
-        const groupsData = await apiService.getGroups();
+        // Use the correct API method based on user role
+        let groupsData;
+        if (user?.role) {
+          const role = user.role.toLowerCase();
+          if (role === 'adminclerk' || role === 'clerk') {
+            groupsData = await apiService.getClerkGroups();
+          } else {
+            groupsData = await apiService.getGroups();
+          }
+        } else {
+          // Default to admin method if user role is not available
+          groupsData = await apiService.getGroups();
+        }
         setGroups(groupsData);
       } catch (error) {
         console.error('Error loading groups:', error);
       }
     };
     loadGroups();
-  }, []);
+  }, [user]);
 
   // Generate report on component mount
   const generateReport = useCallback(async () => {

@@ -18,13 +18,16 @@ import {
   FaClipboardList,
   FaHistory,
   FaShieldAlt,
-  FaTimes
+  FaTimes,
+  FaPlus,
+  FaUpload
 } from 'react-icons/fa';
 import { toast, Toaster } from 'react-hot-toast';
 import apiService from '../services/api';
-import { formatCurrency, formatDate } from '../utils/formatters';
+import { formatCurrency, formatDate, formatIndianCurrency } from '../utils/formatters';
 import MemberStatementModal from './admin/MemberStatementModal';
 import ReportsModal from './admin/ReportsModal';
+import CollectionEntryTab from './admin/CollectionEntryTab';
 
 function AdminClerkDashboard({ user, onLogout }) {
   const [loading, setLoading] = useState(true);
@@ -69,8 +72,31 @@ function AdminClerkDashboard({ user, onLogout }) {
   const [showCollectionDetailsModal, setShowCollectionDetailsModal] = useState(false);
   const [selectedCollection, setSelectedCollection] = useState(null);
 
+  // Collection Entry states
+  const [collectionEntryForm, setCollectionEntryForm] = useState({
+    group_id: '',
+    collection_date: new Date().toISOString().split('T')[0],
+    receipt_number: '',
+    members: []
+  });
+  const [collectionEntryMembers, setCollectionEntryMembers] = useState([]);
+  const [collectionEntryLoading, setCollectionEntryLoading] = useState(false);
+  const [collectionEntryReceipt, setCollectionEntryReceipt] = useState(null);
+  const [collectionEntrySubmitting, setCollectionEntrySubmitting] = useState(false);
+
+  const loadGroups = async () => {
+    try {
+      const groupsData = await apiService.getClerkGroups();
+      setGroups(groupsData);
+    } catch (error) {
+      console.error('Error loading groups:', error);
+      // Don't show error toast for groups as it's not critical
+    }
+  };
+
   useEffect(() => {
     loadDashboardData();
+    loadGroups(); // Load groups when dashboard initializes
   }, []);
 
   const loadDashboardData = async () => {
@@ -202,16 +228,6 @@ function AdminClerkDashboard({ user, onLogout }) {
     }
   };
 
-  const loadGroups = async () => {
-    try {
-      const groupsData = await apiService.getClerkGroups();
-      setGroups(groupsData);
-    } catch (error) {
-      console.error('Error loading groups:', error);
-      // Don't show error toast for groups as it's not critical
-    }
-  };
-
   const handleViewMemberStatement = (member) => {
     setSelectedMemberForStatement(member);
     setShowMemberStatement(true);
@@ -269,6 +285,101 @@ function AdminClerkDashboard({ user, onLogout }) {
           errorMessage = 'Connection error: Please check your internet connection and try again.';
         } else {
           errorMessage = 'Unable to verify collection at this time. Please try again later or contact support if the issue persists.';
+        }
+      }
+      
+      toast((t) => (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+          <span>{errorMessage}</span>
+          <button
+            onClick={() => {
+              toast.dismiss(t.id);
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'white',
+              cursor: 'pointer',
+              padding: '0',
+              marginLeft: '10px',
+              fontSize: '18px',
+              fontWeight: 'bold'
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      ), {
+        duration: 2000,
+        position: "top-center",
+        style: {
+          background: '#EF4444',
+          color: '#fff',
+          padding: '12px 16px',
+          fontSize: '14px',
+        },
+      });
+    }
+  };
+
+  const rejectCollectionRecord = async (recordId) => {
+    // Show confirmation toast instead of window.confirm
+    toast(
+      (t) => (
+        <div className="flex items-center space-x-4">
+          <span>Are you sure you want to reject this collection? This action cannot be undone.</span>
+          <div className="flex space-x-2">
+            <button
+              onClick={() => {
+                toast.dismiss(t.id);
+                confirmRejectCollectionRecord(recordId);
+              }}
+              className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+            >
+              Yes
+            </button>
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              className="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700"
+            >
+              No
+            </button>
+          </div>
+        </div>
+      ),
+      {
+        duration: 10000,
+        position: "top-center",
+      }
+    );
+  };
+
+  const confirmRejectCollectionRecord = async (recordId) => {
+    try {
+      await apiService.rejectClerkCollectionRecord(recordId);
+      
+      // Reload data after rejection
+      await loadDashboardData();
+      
+      // Close modal if open
+      if (showCollectionDetailsModal) {
+        setShowCollectionDetailsModal(false);
+        setSelectedCollection(null);
+      }
+      
+      toast.success('Collection rejected and deleted successfully.');
+    } catch (error) {
+      let errorMessage = 'Failed to reject collection. Please try again.';
+      
+      if (error.message) {
+        if (error.message.includes('not found')) {
+          errorMessage = 'The collection record was not found. Please refresh and try again.';
+        } else if (error.message.includes('Permission denied') || error.message.includes('403')) {
+          errorMessage = 'You do not have permission to reject this collection.';
+        } else if (error.message.includes('already verified')) {
+          errorMessage = 'Cannot reject an already verified collection.';
+        } else {
+          errorMessage = 'Unable to reject collection at this time. Please try again later or contact support if the issue persists.';
         }
       }
       
@@ -626,6 +737,21 @@ function AdminClerkDashboard({ user, onLogout }) {
                 <span className="hidden sm:inline">Transactions</span>
                 <span className="sm:hidden">Transactions</span>
               </button>
+              <button
+                onClick={() => {
+                  setActiveTab('collection-entry');
+                  loadGroups();
+                }}
+                className={`py-3 sm:py-4 px-2 sm:px-3 border-b-2 font-semibold text-xs sm:text-sm whitespace-nowrap transition-all duration-200 rounded-t-lg cursor-pointer ${
+                  activeTab === 'collection-entry'
+                    ? 'border-blue-500 text-blue-600 bg-blue-50'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                <FaMoneyBillWave className="inline mr-1 sm:mr-2 w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Bulk Collection Entry</span>
+              
+              </button>
             </nav>
           </div>
 
@@ -980,16 +1106,23 @@ function AdminClerkDashboard({ user, onLogout }) {
                                   <button
                                     onClick={() => verifyCollectionRecord(collection.id)}
                                     className="text-green-600 hover:text-green-900 text-xs px-3 py-1.5 rounded-lg hover:bg-green-50 transition-colors duration-200 font-semibold cursor-pointer"
-                                    title="Verify Collection"
+                                    title="Verify Collection (Bill Collector Collections Only)"
                                   >
                                     <FaCheckCircle className="inline mr-1" /> Verify
+                                  </button>
+                                  <button
+                                    onClick={() => rejectCollectionRecord(collection.id)}
+                                    className="text-red-600 hover:text-red-900 text-xs px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors duration-200 font-semibold cursor-pointer"
+                                    title="Reject Collection"
+                                  >
+                                    <FaTimes className="inline mr-1" /> Reject
                                   </button>
                                   <button
                                     onClick={() => {
                                       setSelectedCollection(collection);
                                       setShowCollectionDetailsModal(true);
                                     }}
-                                    className="text-blue-600 hover:text-blue-900 text-xs px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-colors duration-200 font-semibold"
+                                    className="text-blue-600 hover:text-blue-900 text-xs px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-colors duration-200 font-semibold cursor-pointer"
                                     title="View Details"
                                   >
                                     <FaEye className="inline mr-1" /> View
@@ -1093,6 +1226,13 @@ function AdminClerkDashboard({ user, onLogout }) {
                             >
                               <FaCheckCircle className="w-4 h-4 mr-2" />
                               Verify
+                            </button>
+                            <button
+                              onClick={() => rejectCollectionRecord(collection.id)}
+                              className="flex-1 flex items-center justify-center px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 text-sm font-semibold cursor-pointer"
+                            >
+                              <FaTimes className="w-4 h-4 mr-2" />
+                              Reject
                             </button>
                             <button
                               onClick={() => {
@@ -1408,6 +1548,27 @@ function AdminClerkDashboard({ user, onLogout }) {
               </div>
             )}
 
+            {/* Collection Entry Tab */}
+            {activeTab === 'collection-entry' && (
+              <CollectionEntryTab
+                collectionEntryForm={collectionEntryForm}
+                setCollectionEntryForm={setCollectionEntryForm}
+                collectionEntryMembers={collectionEntryMembers}
+                setCollectionEntryMembers={setCollectionEntryMembers}
+                collectionEntryLoading={collectionEntryLoading}
+                setCollectionEntryLoading={setCollectionEntryLoading}
+                collectionEntryReceipt={collectionEntryReceipt}
+                setCollectionEntryReceipt={setCollectionEntryReceipt}
+                collectionEntrySubmitting={collectionEntrySubmitting}
+                setCollectionEntrySubmitting={setCollectionEntrySubmitting}
+                groups={groups}
+                loadGroups={loadGroups}
+                onSave={async () => {
+                  await loadDashboardData();
+                }}
+              />
+            )}
+
             {/* Transactions Tab */}
             {activeTab === 'transactions' && (
               <div>
@@ -1532,7 +1693,7 @@ function AdminClerkDashboard({ user, onLogout }) {
                                 <td className="px-6 py-4 text-sm font-semibold text-gray-900">
                                   {transaction.description}
                                 </td>
-                                <td className="px-6 py-4 text-sm font-bold text-green-600 text-lg">
+                                <td className="px-6 py-4 font-bold text-green-600 text-lg">
                                   {formatCurrency(transaction.amount)}
                                 </td>
                                 <td className="px-6 py-4 text-sm text-gray-600">
@@ -1654,6 +1815,29 @@ function AdminClerkDashboard({ user, onLogout }) {
                     <p className="text-sm font-medium text-gray-500">Notes</p>
                     <p className="text-sm text-gray-900">{selectedCollection.notes || 'No notes'}</p>
                   </div>
+                  {selectedCollection.receipt_file_path && (
+                    <div>
+                      <p className="text-sm font-medium text-gray-500 mb-2">Receipt</p>
+                      <div className="flex items-center space-x-2">
+                        <a
+                          href={`${apiService.baseURL.replace('/api/v1', '')}/${selectedCollection.receipt_file_path}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 underline flex items-center"
+                        >
+                          <FaDownload className="mr-1" />
+                          View Receipt
+                        </a>
+                      </div>
+                      {selectedCollection.receipt_file_path.toLowerCase().match(/\.(jpg|jpeg|png)$/) && (
+                        <img
+                          src={`${apiService.baseURL.replace('/api/v1', '')}/${selectedCollection.receipt_file_path}`}
+                          alt="Receipt"
+                          className="mt-2 max-w-md rounded-lg border border-gray-300"
+                        />
+                      )}
+                    </div>
+                  )}
                 </div>
                 
                 <div>
@@ -1704,6 +1888,16 @@ function AdminClerkDashboard({ user, onLogout }) {
                   className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 cursor-pointer"
                 >
                   Close
+                </button>
+                <button
+                  onClick={() => {
+                    rejectCollectionRecord(selectedCollection.id);
+                    setShowCollectionDetailsModal(false);
+                  }}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 cursor-pointer"
+                >
+                  <FaTimes className="inline mr-2" />
+                  Reject
                 </button>
                 <button
                   onClick={() => {

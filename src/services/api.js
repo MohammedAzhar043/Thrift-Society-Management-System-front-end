@@ -1,8 +1,8 @@
 /**
  * API service for communicating with the backend
  */
-  // const API_BASE_URL = 'http://82.112.231.241:8000/api/v1';
-const API_BASE_URL = 'http://localhost:8000/api/v1';
+  const API_BASE_URL = 'http://82.112.231.241:8000/api/v1';
+// const API_BASE_URL = 'http://localhost:8000/api/v1';
 
 class ApiService {
   constructor() {
@@ -292,6 +292,13 @@ class ApiService {
       method: 'POST',
     });
   }
+
+  async rejectClerkCollectionRecord(recordId) {
+    return await this.request(`/clerk/collections/${recordId}/reject`, {
+      method: 'DELETE',
+    });
+  }
+
 
   async getCollectionMonitoringData(days = 30) {
     return await this.request(`/clerk/monitoring/collections?days=${days}`);
@@ -882,6 +889,52 @@ class ApiService {
 
   async getMemberTransactions(memberId) {
     return await this.request(`/admin/members/${memberId}/transactions`);
+  }
+
+  // Admin Transaction History APIs
+  async getAdminTransactionHistory(filters = {}) {
+    const params = new URLSearchParams();
+    if (filters.group_id) params.append('group_id', filters.group_id);
+    if (filters.start_date) params.append('start_date', filters.start_date);
+    if (filters.end_date) params.append('end_date', filters.end_date);
+    if (filters.skip !== undefined) params.append('skip', filters.skip);
+    if (filters.limit !== undefined) params.append('limit', filters.limit);
+    
+    const queryString = params.toString();
+    return await this.request(`/admin/transactions/history${queryString ? `?${queryString}` : ''}`);
+  }
+
+  // Admin Receipt API
+  async getAdminCollectionReceipt(recordId) {
+    const response = await fetch(`${this.baseURL}/admin/collections/${recordId}/receipt`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+    
+    if (response.status === 401) {
+      this.clearToken();
+      window.location.href = '/login';
+      return;
+    }
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+    }
+
+    // Return blob URL for viewing/downloading
+    const blob = await response.blob();
+    return URL.createObjectURL(blob);
+  }
+
+  // Admin Edit Collection Item API
+  async updateCollectionItem(itemId, amount) {
+    return await this.request(`/admin/collections/items/${itemId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ amount: parseFloat(amount) }),
+    });
   }
 
 

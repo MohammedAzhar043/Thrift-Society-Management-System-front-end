@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { toast, Toaster } from "react-hot-toast";
-import { FaCheck, FaFileAlt,FaTimes, FaEdit, FaTrash, FaEye, FaUsers, FaPlus, FaMapMarkerAlt,FaInfoCircle, FaUserTie } from "react-icons/fa";
+import { FaCheck, FaFileAlt,FaTimes, FaEdit, FaTrash, FaEye, FaUsers, FaPlus, FaMapMarkerAlt,FaInfoCircle, FaUserTie, FaDownload, FaMoneyBillWave, FaHistory, FaSync, FaFileDownload, FaSearch, FaFilter, FaCalendarAlt, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import apiService from "../services/api";
 import { useDashboardData } from "../hooks/useDashboardData";
 import { formatIndianCurrency } from "../utils/formatters";
@@ -78,6 +78,35 @@ function AdminDashboard({ user, onLogout }) {
   const [showMemberStatement, setShowMemberStatement] = useState(false);
   const [selectedMemberForStatement, setSelectedMemberForStatement] = useState(null);
   const [showPrintConfirmation, setShowPrintConfirmation] = useState(false);
+  
+  // Transaction History states
+  const [collections, setCollections] = useState([]);
+  const [loadingCollections, setLoadingCollections] = useState(false);
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [totalCollections, setTotalCollections] = useState(0);
+  
+  // Filter states
+  const [filters, setFilters] = useState({
+    group_id: '',
+    start_date: '',
+    end_date: '',
+    search: ''
+  });
+  const [showFilters, setShowFilters] = useState(false);
+  
+  // Edit collection states
+  const [showEditCollectionModal, setShowEditCollectionModal] = useState(false);
+  const [selectedCollectionForEdit, setSelectedCollectionForEdit] = useState(null);
+  const [collectionItems, setCollectionItems] = useState([]);
+  const [editingCollection, setEditingCollection] = useState(false);
+  
+  // Receipt modal states
+  const [showReceiptModal, setShowReceiptModal] = useState(false);
+  const [receiptUrl, setReceiptUrl] = useState(null);
+  const [receiptFileName, setReceiptFileName] = useState('');
  // const [showReportsModal, setShowReportsModal] = useState(false);
 
   // Form states
@@ -104,6 +133,7 @@ function AdminDashboard({ user, onLogout }) {
   useEffect(() => {
     loadAdditionalData();
     loadUsers();
+    loadAdminTransactionHistory(1, true);
   }, []);
 
   useEffect(() => {
@@ -164,6 +194,8 @@ function AdminDashboard({ user, onLogout }) {
       // Load pending approvals
       const approvals = await apiService.getPendingApprovals();
       setPendingApprovals(approvals);
+
+      // Clerk collections are now auto-verified, so no need to load pending collections
 
       // Load groups
       const groupsData = await apiService.getGroups();
@@ -334,6 +366,7 @@ function AdminDashboard({ user, onLogout }) {
       toast.error(errorMessage);
     }
   };
+
 
   const confirmApproval = async (
     approvalType,
@@ -724,6 +757,209 @@ function AdminDashboard({ user, onLogout }) {
   const handleViewMemberStatement = (member) => {
     setSelectedMemberForStatement(member);
     setShowMemberStatement(true);
+  };
+
+  // Format payment type helper
+  const formatPaymentType = (paymentType) => {
+    if (!paymentType) return 'N/A';
+    const typeMap = {
+      'LOAN_PRINCIPAL': 'EMI',
+      'LOAN_INTEREST': 'Interest',
+      'DEPOSIT': 'Deposit',
+      'JOINING_FEE': 'Joining Fee',
+      'CARRY_FORWARD': 'Carry Forward'
+    };
+    return typeMap[paymentType] || paymentType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
+
+  // Load admin transaction history (collections) with pagination
+  const loadAdminTransactionHistory = async (page = currentPage, resetPage = false) => {
+    setLoadingCollections(true);
+    try {
+      const skip = resetPage ? 0 : (page - 1) * itemsPerPage;
+      const filterParams = {
+        skip: skip,
+        limit: itemsPerPage,
+      };
+      
+      // Add filters if set
+      if (filters.group_id) filterParams.group_id = parseInt(filters.group_id);
+      if (filters.start_date) filterParams.start_date = filters.start_date;
+      if (filters.end_date) filterParams.end_date = filters.end_date;
+      
+      const collectionsData = await apiService.getAdminTransactionHistory(filterParams);
+      
+      // If we get a response with pagination info, use it; otherwise estimate
+      if (Array.isArray(collectionsData)) {
+        setCollections(collectionsData);
+        // Estimate total: if we got full page, there might be more
+        if (collectionsData.length === itemsPerPage) {
+          setTotalCollections((page * itemsPerPage) + 1); // At least this many
+        } else {
+          setTotalCollections((page - 1) * itemsPerPage + collectionsData.length);
+        }
+      } else {
+        setCollections(collectionsData.items || collectionsData.data || []);
+        setTotalCollections(collectionsData.total || collectionsData.count || 0);
+      }
+    } catch (err) {
+      console.error('Error loading admin transaction history:', err);
+      toast.error('Failed to load transaction history');
+      setCollections([]);
+      setTotalCollections(0);
+    } finally {
+      setLoadingCollections(false);
+    }
+  };
+  
+  // Handle filter changes
+  const handleFilterChange = (key, value) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+  };
+  
+  // Apply filters
+  const applyFilters = () => {
+    setCurrentPage(1);
+    loadAdminTransactionHistory(1, true);
+  };
+  
+  // Clear filters
+  const clearFilters = () => {
+    setFilters({
+      group_id: '',
+      start_date: '',
+      end_date: '',
+      search: ''
+    });
+    setCurrentPage(1);
+    loadAdminTransactionHistory(1, true);
+  };
+  
+  // Handle page change
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    loadAdminTransactionHistory(newPage);
+    // Scroll to top of transaction history section
+    const element = document.getElementById('transaction-history-section');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+  
+  // Handle items per page change
+  const handleItemsPerPageChange = (newItemsPerPage) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1);
+    loadAdminTransactionHistory(1, true);
+  };
+  
+  // Calculate pagination info
+  const totalPages = Math.ceil(totalCollections / itemsPerPage);
+  const startItem = (currentPage - 1) * itemsPerPage + 1;
+  const endItem = Math.min(currentPage * itemsPerPage, totalCollections);
+
+  // Handle view receipt
+  const handleViewReceipt = async (recordId, receiptFilePath) => {
+    try {
+      if (!receiptFilePath) {
+        toast.error('No receipt available for this collection');
+        return;
+      }
+      
+      // Get receipt blob URL
+      const url = await apiService.getAdminCollectionReceipt(recordId);
+      
+      // Set modal state to show receipt
+      setReceiptUrl(url);
+      setReceiptFileName(receiptFilePath.split('/').pop() || 'receipt');
+      setShowReceiptModal(true);
+    } catch (err) {
+      console.error('Error viewing receipt:', err);
+      toast.error(err.message || 'Failed to view receipt');
+    }
+  };
+
+  // Handle close receipt modal
+  const handleCloseReceiptModal = () => {
+    if (receiptUrl) {
+      URL.revokeObjectURL(receiptUrl);
+    }
+    setShowReceiptModal(false);
+    setReceiptUrl(null);
+    setReceiptFileName('');
+  };
+
+  // Handle edit collection
+  const handleEditCollection = (collection) => {
+    if (!collection.is_verified) {
+      toast.error('Cannot edit unverified collections. Please verify the collection first.');
+      return;
+    }
+    
+    setSelectedCollectionForEdit(collection);
+    // Create editable items array with original amounts
+    const items = collection.collection_items?.map(item => ({
+      ...item,
+      editedAmount: item.amount.toString(),
+      hasChanged: false
+    })) || [];
+    setCollectionItems(items);
+    setShowEditCollectionModal(true);
+  };
+  
+  // Handle collection item amount change
+  const handleCollectionItemAmountChange = (index, newAmount) => {
+    const updatedItems = [...collectionItems];
+    const originalAmount = parseFloat(updatedItems[index].amount);
+    updatedItems[index].editedAmount = newAmount;
+    updatedItems[index].hasChanged = parseFloat(newAmount) !== originalAmount;
+    setCollectionItems(updatedItems);
+  };
+  
+  // Handle save collection edits
+  const handleSaveCollectionEdits = async () => {
+    if (!selectedCollectionForEdit) return;
+    
+    // Find all changed items
+    const changedItems = collectionItems.filter(item => item.hasChanged);
+    
+    if (changedItems.length === 0) {
+      toast.error('No changes to save');
+      return;
+    }
+    
+    // Validate all amounts
+    for (const item of changedItems) {
+      const newAmount = parseFloat(item.editedAmount);
+      if (isNaN(newAmount) || newAmount < 0) {
+        toast.error(`Please enter a valid amount for ${item.member?.user?.full_name || 'Member'}`);
+        return;
+      }
+    }
+    
+    setEditingCollection(true);
+    try {
+      // Update all changed items sequentially
+      for (const item of changedItems) {
+        const newAmount = parseFloat(item.editedAmount);
+        await apiService.updateCollectionItem(item.id, newAmount);
+      }
+      
+      toast.success(`Successfully updated ${changedItems.length} transaction${changedItems.length > 1 ? 's' : ''}!`);
+      setShowEditCollectionModal(false);
+      setSelectedCollectionForEdit(null);
+      setCollectionItems([]);
+      
+      // Reload transaction history
+      await loadAdminTransactionHistory(currentPage);
+      await loadAdditionalData();
+      refreshDashboard();
+    } catch (err) {
+      console.error('Error updating collection:', err);
+      toast.error(err.message || 'Failed to update collection transactions');
+    } finally {
+      setEditingCollection(false);
+    }
   };
 
   const refreshReportsData = async () => {
@@ -1481,6 +1717,8 @@ function AdminDashboard({ user, onLogout }) {
         />
           </div>
         </div>
+
+
         {/* Enhanced Groups Management Section */}
         <div className="bg-white/95 backdrop-blur-sm shadow-xl rounded-2xl mb-8 border border-gray-200/50 hover:shadow-2xl transition-all duration-300">
           <div className="bg-gradient-to-r from-emerald-600 to-teal-700 px-6 py-4 rounded-t-2xl">
@@ -2803,6 +3041,327 @@ function AdminDashboard({ user, onLogout }) {
             </div>
           </div>
         )}
+
+        {/* Transaction History Section */}
+        <div id="transaction-history-section" className="grid grid-cols-1 lg:grid-cols-1 gap-8 mb-8">
+          <Card>
+            <SectionHeader
+              title="Transaction History"
+              description="View all collection transactions with receipts and edit options"
+            />
+            <SectionContent>
+              {/* Filters and Controls */}
+              <div className="mb-6 space-y-4">
+                {/* Filter Toggle and Actions */}
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => setShowFilters(!showFilters)}
+                      className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
+                    >
+                      <FaFilter className="mr-2" />
+                      {showFilters ? 'Hide Filters' : 'Show Filters'}
+                    </button>
+                    {showFilters && (
+                      <button
+                        onClick={clearFilters}
+                        className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
+                      >
+                        Clear Filters
+                      </button>
+                    )}
+                  </div>
+                  
+                  <div className="flex items-center space-x-4">
+                    {/* Items per page selector */}
+                    <div className="flex items-center space-x-2">
+                      <label className="text-sm text-gray-600">Show:</label>
+                      <select
+                        value={itemsPerPage}
+                        onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value))}
+                        className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
+                      >
+                        <option value={5}>5</option>
+                        <option value={10}>10</option>
+                      </select>
+                    </div>
+                    
+                    <button
+                      onClick={() => {
+                        loadAdminTransactionHistory(currentPage);
+                        loadAdditionalData();
+                        refreshDashboard();
+                      }}
+                      disabled={loadingCollections}
+                      className="p-2 sm:p-3 text-gray-400 hover:text-blue-600 disabled:opacity-50 rounded-lg hover:bg-blue-50 transition-all duration-200 cursor-pointer"
+                      title="Refresh transaction data"
+                    >
+                      <FaSync className={`h-4 w-4 sm:h-5 sm:w-5 ${loadingCollections ? 'animate-spin' : ''}`} />
+                    </button>
+                  </div>
+                </div>
+                
+                {/* Filter Panel */}
+                {showFilters && (
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      {/* Group Filter */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Group
+                        </label>
+                        <select
+                          value={filters.group_id}
+                          onChange={(e) => handleFilterChange('group_id', e.target.value)}
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
+                        >
+                          <option value="">All Groups</option>
+                          {groups.map((group) => (
+                            <option key={group.id} value={group.id}>
+                              {group.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      
+                      {/* Start Date Filter */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <FaCalendarAlt className="inline mr-1" />
+                          Start Date
+                        </label>
+                        <input
+                          type="date"
+                          value={filters.start_date}
+                          onChange={(e) => handleFilterChange('start_date', e.target.value)}
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
+                      
+                      {/* End Date Filter */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <FaCalendarAlt className="inline mr-1" />
+                          End Date
+                        </label>
+                        <input
+                          type="date"
+                          value={filters.end_date}
+                          onChange={(e) => handleFilterChange('end_date', e.target.value)}
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
+                      
+                      {/* Apply Filter Button */}
+                      <div className="flex items-end">
+                        <button
+                          onClick={applyFilters}
+                          className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors duration-200 cursor-pointer"
+                        >
+                          Apply Filters
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Results Count */}
+                {totalCollections > 0 && (
+                  <div className="text-sm text-gray-600">
+                    Showing {startItem} to {endItem} of {totalCollections} transactions
+                  </div>
+                )}
+              </div>
+              
+              {loadingCollections ? (
+                <div className="text-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                  <p className="text-gray-500 text-lg">Loading transaction history...</p>
+                </div>
+              ) : collections.length > 0 ? (
+                <div className="space-y-4">
+                  {collections.map((collection) => (
+                    <div key={collection.id} className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-all duration-200">
+                      <div className="flex flex-col lg:flex-row lg:items-start justify-between space-y-4 lg:space-y-0">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3 mb-3">
+                            <div className="bg-gradient-to-r from-blue-100 to-indigo-100 rounded-lg p-2">
+                              <FaMoneyBillWave className="h-4 w-4 text-blue-600" />
+                            </div>
+                            <div>
+                              <p className="text-lg font-semibold text-gray-900">
+                                {collection.group?.name || 'Unknown Group'}
+                              </p>
+                              <p className="text-sm text-gray-600 flex items-center mt-1">
+                                <span className="mr-2">📅</span>
+                                {new Date(collection.collection_date).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                          {collection.notes && (
+                            <div className="bg-white rounded-lg p-3 border border-gray-200">
+                              <p className="text-sm text-gray-700">
+                                <span className="font-medium">Notes:</span> {collection.notes}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex flex-col lg:items-end space-y-3">
+                          <div className="text-right">
+                            <p className="text-2xl font-bold text-green-600">
+                              {formatIndianCurrency(collection.grand_total)}
+                            </p>
+                            <p className="text-sm text-gray-500">
+                              Receipt: {collection.receipt_number || 'N/A'}
+                            </p>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            {collection.is_verified && (
+                              <button
+                                onClick={() => handleEditCollection(collection)}
+                                className="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-semibold text-purple-600 bg-purple-50 hover:bg-purple-100 border border-purple-200 transition-colors duration-200 cursor-pointer"
+                                title="Edit Collection"
+                              >
+                                <FaEdit className="mr-1" />
+                                Edit Collection
+                              </button>
+                            )}
+                            {collection.receipt_file_path && (
+                              <button
+                                onClick={() => handleViewReceipt(collection.id, collection.receipt_file_path)}
+                                className="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors duration-200 cursor-pointer"
+                                title="View/Download Receipt"
+                              >
+                                <FaFileDownload className="mr-1" />
+                                Receipt
+                              </button>
+                            )}
+                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
+                              collection.is_verified 
+                                ? 'bg-green-100 text-green-800 border border-green-200' 
+                                : 'bg-yellow-100 text-yellow-800 border border-yellow-200'
+                            }`}>
+                              {collection.is_verified ? '✅ Verified' : '⏳ Pending'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {collection.collection_items && collection.collection_items.length > 0 && (
+                        <div className="mt-4 pt-4 border-t border-gray-200">
+                          <div className="bg-white rounded-lg p-4 border border-gray-200">
+                            <p className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                              <span className="mr-2">📋</span>
+                              Collection Items ({collection.collection_items.length})
+                            </p>
+                            <div className="overflow-x-auto">
+                              <table className="w-full">
+                                <thead>
+                                  <tr className="border-b border-gray-200">
+                                    <th className="text-left py-2 px-3 text-xs font-semibold text-gray-600 uppercase">Member</th>
+                                    <th className="text-left py-2 px-3 text-xs font-semibold text-gray-600 uppercase">Transaction</th>
+                                    <th className="text-right py-2 px-3 text-xs font-semibold text-gray-600 uppercase">Amount</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {collection.collection_items.map((item, index) => (
+                                    <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
+                                      <td className="py-2 px-3 text-sm font-semibold text-gray-700">
+                                        {item.member?.user?.full_name || item.member?.member_code || `Member ${item.member_id}`}
+                                      </td>
+                                      <td className="py-2 px-3 text-sm font-semibold text-gray-700">
+                                        {formatPaymentType(item.payment_type)}
+                                      </td>
+                                      <td className="py-2 px-3 text-sm font-bold text-green-600 text-right">
+                                        {formatIndianCurrency(item.amount)}
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="bg-gradient-to-r from-gray-100 to-gray-200 rounded-full p-4 w-16 h-16 mx-auto mb-4">
+                    <FaHistory className="h-8 w-8 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No transaction history</h3>
+                  <p className="text-sm text-gray-500">
+                    {showFilters && (filters.group_id || filters.start_date || filters.end_date)
+                      ? 'No collections found matching your filters.'
+                      : 'No collections found.'}
+                  </p>
+                </div>
+              )}
+              
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-gray-200 pt-4">
+                  <div className="text-sm text-gray-600">
+                    Page {currentPage} of {totalPages}
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    {/* Previous Button */}
+                    <button
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1 || loadingCollections}
+                      className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors duration-200"
+                    >
+                      <FaChevronLeft className="h-4 w-4" />
+                    </button>
+                    
+                    {/* Page Numbers */}
+                    <div className="flex items-center space-x-1">
+                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                        let pageNum;
+                        if (totalPages <= 5) {
+                          pageNum = i + 1;
+                        } else if (currentPage <= 3) {
+                          pageNum = i + 1;
+                        } else if (currentPage >= totalPages - 2) {
+                          pageNum = totalPages - 4 + i;
+                        } else {
+                          pageNum = currentPage - 2 + i;
+                        }
+                        
+                        return (
+                          <button
+                            key={pageNum}
+                            onClick={() => handlePageChange(pageNum)}
+                            disabled={loadingCollections}
+                            className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 cursor-pointer ${
+                              currentPage === pageNum
+                                ? 'bg-blue-600 text-white'
+                                : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                            } disabled:opacity-50 disabled:cursor-not-allowed`}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    
+                    {/* Next Button */}
+                    <button
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages || loadingCollections}
+                      className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors duration-200"
+                    >
+                      <FaChevronRight className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </SectionContent>
+          </Card>
+        </div>
       </main>
 
       {/* User Management Modal */}
@@ -2992,6 +3551,125 @@ function AdminDashboard({ user, onLogout }) {
         user={user}
       />
 
+      {/* Edit Collection Modal */}
+      {showEditCollectionModal && selectedCollectionForEdit && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+          <div className="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl border border-gray-200 max-h-[90vh] flex flex-col">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 px-6 py-5 border-b border-gray-200 rounded-t-2xl">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-lg p-2">
+                    <FaEdit className="text-white h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-900">Edit Collection</h3>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {selectedCollectionForEdit.group?.name || 'Unknown Group'} - {new Date(selectedCollectionForEdit.collection_date).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowEditCollectionModal(false);
+                    setSelectedCollectionForEdit(null);
+                    setCollectionItems([]);
+                  }}
+                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer"
+                >
+                  <FaTimes className="h-6 w-6" />
+                </button>
+              </div>
+            </div>
+            
+            {/* Content */}
+            <div className="flex-1 overflow-auto p-6">
+              <div className="space-y-4">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                  <p className="text-sm text-blue-800">
+                    <strong>Note:</strong> You can edit multiple transaction amounts at once. Only changed amounts will be saved.
+                  </p>
+                </div>
+                
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-gray-200 bg-gray-50">
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Member</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Transaction Type</th>
+                        <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Current Amount</th>
+                        <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">New Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {collectionItems.map((item, index) => (
+                        <tr key={item.id} className={`border-b border-gray-100 ${item.hasChanged ? 'bg-yellow-50' : 'hover:bg-gray-50'}`}>
+                          <td className="py-3 px-4 text-sm font-semibold text-gray-700">
+                            {item.member?.user?.full_name || item.member?.member_code || `Member ${item.member_id}`}
+                          </td>
+                          <td className="py-3 px-4 text-sm font-semibold text-gray-700">
+                            {formatPaymentType(item.payment_type)}
+                          </td>
+                          <td className="py-3 px-4 text-sm font-semibold text-gray-900 text-right">
+                            {formatIndianCurrency(item.amount)}
+                          </td>
+                          <td className="py-3 px-4 text-right">
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value={item.editedAmount}
+                              onChange={(e) => handleCollectionItemAmountChange(index, e.target.value)}
+                              className={`w-32 px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-right ${
+                                item.hasChanged ? 'border-yellow-400 bg-yellow-50' : 'border-gray-300'
+                              }`}
+                              placeholder="Enter amount"
+                            />
+                            {item.hasChanged && (
+                              <span className="ml-2 text-xs text-yellow-600">Changed</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                
+                {collectionItems.filter(item => item.hasChanged).length > 0 && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <p className="text-sm text-yellow-800">
+                      <strong>{collectionItems.filter(item => item.hasChanged).length}</strong> transaction(s) will be updated.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* Footer */}
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 rounded-b-2xl flex justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setShowEditCollectionModal(false);
+                  setSelectedCollectionForEdit(null);
+                  setCollectionItems([]);
+                }}
+                disabled={editingCollection}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveCollectionEdits}
+                disabled={editingCollection || collectionItems.filter(item => item.hasChanged).length === 0}
+                className="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              >
+                {editingCollection ? 'Saving...' : `Save ${collectionItems.filter(item => item.hasChanged).length > 0 ? `${collectionItems.filter(item => item.hasChanged).length} Change(s)` : 'Changes'}`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Member Statement Modal */}
       <MemberStatementModal
         isOpen={showMemberStatement}
@@ -2999,6 +3677,91 @@ function AdminDashboard({ user, onLogout }) {
         memberId={selectedMemberForStatement?.id}
         memberData={selectedMemberForStatement}
       />
+
+      {/* Receipt Viewer Modal */}
+      {showReceiptModal && receiptUrl && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+          <div className="relative w-full max-w-5xl bg-white rounded-2xl shadow-2xl border border-gray-200 max-h-[90vh] flex flex-col">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200 rounded-t-2xl flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg p-2">
+                  <FaFileDownload className="text-white h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900">Receipt</h3>
+                  <p className="text-sm text-gray-600 mt-1">{receiptFileName}</p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => {
+                    const link = document.createElement('a');
+                    link.href = receiptUrl;
+                    link.download = receiptFileName;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                  }}
+                  className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 cursor-pointer"
+                  title="Download Receipt"
+                >
+                  <FaDownload className="h-5 w-5" />
+                </button>
+                <button
+                  onClick={handleCloseReceiptModal}
+                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer"
+                >
+                  <FaTimes className="h-6 w-6" />
+                </button>
+              </div>
+            </div>
+            
+            {/* Content */}
+            <div className="flex-1 overflow-auto p-6 bg-gray-50">
+              <div className="flex items-center justify-center min-h-full">
+                {receiptFileName.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp)$/) ? (
+                  // Display image
+                  <img
+                    src={receiptUrl}
+                    alt="Receipt"
+                    className="max-w-full max-h-[70vh] rounded-lg shadow-lg border border-gray-200 object-contain"
+                  />
+                ) : receiptFileName.toLowerCase().endsWith('.pdf') ? (
+                  // Display PDF
+                  <iframe
+                    src={receiptUrl}
+                    className="w-full h-[70vh] rounded-lg shadow-lg border border-gray-200"
+                    title="Receipt PDF"
+                  />
+                ) : (
+                  // Download link for other file types
+                  <div className="text-center">
+                    <div className="bg-white rounded-lg p-8 border border-gray-200 shadow-lg">
+                      <FaFileDownload className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                      <p className="text-lg font-semibold text-gray-900 mb-2">Receipt File</p>
+                      <p className="text-sm text-gray-600 mb-4">{receiptFileName}</p>
+                      <button
+                        onClick={() => {
+                          const link = document.createElement('a');
+                          link.href = receiptUrl;
+                          link.download = receiptFileName;
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                        }}
+                        className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-semibold cursor-pointer"
+                      >
+                        Download Receipt
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
     </>
   );

@@ -148,7 +148,7 @@ function Login({ onLogin }) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   maxLength={72}
-                  className={`py-2 sm:py-2 pl-8 sm:pr-10 block w-full border rounded-md leading-5 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-sm ${
+                  className={`py-2 sm:py-2 pl-8 sm:pl-10 block w-full border rounded-md leading-5 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-sm ${
                     password.length > 60 ? 'border-yellow-300' : 'border-gray-300'
                   }`}
                   placeholder="Enter your password"

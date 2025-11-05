@@ -9,6 +9,19 @@ function BillCollectorDashboard({ user, onLogout }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
+
+  // Helper function to format payment type
+  const formatPaymentType = (paymentType) => {
+    if (!paymentType) return 'N/A';
+    const typeMap = {
+      'LOAN_PRINCIPAL': 'EMI',
+      'LOAN_INTEREST': 'Interest',
+      'DEPOSIT': 'Deposit',
+      'JOINING_FEE': 'Joining Fee',
+      'CARRY_FORWARD': 'Carry Forward'
+    };
+    return typeMap[paymentType] || paymentType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
   
   // Form submission hooks
   const { isSubmitting: isSubmittingCollection, submitForm: submitCollectionForm } = useFormSubmission();
@@ -116,15 +129,10 @@ function BillCollectorDashboard({ user, onLogout }) {
         );
         
         
-        // Fetch payment history for this member's loan
+        // Get payments made from stored aggregated amount (fast, no API call needed)
         let paymentsMade = 0;
-        if (memberLoan) {
-          try {
-            const paymentData = await apiService.getLoanPayments(memberLoan.id);
-            paymentsMade = paymentData.total_payments || 0;
-          } catch (error) {
-            paymentsMade = 0;
-          }
+        if (memberLoan && memberLoan.total_collected_amount !== undefined && memberLoan.total_collected_amount !== null) {
+          paymentsMade = parseFloat(memberLoan.total_collected_amount) || 0;
         }
         
         // Check if member has paid this month by looking at collection records
@@ -264,8 +272,8 @@ function BillCollectorDashboard({ user, onLogout }) {
     // Calculate total amount to be paid
     const totalAmount = emi * termMonths;
     
-    // Get payments made from member's payment history
-    const paymentsMade = member.payments_made || 0;
+    // Get payments made from stored aggregated amount (fast, no calculation needed)
+    const paymentsMade = loanInfo.total_collected_amount ? parseFloat(loanInfo.total_collected_amount) || 0 : 0;
     
     // Calculate remaining amount
     const remainingAmount = totalAmount - paymentsMade;
@@ -608,15 +616,6 @@ function BillCollectorDashboard({ user, onLogout }) {
 
   // Add collection item
   const addCollectionItem = (memberId = null) => {
-    // If memberId is provided, check if they can pay
-    if (memberId) {
-      const member = groupMembers.find(m => m.id === memberId);
-      if (member && hasMemberPaidThisMonth(member)) {
-        setError('This member has already paid their EMI for this month');
-        return;
-      }
-    }
-    
     setCollectionForm(prev => {
       const newItem = { 
         member_id: memberId || '', 
@@ -748,15 +747,6 @@ function BillCollectorDashboard({ user, onLogout }) {
 
   // Update collection item
   const updateCollectionItem = (index, field, value) => {
-    // If member_id is being updated, check if they can pay
-    if (field === 'member_id' && value) {
-      const selectedMember = getMemberById(value);
-      if (selectedMember && hasMemberPaidThisMonth(selectedMember)) {
-        setError('This member has already paid their EMI for this month');
-        return;
-      }
-    }
-    
     setCollectionForm(prev => {
       const updatedItems = prev.collection_items.map((item, i) => {
         if (i === index) {
@@ -1659,20 +1649,14 @@ function BillCollectorDashboard({ user, onLogout }) {
                             <option value="">
                                 {loadingMembers ? 'Loading members...' : '👤 Select Member'}
                             </option>
-                            {groupMembers.map(member => {
-                              const hasPaid = hasMemberPaidThisMonth(member);
-                              return (
-                                <option 
-                                  key={member.id} 
-                                  value={member.id}
-                                  disabled={hasPaid}
-                                  style={{ color: hasPaid ? '#9CA3AF' : 'inherit' }}
-                                >
-                                  {member.user?.full_name || member.member_code} ({member.member_code})
-                                  {hasPaid ? ' - Already Paid This Month' : ''}
+                            {groupMembers.map(member => (
+                              <option 
+                                key={member.id} 
+                                value={member.id}
+                              >
+                                {member.user?.full_name || member.member_code} ({member.member_code})
                               </option>
-                              );
-                            })}
+                            ))}
                             </select>
                           </div>
                           <button
@@ -2138,12 +2122,11 @@ function BillCollectorDashboard({ user, onLogout }) {
                               const interestAmount = emiBreakdown.interest || 0;
                               const totalEMI = emiDue || 0;
                               
-                              // Check if member has already paid this month (including current collection)
+                              // Check if member has already paid this month (for display purposes only)
                               const hasPaidThisMonth = hasMemberPaidThisMonth(member);
                               
-                              // For members without loans, they can make savings deposits anytime
-                              // Payment status logic: if no loan, they can always pay (savings deposits)
-                              const canPay = hasActiveLoan ? !hasPaidThisMonth : true;
+                              // Members can always pay (multiple payments per month allowed)
+                              const canPay = true;
                               
                               return (
                                 <tr key={member.id} className="hover:bg-gray-50">
@@ -2215,24 +2198,20 @@ function BillCollectorDashboard({ user, onLogout }) {
                                     <button
                                       type="button"
                                       onClick={() => {
-                                        if (!canPay) {
-                                          setError('This member has already paid their EMI for this month');
-                                          return;
-                                        }
                                         if (isMemberInCollection(member.id)) {
                                           setError('This member is already added to the collection');
                                           return;
                                         }
                                         addCollectionItem(member.id);
                                       }}
-                                      disabled={!canPay || isMemberInCollection(member.id)}
+                                      disabled={isMemberInCollection(member.id)}
                                       className={`px-3 py-1 text-sm rounded ${
-                                        !canPay || isMemberInCollection(member.id)
+                                        isMemberInCollection(member.id)
                                           ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
                                           : 'bg-blue-600 text-white hover:bg-blue-700'
                                       }`}
                                     >
-                                      {!canPay ? 'Paid' : isMemberInCollection(member.id) ? 'Added' : 'Add'}
+                                      {isMemberInCollection(member.id) ? 'Added' : 'Add'}
                                     </button>
                                   </td>
                                 </tr>
@@ -2255,8 +2234,10 @@ function BillCollectorDashboard({ user, onLogout }) {
                             const interestAmount = emiBreakdown.interest || 0;
                             const totalEMI = emiDue || 0;
                             
+                            // Check if member has already paid this month (for display purposes only)
                             const hasPaidThisMonth = hasMemberPaidThisMonth(member);
-                            const canPay = hasActiveLoan ? !hasPaidThisMonth : true;
+                            // Members can always pay (multiple payments per month allowed)
+                            const canPay = true;
                             
                             return (
                               <div key={member.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
@@ -2265,9 +2246,9 @@ function BillCollectorDashboard({ user, onLogout }) {
                                     <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-2">
                                       <span className="text-xs sm:text-sm font-medium text-gray-500">{member.member_code}</span>
                                       <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium w-fit ${
-                                        canPay ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                        hasPaidThisMonth ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'
                                       }`}>
-                                        {canPay ? 'Can Pay' : 'Already Paid'}
+                                        {hasPaidThisMonth ? 'Paid This Month' : 'Can Pay'}
                                       </span>
                                     </div>
                                     <h3 className="text-sm sm:text-base font-semibold text-gray-900 break-words">
@@ -2276,13 +2257,8 @@ function BillCollectorDashboard({ user, onLogout }) {
                                   </div>
                                   <button
                                     type="button"
-                                    onClick={() => addMemberToCollection(member.id)}
-                                    disabled={!canPay}
-                                    className={`p-2 rounded-full transition-colors ${
-                                      canPay 
-                                        ? 'text-blue-600 hover:bg-blue-50 cursor-pointer' 
-                                        : 'text-gray-400 cursor-not-allowed'
-                                    }`}
+                                    onClick={() => addCollectionItem(member.id)}
+                                    className="p-2 rounded-full transition-colors text-blue-600 hover:bg-blue-50 cursor-pointer"
                                   >
                                     <FaPlus className="w-4 h-4" />
                                   </button>
@@ -2481,18 +2457,34 @@ function BillCollectorDashboard({ user, onLogout }) {
                                 <span className="mr-2">📋</span>
                                 Collection Items ({collection.collection_items.length})
                               </p>
-                              <div className="space-y-2">
-                                {collection.collection_items.map((item, index) => (
-                                  <div key={index} className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded-lg">
-                                    <span className="text-sm font-medium text-gray-700">
-                                      {item.member?.user?.full_name || item.member?.member_code || `Member ${item.member_id}`}
-                                    </span>
-                                    <span className="text-sm font-bold text-green-600">{formatIndianCurrency(item.amount)}</span>
-                                  </div>
-                                ))}
-                              </div>
+                              <div className="overflow-x-auto">
+                                <table className="w-full">
+                                  <thead>
+                                    <tr className="border-b border-gray-200">
+                                      <th className="text-left py-2 px-3 text-xs font-semibold text-gray-600 uppercase">Member</th>
+                                      <th className="text-left py-2 px-3 text-xs font-semibold text-gray-600 uppercase">Transaction</th>
+                                      <th className="text-right py-2 px-3 text-xs font-semibold text-gray-600 uppercase">Amount</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {collection.collection_items.map((item, index) => (
+                                      <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
+                                        <td className="py-2 px-3 text-sm font-semibold text-gray-700">
+                                          {item.member?.user?.full_name || item.member?.member_code || `Member ${item.member_id}`}
+                                        </td>
+                                        <td className="py-2 px-3 text-sm font-semibold text-gray-700">
+                                          {formatPaymentType(item.payment_type)}
+                                        </td>
+                                        <td className="py-2 px-3 text-sm font-bold text-green-600 text-right">
+                                          {formatIndianCurrency(item.amount)}
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
                               </div>
                             </div>
+                          </div>
                           )}
                         </div>
                       ))}
