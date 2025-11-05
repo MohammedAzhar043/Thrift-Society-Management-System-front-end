@@ -1,8 +1,9 @@
 /**
  * API service for communicating with the backend
  */
-  const API_BASE_URL = 'http://82.112.231.241:8000/api/v1';
+  // const API_BASE_URL = 'http://kranthimahila.org/api/v1';
 // const API_BASE_URL = 'http://localhost:8000/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://kranthimahila.org/api/v1';
 
 class ApiService {
   constructor() {
