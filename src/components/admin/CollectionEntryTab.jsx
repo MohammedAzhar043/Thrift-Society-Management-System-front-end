@@ -9,7 +9,9 @@ const TRANSACTION_TYPES = [
   { value: 'EMI', label: 'EMI' },
   { value: 'DEPOSIT', label: 'Deposit' },
   { value: 'INTEREST', label: 'Interest' },
-  { value: 'JOINING_FEE', label: 'Joining Fee' }
+  { value: 'JOINING_FEE', label: 'Joining Fee' },
+  { value: 'SHARE_CAPITAL', label: 'Share Capital' },
+  { value: 'LRF', label: 'LRF' }
 ];
 
 function CollectionEntryTab({
@@ -117,6 +119,7 @@ function CollectionEntryTab({
       ...prev,
       members: [...prev.members, {
         member_id: '',
+        receipt_number: '', // Receipt number for this member
         transaction_types: [], // Array of selected transaction types
         amounts: {} // Object to store amounts: { EMI_PRINCIPAL: 0, EMI_INTEREST: 0, DEPOSIT: 0, etc. }
       }]
@@ -389,6 +392,7 @@ function CollectionEntryTab({
               loan_id: memberLoanMap[parseInt(memberEntry.member_id)] ?? null,
               amount: principalAmount,
               payment_type: 'LOAN_PRINCIPAL',
+              receipt_number: memberEntry.receipt_number || null,
               notes: 'EMI Principal payment'
             });
           }
@@ -403,6 +407,7 @@ function CollectionEntryTab({
               loan_id: null,
               amount: depositAmount,
               payment_type: 'DEPOSIT',
+              receipt_number: memberEntry.receipt_number || null,
               notes: 'Savings deposit'
             });
           }
@@ -417,6 +422,7 @@ function CollectionEntryTab({
               loan_id: memberLoanMap[parseInt(memberEntry.member_id)] ?? null,
               amount: interestAmount,
               payment_type: 'LOAN_INTEREST',
+              receipt_number: memberEntry.receipt_number || null,
               notes: 'Interest payment'
             });
           }
@@ -431,7 +437,38 @@ function CollectionEntryTab({
               loan_id: null,
               amount: joiningFeeAmount,
               payment_type: 'JOINING_FEE',
+              receipt_number: memberEntry.receipt_number || null,
               notes: 'Joining fee'
+            });
+          }
+        }
+        
+        // Add Share Capital
+        if (memberEntry.transaction_types.includes('SHARE_CAPITAL')) {
+          const shareCapitalAmount = parseFloat(amounts['SHARE_CAPITAL'] || 0);
+          if (shareCapitalAmount > 0) {
+            collectionItems.push({
+              member_id: parseInt(memberEntry.member_id),
+              loan_id: null,
+              amount: shareCapitalAmount,
+              payment_type: 'SHARE_CAPITAL',
+              receipt_number: memberEntry.receipt_number || null,
+              notes: 'Share capital'
+            });
+          }
+        }
+        
+        // Add LRF
+        if (memberEntry.transaction_types.includes('LRF')) {
+          const lrfAmount = parseFloat(amounts['LRF'] || 0);
+          if (lrfAmount > 0) {
+            collectionItems.push({
+              member_id: parseInt(memberEntry.member_id),
+              loan_id: null,
+              amount: lrfAmount,
+              payment_type: 'LRF',
+              receipt_number: memberEntry.receipt_number || null,
+              notes: 'LRF'
             });
           }
         }
@@ -443,17 +480,22 @@ function CollectionEntryTab({
         if (item.payment_type === 'LOAN_PRINCIPAL') acc.total_loan_principal += item.amount;
         if (item.payment_type === 'LOAN_INTEREST') acc.total_loan_interest += item.amount;
         if (item.payment_type === 'JOINING_FEE') acc.total_joining_fees += item.amount;
+        if (item.payment_type === 'SHARE_CAPITAL') acc.total_share_capital += item.amount;
+        if (item.payment_type === 'LRF') acc.total_lrf += item.amount;
         return acc;
       }, {
         total_deposits: 0,
         total_loan_principal: 0,
         total_loan_interest: 0,
         total_joining_fees: 0,
-        total_carry_forward: 0
+        total_carry_forward: 0,
+        total_share_capital: 0,
+        total_lrf: 0
       });
       
       const grandTotal = totals.total_deposits + totals.total_loan_principal + 
-                        totals.total_loan_interest + totals.total_joining_fees;
+                        totals.total_loan_interest + totals.total_joining_fees + 
+                        totals.total_share_capital + totals.total_lrf;
       
       const uniqueMembers = new Set(collectionItems.map(item => item.member_id)).size;
       
@@ -461,13 +503,14 @@ function CollectionEntryTab({
       const collectionData = {
         group_id: parseInt(collectionEntryForm.group_id),
         collection_date: collectionEntryForm.collection_date,
-        receipt_number: collectionEntryForm.receipt_number || null,
         receipt_file_path: receiptFilePath,
         total_deposits: totals.total_deposits,
         total_loan_principal: totals.total_loan_principal,
         total_loan_interest: totals.total_loan_interest,
         total_joining_fees: totals.total_joining_fees,
         total_carry_forward: totals.total_carry_forward,
+        total_share_capital: totals.total_share_capital,
+        total_lrf: totals.total_lrf,
         member_count: uniqueMembers,
         transaction_count: collectionItems.length,
         grand_total: grandTotal,
@@ -497,7 +540,6 @@ function CollectionEntryTab({
       setCollectionEntryForm({
         group_id: '',
         collection_date: new Date().toISOString().split('T')[0],
-        receipt_number: '',
         members: []
       });
       setCollectionEntryMembers([]);
@@ -624,20 +666,6 @@ function CollectionEntryTab({
                 required
               />
             </div>
-            
-            {/* Receipt Number */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Receipt Number
-              </label>
-              <input
-                type="text"
-                value={collectionEntryForm.receipt_number}
-                onChange={(e) => setCollectionEntryForm(prev => ({ ...prev, receipt_number: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-text"
-                placeholder="Enter receipt number"
-              />
-            </div>
           </div>
         </div>
 
@@ -678,7 +706,7 @@ function CollectionEntryTab({
                 </div>
                 
                 {/* Member Selection */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Member *
@@ -697,6 +725,20 @@ function CollectionEntryTab({
                         </option>
                       ))}
                     </select>
+                  </div>
+                  
+                  {/* Receipt Number - Per Member */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Receipt Number
+                    </label>
+                    <input
+                      type="text"
+                      value={memberEntry.receipt_number || ''}
+                      onChange={(e) => updateMemberEntry(index, 'receipt_number', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-text"
+                      placeholder="Enter receipt number"
+                    />
                   </div>
                   
                   {/* Total Amount - Auto-calculated */}

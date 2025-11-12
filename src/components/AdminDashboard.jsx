@@ -3211,9 +3211,6 @@ function AdminDashboard({ user, onLogout }) {
                             <p className="text-2xl font-bold text-green-600">
                               {formatIndianCurrency(collection.grand_total)}
                             </p>
-                            <p className="text-sm text-gray-500">
-                              Receipt: {collection.receipt_number || 'N/A'}
-                            </p>
                           </div>
                           <div className="flex items-center space-x-2">
                             {collection.is_verified && (

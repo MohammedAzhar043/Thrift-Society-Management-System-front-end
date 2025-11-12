@@ -18,9 +18,33 @@ function BillCollectorDashboard({ user, onLogout }) {
       'LOAN_INTEREST': 'Interest',
       'DEPOSIT': 'Deposit',
       'JOINING_FEE': 'Joining Fee',
-      'CARRY_FORWARD': 'Carry Forward'
+      'CARRY_FORWARD': 'Carry Forward',
+      'SHARE_CAPITAL': 'Share Capital',
+      'LRF': 'LRF'
     };
     return typeMap[paymentType] || paymentType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
+
+  // Helper function to generate receipt number from collection record
+  const getReceiptNumber = (collection) => {
+    // If receipt_number exists on collection, use it
+    if (collection.receipt_number) {
+      return collection.receipt_number;
+    }
+    
+    // Otherwise, generate from collection ID and date
+    if (collection.id && collection.collection_date) {
+      const date = new Date(collection.collection_date);
+      const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
+      return `RCP-${dateStr}-${String(collection.id).padStart(4, '0')}`;
+    }
+    
+    // Fallback: use collection ID
+    if (collection.id) {
+      return `RCP-${collection.id}`;
+    }
+    
+    return 'N/A';
   };
   
   // Form submission hooks
@@ -51,6 +75,8 @@ function BillCollectorDashboard({ user, onLogout }) {
     total_loan_interest: 0,
     total_joining_fees: 0,
     total_carry_forward: 0,
+    total_share_capital: 0,
+    total_lrf: 0,
     grand_total: 0,
     member_count: 0,
     transaction_count: 0,
@@ -68,7 +94,9 @@ function BillCollectorDashboard({ user, onLogout }) {
     { value: 'LOAN_PRINCIPAL', label: 'Loan Principal', description: 'EMI principal payment' },
     { value: 'LOAN_INTEREST', label: 'Loan Interest', description: 'EMI interest payment' },
     { value: 'JOINING_FEE', label: 'Joining Fee', description: 'One-time joining fee' },
-    { value: 'CARRY_FORWARD', label: 'Carry Forward', description: 'Previous month carry forward amount' }
+    { value: 'CARRY_FORWARD', label: 'Carry Forward', description: 'Previous month carry forward amount' },
+    { value: 'SHARE_CAPITAL', label: 'Share Capital', description: 'Share capital payment' },
+    { value: 'LRF', label: 'LRF', description: 'Loan Recovery Fund payment' }
   ];
 
   // Fetch dashboard data
@@ -346,8 +374,10 @@ function BillCollectorDashboard({ user, onLogout }) {
     const interestAmount = parseFloat(item.interest_amount || 0);
     const depositAmount = parseFloat(item.deposit_amount || 0);
     const joiningFeeAmount = parseFloat(item.joining_fee || 0);
+    const shareCapitalAmount = parseFloat(item.share_capital || 0);
+    const lrfAmount = parseFloat(item.lrf || 0);
     
-    return principalAmount + interestAmount + depositAmount + joiningFeeAmount;
+    return principalAmount + interestAmount + depositAmount + joiningFeeAmount + shareCapitalAmount + lrfAmount;
   };
 
   // Get member by ID for calculations
@@ -413,9 +443,11 @@ function BillCollectorDashboard({ user, onLogout }) {
         const interestAmount = parseFloat(item.interest_amount || 0);
         const depositAmount = parseFloat(item.deposit_amount || 0);
         const joiningFeeAmount = parseFloat(item.joining_fee || 0);
+        const shareCapitalAmount = parseFloat(item.share_capital || 0);
+        const lrfAmount = parseFloat(item.lrf || 0);
         
         // Validate amounts
-        if (isNaN(principalAmount) || isNaN(interestAmount) || isNaN(depositAmount) || isNaN(joiningFeeAmount)) {
+        if (isNaN(principalAmount) || isNaN(interestAmount) || isNaN(depositAmount) || isNaN(joiningFeeAmount) || isNaN(shareCapitalAmount) || isNaN(lrfAmount)) {
           console.error('Invalid amount in collection item:', item);
           return;
         }
@@ -511,6 +543,28 @@ function BillCollectorDashboard({ user, onLogout }) {
             notes: 'Joining fee'
           });
         }
+
+        // Add share capital if amount > 0
+        if (shareCapitalAmount > 0) {
+          transformedCollectionItems.push({
+            member_id: item.member_id,
+            loan_id: null,
+            amount: shareCapitalAmount,
+            payment_type: 'SHARE_CAPITAL',
+            notes: 'Share capital payment'
+          });
+        }
+
+        // Add LRF if amount > 0
+        if (lrfAmount > 0) {
+          transformedCollectionItems.push({
+            member_id: item.member_id,
+            loan_id: null,
+            amount: lrfAmount,
+            payment_type: 'LRF',
+            notes: 'Loan Recovery Fund payment'
+          });
+        }
       });
       } catch (transformError) {
         console.error('Error transforming collection items:', transformError);
@@ -528,7 +582,9 @@ function BillCollectorDashboard({ user, onLogout }) {
         total_loan_principal: 0,
         total_loan_interest: 0,
         total_joining_fees: 0,
-        total_carry_forward: 0
+        total_carry_forward: 0,
+        total_share_capital: 0,
+        total_lrf: 0
       };
 
       transformedCollectionItems.forEach(item => {
@@ -542,6 +598,10 @@ function BillCollectorDashboard({ user, onLogout }) {
           calculatedTotals.total_joining_fees += parseFloat(item.amount);
         } else if (item.payment_type === 'CARRY_FORWARD') {
           calculatedTotals.total_carry_forward += parseFloat(item.amount);
+        } else if (item.payment_type === 'SHARE_CAPITAL') {
+          calculatedTotals.total_share_capital += parseFloat(item.amount);
+        } else if (item.payment_type === 'LRF') {
+          calculatedTotals.total_lrf += parseFloat(item.amount);
         }
       });
 
@@ -554,6 +614,8 @@ function BillCollectorDashboard({ user, onLogout }) {
         total_loan_interest: calculatedTotals.total_loan_interest,
         total_joining_fees: calculatedTotals.total_joining_fees,
         total_carry_forward: calculatedTotals.total_carry_forward,
+        total_share_capital: calculatedTotals.total_share_capital,
+        total_lrf: calculatedTotals.total_lrf,
         member_count: new Set(transformedCollectionItems.map(item => item.member_id)).size,
         transaction_count: transformedCollectionItems.length,
         notes: collectionForm.notes || null,
@@ -633,27 +695,54 @@ function BillCollectorDashboard({ user, onLogout }) {
         total_loan_principal: 0,
         total_loan_interest: 0,
         total_joining_fees: 0,
-        total_carry_forward: 0
+        total_carry_forward: 0,
+        total_share_capital: 0,
+        total_lrf: 0
       };
       
       updatedItems.forEach(item => {
+        // For items with separate amount fields (new structure)
+        const principalAmount = parseFloat(item.principal_amount || 0);
+        const interestAmount = parseFloat(item.interest_amount || 0);
+        const depositAmount = parseFloat(item.deposit_amount || 0);
+        const joiningFeeAmount = parseFloat(item.joining_fee || 0);
+        const shareCapitalAmount = parseFloat(item.share_capital || 0);
+        const lrfAmount = parseFloat(item.lrf || 0);
+        
+        // Add amounts from separate fields
+        totals.total_deposits += depositAmount;
+        totals.total_loan_principal += principalAmount;
+        totals.total_loan_interest += interestAmount;
+        totals.total_joining_fees += joiningFeeAmount;
+        totals.total_share_capital += shareCapitalAmount;
+        totals.total_lrf += lrfAmount;
+        
+        // Also handle legacy payment_type structure if present
         const amount = parseFloat(item.amount || 0);
-        switch (item.payment_type) {
-          case 'DEPOSIT':
-            totals.total_deposits += amount;
-            break;
-          case 'LOAN_PRINCIPAL':
-            totals.total_loan_principal += amount;
-            break;
-          case 'LOAN_INTEREST':
-            totals.total_loan_interest += amount;
-            break;
-          case 'JOINING_FEE':
-            totals.total_joining_fees += amount;
-            break;
-          case 'CARRY_FORWARD':
-            totals.total_carry_forward += amount;
-            break;
+        if (amount > 0 && item.payment_type) {
+          switch (item.payment_type) {
+            case 'DEPOSIT':
+              totals.total_deposits += amount;
+              break;
+            case 'LOAN_PRINCIPAL':
+              totals.total_loan_principal += amount;
+              break;
+            case 'LOAN_INTEREST':
+              totals.total_loan_interest += amount;
+              break;
+            case 'JOINING_FEE':
+              totals.total_joining_fees += amount;
+              break;
+            case 'CARRY_FORWARD':
+              totals.total_carry_forward += amount;
+              break;
+            case 'SHARE_CAPITAL':
+              totals.total_share_capital += amount;
+              break;
+            case 'LRF':
+              totals.total_lrf += amount;
+              break;
+          }
         }
       });
       
@@ -683,27 +772,54 @@ function BillCollectorDashboard({ user, onLogout }) {
         total_loan_principal: 0,
         total_loan_interest: 0,
         total_joining_fees: 0,
-        total_carry_forward: 0
+        total_carry_forward: 0,
+        total_share_capital: 0,
+        total_lrf: 0
       };
       
       updatedItems.forEach(item => {
+        // For items with separate amount fields (new structure)
+        const principalAmount = parseFloat(item.principal_amount || 0);
+        const interestAmount = parseFloat(item.interest_amount || 0);
+        const depositAmount = parseFloat(item.deposit_amount || 0);
+        const joiningFeeAmount = parseFloat(item.joining_fee || 0);
+        const shareCapitalAmount = parseFloat(item.share_capital || 0);
+        const lrfAmount = parseFloat(item.lrf || 0);
+        
+        // Add amounts from separate fields
+        totals.total_deposits += depositAmount;
+        totals.total_loan_principal += principalAmount;
+        totals.total_loan_interest += interestAmount;
+        totals.total_joining_fees += joiningFeeAmount;
+        totals.total_share_capital += shareCapitalAmount;
+        totals.total_lrf += lrfAmount;
+        
+        // Also handle legacy payment_type structure if present
         const amount = parseFloat(item.amount || 0);
-        switch (item.payment_type) {
-          case 'DEPOSIT':
-            totals.total_deposits += amount;
-            break;
-          case 'LOAN_PRINCIPAL':
-            totals.total_loan_principal += amount;
-            break;
-          case 'LOAN_INTEREST':
-            totals.total_loan_interest += amount;
-            break;
-          case 'JOINING_FEE':
-            totals.total_joining_fees += amount;
-            break;
-          case 'CARRY_FORWARD':
-            totals.total_carry_forward += amount;
-            break;
+        if (amount > 0 && item.payment_type) {
+          switch (item.payment_type) {
+            case 'DEPOSIT':
+              totals.total_deposits += amount;
+              break;
+            case 'LOAN_PRINCIPAL':
+              totals.total_loan_principal += amount;
+              break;
+            case 'LOAN_INTEREST':
+              totals.total_loan_interest += amount;
+              break;
+            case 'JOINING_FEE':
+              totals.total_joining_fees += amount;
+              break;
+            case 'CARRY_FORWARD':
+              totals.total_carry_forward += amount;
+              break;
+            case 'SHARE_CAPITAL':
+              totals.total_share_capital += amount;
+              break;
+            case 'LRF':
+              totals.total_lrf += amount;
+              break;
+          }
         }
       });
       
@@ -771,27 +887,54 @@ function BillCollectorDashboard({ user, onLogout }) {
         total_loan_principal: 0,
         total_loan_interest: 0,
         total_joining_fees: 0,
-        total_carry_forward: 0
+        total_carry_forward: 0,
+        total_share_capital: 0,
+        total_lrf: 0
       };
       
       updatedItems.forEach(item => {
+        // For items with separate amount fields (new structure)
+        const principalAmount = parseFloat(item.principal_amount || 0);
+        const interestAmount = parseFloat(item.interest_amount || 0);
+        const depositAmount = parseFloat(item.deposit_amount || 0);
+        const joiningFeeAmount = parseFloat(item.joining_fee || 0);
+        const shareCapitalAmount = parseFloat(item.share_capital || 0);
+        const lrfAmount = parseFloat(item.lrf || 0);
+        
+        // Add amounts from separate fields
+        totals.total_deposits += depositAmount;
+        totals.total_loan_principal += principalAmount;
+        totals.total_loan_interest += interestAmount;
+        totals.total_joining_fees += joiningFeeAmount;
+        totals.total_share_capital += shareCapitalAmount;
+        totals.total_lrf += lrfAmount;
+        
+        // Also handle legacy payment_type structure if present
         const amount = parseFloat(item.amount || 0);
-        switch (item.payment_type) {
-          case 'DEPOSIT':
-            totals.total_deposits += amount;
-            break;
-          case 'LOAN_PRINCIPAL':
-            totals.total_loan_principal += amount;
-            break;
-          case 'LOAN_INTEREST':
-            totals.total_loan_interest += amount;
-            break;
-          case 'JOINING_FEE':
-            totals.total_joining_fees += amount;
-            break;
-          case 'CARRY_FORWARD':
-            totals.total_carry_forward += amount;
-            break;
+        if (amount > 0 && item.payment_type) {
+          switch (item.payment_type) {
+            case 'DEPOSIT':
+              totals.total_deposits += amount;
+              break;
+            case 'LOAN_PRINCIPAL':
+              totals.total_loan_principal += amount;
+              break;
+            case 'LOAN_INTEREST':
+              totals.total_loan_interest += amount;
+              break;
+            case 'JOINING_FEE':
+              totals.total_joining_fees += amount;
+              break;
+            case 'CARRY_FORWARD':
+              totals.total_carry_forward += amount;
+              break;
+            case 'SHARE_CAPITAL':
+              totals.total_share_capital += amount;
+              break;
+            case 'LRF':
+              totals.total_lrf += amount;
+              break;
+          }
         }
       });
       
@@ -1508,7 +1651,7 @@ function BillCollectorDashboard({ user, onLogout }) {
                             {formatIndianCurrency(collection.grand_total)}
                           </p>
                               <p className="text-xs text-gray-500 truncate">
-                            Receipt: {collection.receipt_number || 'N/A'}
+                            Receipt: {getReceiptNumber(collection)}
                           </p>
                             </div>
                             <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-semibold w-fit ${
@@ -1988,6 +2131,38 @@ function BillCollectorDashboard({ user, onLogout }) {
                                     />
                                   </div>
 
+                                  {/* Share Capital */}
+                                  <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                      Share Capital
+                                    </label>
+                                    <input
+                                      type="number"
+                                      placeholder="0.00"
+                                      value={item.share_capital || ''}
+                                      onChange={(e) => updateCollectionItem(index, 'share_capital', e.target.value)}
+                                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg font-medium"
+                                      step="0.01"
+                                      min="0"
+                                    />
+                                  </div>
+
+                                  {/* LRF */}
+                                  <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                      LRF (Loan Recovery Fund)
+                                    </label>
+                                    <input
+                                      type="number"
+                                      placeholder="0.00"
+                                      value={item.lrf || ''}
+                                      onChange={(e) => updateCollectionItem(index, 'lrf', e.target.value)}
+                                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg font-medium"
+                                      step="0.01"
+                                      min="0"
+                                    />
+                                  </div>
+
                                   {/* Savings Information */}
                                   <div className="bg-blue-50 p-3 rounded-lg mt-4">
                                     <div className="text-sm text-blue-800">
@@ -2437,7 +2612,7 @@ function BillCollectorDashboard({ user, onLogout }) {
                                 {formatIndianCurrency(collection.grand_total)}
                               </p>
                               <p className="text-sm text-gray-500">
-                                Receipt: {collection.receipt_number || 'N/A'}
+                                Receipt: {getReceiptNumber(collection)}
                               </p>
                             </div>
                             <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${

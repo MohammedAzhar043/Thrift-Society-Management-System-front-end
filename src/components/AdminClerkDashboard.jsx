@@ -76,7 +76,6 @@ function AdminClerkDashboard({ user, onLogout }) {
   const [collectionEntryForm, setCollectionEntryForm] = useState({
     group_id: '',
     collection_date: new Date().toISOString().split('T')[0],
-    receipt_number: '',
     members: []
   });
   const [collectionEntryMembers, setCollectionEntryMembers] = useState([]);
