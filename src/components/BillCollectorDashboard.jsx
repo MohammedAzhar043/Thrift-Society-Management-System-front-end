@@ -18,6 +18,7 @@ function BillCollectorDashboard({ user, onLogout }) {
       'LOAN_INTEREST': 'Interest',
       'DEPOSIT': 'Deposit',
       'JOINING_FEE': 'Joining Fee',
+      'INSURANCE_AMOUNT': 'Insurance Amount',
       'CARRY_FORWARD': 'Carry Forward',
       'SHARE_CAPITAL': 'Share Capital',
       'LRF': 'LRF'
@@ -74,6 +75,7 @@ function BillCollectorDashboard({ user, onLogout }) {
     total_loan_principal: 0,
     total_loan_interest: 0,
     total_joining_fees: 0,
+    total_insurance_amount: 0,
     total_carry_forward: 0,
     total_share_capital: 0,
     total_lrf: 0,
@@ -94,6 +96,7 @@ function BillCollectorDashboard({ user, onLogout }) {
     { value: 'LOAN_PRINCIPAL', label: 'Loan Principal', description: 'EMI principal payment' },
     { value: 'LOAN_INTEREST', label: 'Loan Interest', description: 'EMI interest payment' },
     { value: 'JOINING_FEE', label: 'Joining Fee', description: 'One-time joining fee' },
+    { value: 'INSURANCE_AMOUNT', label: 'Insurance Amount', description: 'Insurance payment' },
     { value: 'CARRY_FORWARD', label: 'Carry Forward', description: 'Previous month carry forward amount' },
     { value: 'SHARE_CAPITAL', label: 'Share Capital', description: 'Share capital payment' },
     { value: 'LRF', label: 'LRF', description: 'Loan Recovery Fund payment' }
@@ -374,10 +377,11 @@ function BillCollectorDashboard({ user, onLogout }) {
     const interestAmount = parseFloat(item.interest_amount || 0);
     const depositAmount = parseFloat(item.deposit_amount || 0);
     const joiningFeeAmount = parseFloat(item.joining_fee || 0);
+    const insuranceAmount = parseFloat(item.insurance_amount || 0);
     const shareCapitalAmount = parseFloat(item.share_capital || 0);
     const lrfAmount = parseFloat(item.lrf || 0);
     
-    return principalAmount + interestAmount + depositAmount + joiningFeeAmount + shareCapitalAmount + lrfAmount;
+    return principalAmount + interestAmount + depositAmount + joiningFeeAmount + insuranceAmount + shareCapitalAmount + lrfAmount;
   };
 
   // Get member by ID for calculations
@@ -443,11 +447,12 @@ function BillCollectorDashboard({ user, onLogout }) {
         const interestAmount = parseFloat(item.interest_amount || 0);
         const depositAmount = parseFloat(item.deposit_amount || 0);
         const joiningFeeAmount = parseFloat(item.joining_fee || 0);
+        const insuranceAmount = parseFloat(item.insurance_amount || 0);
         const shareCapitalAmount = parseFloat(item.share_capital || 0);
         const lrfAmount = parseFloat(item.lrf || 0);
         
         // Validate amounts
-        if (isNaN(principalAmount) || isNaN(interestAmount) || isNaN(depositAmount) || isNaN(joiningFeeAmount) || isNaN(shareCapitalAmount) || isNaN(lrfAmount)) {
+        if (isNaN(principalAmount) || isNaN(interestAmount) || isNaN(depositAmount) || isNaN(joiningFeeAmount) || isNaN(insuranceAmount) || isNaN(shareCapitalAmount) || isNaN(lrfAmount)) {
           console.error('Invalid amount in collection item:', item);
           return;
         }
@@ -544,6 +549,17 @@ function BillCollectorDashboard({ user, onLogout }) {
           });
         }
 
+        // Add insurance amount if amount > 0
+        if (insuranceAmount > 0) {
+          transformedCollectionItems.push({
+            member_id: item.member_id,
+            loan_id: null,
+            amount: insuranceAmount,
+            payment_type: 'INSURANCE_AMOUNT',
+            notes: 'Insurance amount'
+          });
+        }
+
         // Add share capital if amount > 0
         if (shareCapitalAmount > 0) {
           transformedCollectionItems.push({
@@ -582,6 +598,7 @@ function BillCollectorDashboard({ user, onLogout }) {
         total_loan_principal: 0,
         total_loan_interest: 0,
         total_joining_fees: 0,
+        total_insurance_amount: 0,
         total_carry_forward: 0,
         total_share_capital: 0,
         total_lrf: 0
@@ -596,6 +613,8 @@ function BillCollectorDashboard({ user, onLogout }) {
           calculatedTotals.total_loan_interest += parseFloat(item.amount);
         } else if (item.payment_type === 'JOINING_FEE') {
           calculatedTotals.total_joining_fees += parseFloat(item.amount);
+        } else if (item.payment_type === 'INSURANCE_AMOUNT') {
+          calculatedTotals.total_insurance_amount += parseFloat(item.amount);
         } else if (item.payment_type === 'CARRY_FORWARD') {
           calculatedTotals.total_carry_forward += parseFloat(item.amount);
         } else if (item.payment_type === 'SHARE_CAPITAL') {
@@ -613,6 +632,7 @@ function BillCollectorDashboard({ user, onLogout }) {
         total_loan_principal: calculatedTotals.total_loan_principal,
         total_loan_interest: calculatedTotals.total_loan_interest,
         total_joining_fees: calculatedTotals.total_joining_fees,
+        total_insurance_amount: calculatedTotals.total_insurance_amount,
         total_carry_forward: calculatedTotals.total_carry_forward,
         total_share_capital: calculatedTotals.total_share_capital,
         total_lrf: calculatedTotals.total_lrf,
@@ -695,6 +715,7 @@ function BillCollectorDashboard({ user, onLogout }) {
         total_loan_principal: 0,
         total_loan_interest: 0,
         total_joining_fees: 0,
+        total_insurance_amount: 0,
         total_carry_forward: 0,
         total_share_capital: 0,
         total_lrf: 0
@@ -706,6 +727,7 @@ function BillCollectorDashboard({ user, onLogout }) {
         const interestAmount = parseFloat(item.interest_amount || 0);
         const depositAmount = parseFloat(item.deposit_amount || 0);
         const joiningFeeAmount = parseFloat(item.joining_fee || 0);
+        const insuranceAmount = parseFloat(item.insurance_amount || 0);
         const shareCapitalAmount = parseFloat(item.share_capital || 0);
         const lrfAmount = parseFloat(item.lrf || 0);
         
@@ -714,6 +736,7 @@ function BillCollectorDashboard({ user, onLogout }) {
         totals.total_loan_principal += principalAmount;
         totals.total_loan_interest += interestAmount;
         totals.total_joining_fees += joiningFeeAmount;
+        totals.total_insurance_amount += insuranceAmount;
         totals.total_share_capital += shareCapitalAmount;
         totals.total_lrf += lrfAmount;
         
@@ -732,6 +755,9 @@ function BillCollectorDashboard({ user, onLogout }) {
               break;
             case 'JOINING_FEE':
               totals.total_joining_fees += amount;
+              break;
+            case 'INSURANCE_AMOUNT':
+              totals.total_insurance_amount += amount;
               break;
             case 'CARRY_FORWARD':
               totals.total_carry_forward += amount;
@@ -772,6 +798,7 @@ function BillCollectorDashboard({ user, onLogout }) {
         total_loan_principal: 0,
         total_loan_interest: 0,
         total_joining_fees: 0,
+        total_insurance_amount: 0,
         total_carry_forward: 0,
         total_share_capital: 0,
         total_lrf: 0
@@ -783,6 +810,7 @@ function BillCollectorDashboard({ user, onLogout }) {
         const interestAmount = parseFloat(item.interest_amount || 0);
         const depositAmount = parseFloat(item.deposit_amount || 0);
         const joiningFeeAmount = parseFloat(item.joining_fee || 0);
+        const insuranceAmount = parseFloat(item.insurance_amount || 0);
         const shareCapitalAmount = parseFloat(item.share_capital || 0);
         const lrfAmount = parseFloat(item.lrf || 0);
         
@@ -791,6 +819,7 @@ function BillCollectorDashboard({ user, onLogout }) {
         totals.total_loan_principal += principalAmount;
         totals.total_loan_interest += interestAmount;
         totals.total_joining_fees += joiningFeeAmount;
+        totals.total_insurance_amount += insuranceAmount;
         totals.total_share_capital += shareCapitalAmount;
         totals.total_lrf += lrfAmount;
         
@@ -809,6 +838,9 @@ function BillCollectorDashboard({ user, onLogout }) {
               break;
             case 'JOINING_FEE':
               totals.total_joining_fees += amount;
+              break;
+            case 'INSURANCE_AMOUNT':
+              totals.total_insurance_amount += amount;
               break;
             case 'CARRY_FORWARD':
               totals.total_carry_forward += amount;
@@ -2125,6 +2157,22 @@ function BillCollectorDashboard({ user, onLogout }) {
                                       placeholder="0.00"
                                       value={item.joining_fee || ''}
                                       onChange={(e) => updateCollectionItem(index, 'joining_fee', e.target.value)}
+                                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg font-medium"
+                                      step="0.01"
+                                      min="0"
+                                    />
+                                  </div>
+
+                                  {/* Insurance Amount */}
+                                  <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                      Insurance Amount
+                                    </label>
+                                    <input
+                                      type="number"
+                                      placeholder="0.00"
+                                      value={item.insurance_amount || ''}
+                                      onChange={(e) => updateCollectionItem(index, 'insurance_amount', e.target.value)}
                                       className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg font-medium"
                                       step="0.01"
                                       min="0"

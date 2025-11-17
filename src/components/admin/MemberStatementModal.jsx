@@ -17,6 +17,9 @@ const MemberStatementModal = ({ isOpen, onClose, memberId, memberData, isClerkVi
     totalSavings: 0,
     totalLoanPrincipal: 0,
     totalLoanInterest: 0,
+    totalJoiningFees: 0,
+    totalInsuranceAmount: 0,
+    totalCarryForward: 0,
     totalPaid: 0,
     currentLoanBalance: 0,
     currentSavingsBalance: 0
@@ -102,6 +105,20 @@ const MemberStatementModal = ({ isOpen, onClose, memberId, memberData, isClerkVi
     }
   };
 
+  const getPaymentTypeDescription = (paymentType) => {
+    const descriptions = {
+      'DEPOSIT': 'Savings Deposit',
+      'LOAN_PRINCIPAL': 'Loan Principal',
+      'LOAN_INTEREST': 'Loan Interest',
+      'JOINING_FEE': 'Joining Fee',
+      'INSURANCE_AMOUNT': 'Insurance Amount',
+      'CARRY_FORWARD': 'Carry Forward',
+      'SHARE_CAPITAL': 'Share Capital',
+      'LRF': 'LRF'
+    };
+    return descriptions[paymentType] || paymentType;
+  };
+
   const processTransactions = (collections, loans) => {
     const allTransactions = [];
     
@@ -113,7 +130,7 @@ const MemberStatementModal = ({ isOpen, onClose, memberId, memberData, isClerkVi
           type: 'collection',
           paymentType: transaction.payment_type,
           amount: parseFloat(transaction.amount),
-          description: transaction.description,
+          description: transaction.description || getPaymentTypeDescription(transaction.payment_type),
           reference: transaction.receipt_number
         });
       });
@@ -127,7 +144,7 @@ const MemberStatementModal = ({ isOpen, onClose, memberId, memberData, isClerkVi
           type: 'loan',
           paymentType: transaction.payment_type,
           amount: parseFloat(transaction.amount),
-          description: transaction.description,
+          description: transaction.description || getPaymentTypeDescription(transaction.payment_type),
           reference: transaction.receipt_number
         });
       });
@@ -137,22 +154,12 @@ const MemberStatementModal = ({ isOpen, onClose, memberId, memberData, isClerkVi
     return allTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
   };
 
-  const getPaymentTypeDescription = (paymentType) => {
-    const descriptions = {
-      'DEPOSIT': 'Savings Deposit',
-      'LOAN_PRINCIPAL': 'Loan Principal',
-      'LOAN_INTEREST': 'Loan Interest',
-      'JOINING_FEE': 'Joining Fee',
-      'CARRY_FORWARD': 'Carry Forward'
-    };
-    return descriptions[paymentType] || paymentType;
-  };
-
   const calculateSummary = (transactions, memberDetails) => {
     let totalSavings = 0;
     let totalLoanPrincipal = 0;
     let totalLoanInterest = 0;
     let totalJoiningFees = 0;
+    let totalInsuranceAmount = 0;
     let totalCarryForward = 0;
     let totalPaid = 0;
     let totalLoanDisbursed = 0;
@@ -173,6 +180,9 @@ const MemberStatementModal = ({ isOpen, onClose, memberId, memberData, isClerkVi
             break;
           case 'JOINING_FEE':
             totalJoiningFees += transaction.amount || 0;
+            break;
+          case 'INSURANCE_AMOUNT':
+            totalInsuranceAmount += transaction.amount || 0;
             break;
           case 'CARRY_FORWARD':
             totalCarryForward += transaction.amount || 0;
@@ -243,6 +253,7 @@ const MemberStatementModal = ({ isOpen, onClose, memberId, memberData, isClerkVi
       totalLoanPrincipal,
       totalLoanInterest,
       totalJoiningFees,
+      totalInsuranceAmount,
       totalCarryForward,
       totalPaid,
       totalLoanDisbursed,
@@ -481,6 +492,10 @@ const MemberStatementModal = ({ isOpen, onClose, memberId, memberData, isClerkVi
                 <div className="text-center">
                   <p className="text-sm text-gray-600">Joining Fees</p>
                   <p className="text-lg font-bold text-purple-600">{formatCurrency(summary.totalJoiningFees)}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-sm text-gray-600">Insurance Amount</p>
+                  <p className="text-lg font-bold text-teal-600">{formatCurrency(summary.totalInsuranceAmount || 0)}</p>
                 </div>
                 <div className="text-center">
                   <p className="text-sm text-gray-600">Carry Forward</p>

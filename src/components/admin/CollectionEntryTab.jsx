@@ -10,6 +10,7 @@ const TRANSACTION_TYPES = [
   { value: 'DEPOSIT', label: 'Deposit' },
   { value: 'INTEREST', label: 'Interest' },
   { value: 'JOINING_FEE', label: 'Joining Fee' },
+  { value: 'INSURANCE_AMOUNT', label: 'Insurance Amount' },
   { value: 'SHARE_CAPITAL', label: 'Share Capital' },
   { value: 'LRF', label: 'LRF' }
 ];
@@ -443,6 +444,21 @@ function CollectionEntryTab({
           }
         }
         
+        // Add Insurance Amount
+        if (memberEntry.transaction_types.includes('INSURANCE_AMOUNT')) {
+          const insuranceAmount = parseFloat(amounts['INSURANCE_AMOUNT'] || 0);
+          if (insuranceAmount > 0) {
+            collectionItems.push({
+              member_id: parseInt(memberEntry.member_id),
+              loan_id: null,
+              amount: insuranceAmount,
+              payment_type: 'INSURANCE_AMOUNT',
+              receipt_number: memberEntry.receipt_number || null,
+              notes: 'Insurance amount'
+            });
+          }
+        }
+        
         // Add Share Capital
         if (memberEntry.transaction_types.includes('SHARE_CAPITAL')) {
           const shareCapitalAmount = parseFloat(amounts['SHARE_CAPITAL'] || 0);
@@ -480,6 +496,7 @@ function CollectionEntryTab({
         if (item.payment_type === 'LOAN_PRINCIPAL') acc.total_loan_principal += item.amount;
         if (item.payment_type === 'LOAN_INTEREST') acc.total_loan_interest += item.amount;
         if (item.payment_type === 'JOINING_FEE') acc.total_joining_fees += item.amount;
+        if (item.payment_type === 'INSURANCE_AMOUNT') acc.total_insurance_amount += item.amount;
         if (item.payment_type === 'SHARE_CAPITAL') acc.total_share_capital += item.amount;
         if (item.payment_type === 'LRF') acc.total_lrf += item.amount;
         return acc;
@@ -488,6 +505,7 @@ function CollectionEntryTab({
         total_loan_principal: 0,
         total_loan_interest: 0,
         total_joining_fees: 0,
+        total_insurance_amount: 0,
         total_carry_forward: 0,
         total_share_capital: 0,
         total_lrf: 0
@@ -495,7 +513,7 @@ function CollectionEntryTab({
       
       const grandTotal = totals.total_deposits + totals.total_loan_principal + 
                         totals.total_loan_interest + totals.total_joining_fees + 
-                        totals.total_share_capital + totals.total_lrf;
+                        totals.total_insurance_amount + totals.total_share_capital + totals.total_lrf;
       
       const uniqueMembers = new Set(collectionItems.map(item => item.member_id)).size;
       
@@ -508,6 +526,7 @@ function CollectionEntryTab({
         total_loan_principal: totals.total_loan_principal,
         total_loan_interest: totals.total_loan_interest,
         total_joining_fees: totals.total_joining_fees,
+        total_insurance_amount: totals.total_insurance_amount,
         total_carry_forward: totals.total_carry_forward,
         total_share_capital: totals.total_share_capital,
         total_lrf: totals.total_lrf,

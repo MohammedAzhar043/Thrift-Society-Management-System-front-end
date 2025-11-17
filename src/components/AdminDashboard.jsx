@@ -767,7 +767,10 @@ function AdminDashboard({ user, onLogout }) {
       'LOAN_INTEREST': 'Interest',
       'DEPOSIT': 'Deposit',
       'JOINING_FEE': 'Joining Fee',
-      'CARRY_FORWARD': 'Carry Forward'
+      'INSURANCE_AMOUNT': 'Insurance Amount',
+      'CARRY_FORWARD': 'Carry Forward',
+      'SHARE_CAPITAL': 'Share Capital',
+      'LRF': 'LRF'
     };
     return typeMap[paymentType] || paymentType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   };

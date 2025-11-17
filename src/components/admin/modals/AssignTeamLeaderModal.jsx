@@ -1,27 +1,27 @@
-import React from 'react';
-import Modal from '../components/Modal';
-import Button from '../components/Button';
+import React from "react";
+import Modal from "../components/Modal";
+import Button from "../components/Button";
 
-const AssignTeamLeaderModal = ({ 
-  isOpen, 
-  onClose, 
+const AssignTeamLeaderModal = ({
+  isOpen,
+  onClose,
   group,
   groupMembers = [],
   onAssignTeamLeader,
-  isLoading = false 
+  isLoading = false,
 }) => {
-  const [selectedMemberId, setSelectedMemberId] = React.useState('');
+  const [selectedMemberId, setSelectedMemberId] = React.useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (selectedMemberId) {
       onAssignTeamLeader(group.id, selectedMemberId);
-      setSelectedMemberId('');
+      setSelectedMemberId("");
     }
   };
 
   const handleClose = () => {
-    setSelectedMemberId('');
+    setSelectedMemberId("");
     onClose();
   };
 
@@ -29,19 +29,20 @@ const AssignTeamLeaderModal = ({
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title={`Assign Team Leader - ${group?.name || 'Group'}`}
+      title={`Assign Team Leader - ${group?.name || "Group"}`}
       size="md"
     >
       <div className="mb-4">
         <p className="text-sm text-gray-600 mb-4">
-          Select a member from this group to assign as the team leader. 
-          The team leader will have access to manage group activities and loans.
+          Select a member from this group to assign as the team leader. The team
+          leader will have access to manage group activities and loans.
         </p>
-        
+
         {groupMembers.length === 0 ? (
           <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
             <p className="text-sm text-yellow-700">
-              No members found in this group. Please add members first before assigning a team leader.
+              No members found in this group. Please add members first before
+              assigning a team leader.
             </p>
           </div>
         ) : (
@@ -59,8 +60,8 @@ const AssignTeamLeaderModal = ({
                 <option value="">Choose a member</option>
                 {groupMembers.map((member) => (
                   <option key={member.id} value={member.id}>
-                    {member.user?.full_name || member.user?.username} 
-                    {member.user?.email ? ` (${member.user.email})` : ''}
+                    {member.user?.full_name || member.user?.username}
+                    {member.user?.email ? ` (${member.user.email})` : ""}
                   </option>
                 ))}
               </select>
@@ -68,17 +69,14 @@ const AssignTeamLeaderModal = ({
 
             <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
               <p className="text-sm text-blue-700">
-                <strong>Note:</strong> The selected member will be assigned the team leader role 
-                and will have access to manage this group's activities, loans, and collections.
+                <strong>Note:</strong> The selected member will be assigned the
+                team leader role and will have access to manage this group's
+                activities, loans, and collections.
               </p>
             </div>
 
             <div className="flex justify-end space-x-3">
-              <Button
-                type="button"
-                onClick={handleClose}
-                variant="secondary"
-              >
+              <Button type="button" onClick={handleClose} variant="secondary">
                 Cancel
               </Button>
               <Button
