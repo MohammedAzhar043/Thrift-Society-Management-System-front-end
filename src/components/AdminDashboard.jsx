@@ -78,6 +78,8 @@ function AdminDashboard({ user, onLogout }) {
   const [showMemberStatement, setShowMemberStatement] = useState(false);
   const [selectedMemberForStatement, setSelectedMemberForStatement] = useState(null);
   const [showPrintConfirmation, setShowPrintConfirmation] = useState(false);
+  const [uploadFile, setUploadFile] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
   
   // Transaction History states
   const [collections, setCollections] = useState([]);
@@ -412,6 +414,58 @@ function AdminDashboard({ user, onLogout }) {
       }
       
       toast.error(errorMessage);
+    }
+  };
+
+  const handleDownloadLoanRequests = async () => {
+    if (loanApprovals.length === 0) {
+      toast.error("No pending loans to download");
+      return;
+    }
+    try {
+      await apiService.downloadLoanRequests();
+      toast.success("Loan requests downloaded successfully!");
+    } catch (error) {
+      toast.error(error.message || "Failed to download loan requests");
+    }
+  };
+
+  const handleUploadLoanRequests = async () => {
+    if (!uploadFile) {
+      toast.error("Please select a file to upload");
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const result = await apiService.uploadLoanRequests(uploadFile);
+      toast.success(
+        `Upload completed! ${result.success_count} successful, ${result.error_count} errors`
+      );
+      if (result.errors && result.errors.length > 0) {
+        console.error("Upload errors:", result.errors);
+      }
+      await loadAdditionalData();
+      refreshDashboard();
+      setUploadFile(null);
+      // Reset file input
+      const fileInput = document.getElementById('loan-upload-file');
+      if (fileInput) fileInput.value = '';
+    } catch (error) {
+      toast.error(error.message || "Failed to upload loan requests");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleMarkAsCredited = async (loanId) => {
+    try {
+      await apiService.markLoanAsCredited(loanId);
+      toast.success("Loan marked as credited successfully!");
+      await loadAdditionalData();
+      refreshDashboard();
+    } catch (error) {
+      toast.error(error.message || "Failed to mark loan as credited");
     }
   };
 
@@ -763,11 +817,12 @@ function AdminDashboard({ user, onLogout }) {
   const formatPaymentType = (paymentType) => {
     if (!paymentType) return 'N/A';
     const typeMap = {
-      'LOAN_PRINCIPAL': 'EMI',
+      'LOAN_PRINCIPAL': 'Loan Instalment',
       'LOAN_INTEREST': 'Interest',
-      'DEPOSIT': 'Deposit',
+      'THRIFT': 'THRIFT',
+      'THRIFT_WITHDRAWAL': 'Thrift Withdrawal',
       'JOINING_FEE': 'Joining Fee',
-      'INSURANCE_AMOUNT': 'Insurance Amount',
+      'CHEYUTHA': 'Cheyutha',
       'CARRY_FORWARD': 'Carry Forward',
       'SHARE_CAPITAL': 'Share Capital',
       'LRF': 'LRF'
@@ -1542,10 +1597,75 @@ function AdminDashboard({ user, onLogout }) {
         <div className="grid grid-cols-1 lg:grid-cols-1 gap-8 mb-8">
           {/* Pending Loan Approvals */}
           <Card>
-            <SectionHeader
-              title="Pending Loan Approvals"
-              description="Loans awaiting approval"
-            />
+            <div className="px-6 py-6 border-b border-gray-100">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                <div>
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900">
+                    Pending Loan Approvals
+                  </h3>
+                  <p className="mt-2 text-sm font-medium text-gray-600">
+                    Loans awaiting approval
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={handleDownloadLoanRequests}
+                    disabled={loanApprovals.length === 0}
+                    className={`px-4 py-2 text-white rounded-lg flex items-center gap-2 font-semibold shadow-md transition-all duration-200 ${
+                      loanApprovals.length === 0
+                        ? 'bg-gray-400 cursor-not-allowed opacity-60'
+                        : 'bg-blue-600 hover:bg-blue-700 hover:shadow-lg cursor-pointer'
+                    }`}
+                    title={loanApprovals.length === 0 ? 'No pending loans to download' : 'Download loan requests'}
+                  >
+                    <FaDownload className="w-4 h-4" />
+                    Download
+                  </button>
+                  <label 
+                    className={`px-4 py-2 text-white rounded-lg flex items-center gap-2 font-semibold shadow-md transition-all duration-200 ${
+                      loanApprovals.length === 0 || isUploading
+                        ? 'bg-gray-400 cursor-not-allowed opacity-60'
+                        : 'bg-green-600 hover:bg-green-700 hover:shadow-lg cursor-pointer'
+                    }`}
+                    title={loanApprovals.length === 0 ? 'No pending loans to upload' : 'Upload loan requests CSV'}
+                  >
+                    <FaFileDownload className="w-4 h-4" />
+                    {isUploading ? "Uploading..." : "Upload"}
+                    <input
+                      id="loan-upload-file"
+                      type="file"
+                      accept=".csv"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          setUploadFile(file);
+                          setIsUploading(true);
+                          try {
+                            const result = await apiService.uploadLoanRequests(file);
+                            toast.success(
+                              `Upload completed! ${result.success_count} successful, ${result.error_count} errors`
+                            );
+                            if (result.errors && result.errors.length > 0) {
+                              console.error("Upload errors:", result.errors);
+                            }
+                            await loadAdditionalData();
+                            refreshDashboard();
+                            e.target.value = '';
+                          } catch (error) {
+                            toast.error(error.message || "Failed to upload loan requests");
+                          } finally {
+                            setIsUploading(false);
+                            setUploadFile(null);
+                          }
+                        }
+                      }}
+                      disabled={isUploading || loanApprovals.length === 0}
+                    />
+                  </label>
+                </div>
+              </div>
+            </div>
             <SectionContent>
               {loanApprovals.length === 0 ? (
                 <div className="text-center py-8">
@@ -3459,11 +3579,11 @@ function AdminDashboard({ user, onLogout }) {
                     value={interestRate}
                     onChange={(e) => setInterestRate(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="e.g., 12.5"
+                    placeholder="e.g., 12.0"
                     autoFocus
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    Enter the interest rate percentage (e.g., 12.5 for 12.5%).
+                    Enter the interest rate percentage (e.g., 12 for 12%).
                     Leave empty to use default rate.
                   </p>
                 </div>

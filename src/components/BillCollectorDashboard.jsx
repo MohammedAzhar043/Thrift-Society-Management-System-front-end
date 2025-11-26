@@ -14,11 +14,12 @@ function BillCollectorDashboard({ user, onLogout }) {
   const formatPaymentType = (paymentType) => {
     if (!paymentType) return 'N/A';
     const typeMap = {
-      'LOAN_PRINCIPAL': 'EMI',
+      'LOAN_PRINCIPAL': 'Loan Instalment',
       'LOAN_INTEREST': 'Interest',
-      'DEPOSIT': 'Deposit',
+      'THRIFT': 'THRIFT',
+      'THRIFT_WITHDRAWAL': 'Thrift Withdrawal',
       'JOINING_FEE': 'Joining Fee',
-      'INSURANCE_AMOUNT': 'Insurance Amount',
+      'CHEYUTHA': 'Cheyutha',
       'CARRY_FORWARD': 'Carry Forward',
       'SHARE_CAPITAL': 'Share Capital',
       'LRF': 'LRF'
@@ -71,11 +72,11 @@ function BillCollectorDashboard({ user, onLogout }) {
   const [collectionForm, setCollectionForm] = useState({
     group_id: '',
     collection_date: new Date().toISOString().split('T')[0],
-    total_deposits: 0,
+    total_thrift: 0,
     total_loan_principal: 0,
     total_loan_interest: 0,
     total_joining_fees: 0,
-    total_insurance_amount: 0,
+    total_cheyutha: 0,
     total_carry_forward: 0,
     total_share_capital: 0,
     total_lrf: 0,
@@ -92,11 +93,11 @@ function BillCollectorDashboard({ user, onLogout }) {
 
   // Payment types for the dropdown
   const paymentTypes = [
-    { value: 'DEPOSIT', label: 'Savings Deposit', description: 'General savings deposit' },
-    { value: 'LOAN_PRINCIPAL', label: 'Loan Principal', description: 'EMI principal payment' },
-    { value: 'LOAN_INTEREST', label: 'Loan Interest', description: 'EMI interest payment' },
+    { value: 'THRIFT', label: 'THRIFT', description: 'General thrift deposit' },
+    { value: 'LOAN_PRINCIPAL', label: 'Loan Instalment', description: 'Loan instalment principal payment' },
+    { value: 'LOAN_INTEREST', label: 'Interest', description: 'Loan instalment interest payment' },
     { value: 'JOINING_FEE', label: 'Joining Fee', description: 'One-time joining fee' },
-    { value: 'INSURANCE_AMOUNT', label: 'Insurance Amount', description: 'Insurance payment' },
+    { value: 'CHEYUTHA', label: 'Cheyutha', description: 'Cheyutha payment' },
     { value: 'CARRY_FORWARD', label: 'Carry Forward', description: 'Previous month carry forward amount' },
     { value: 'SHARE_CAPITAL', label: 'Share Capital', description: 'Share capital payment' },
     { value: 'LRF', label: 'LRF', description: 'Loan Recovery Fund payment' }
@@ -151,8 +152,8 @@ function BillCollectorDashboard({ user, onLogout }) {
       // The payment type will determine what information to show
       const filteredMembers = members;
       
-      // Add EMI calculation for each member
-      const membersWithEMI = await Promise.all(filteredMembers.map(async (member) => {
+      // Add loan instalment calculation for each member
+      const membersWithLoanInstalment = await Promise.all(filteredMembers.map(async (member) => {
         // Find the member's active loan - include all relevant loan statuses
         const memberLoan = loans.find(loan => 
           loan.member_id === member.id && 
@@ -175,7 +176,7 @@ function BillCollectorDashboard({ user, onLogout }) {
         let lastPaymentDate = null;
         
         if (memberLoan) {
-          // For members with loans, check if they have made EMI payments this month
+          // For members with loans, check if they have made loan instalment payments this month
           const thisMonthCollections = collectionRecords.filter(collection => {
             const collectionDate = new Date(collection.collection_date);
             const collectionYear = collectionDate.getFullYear();
@@ -183,14 +184,14 @@ function BillCollectorDashboard({ user, onLogout }) {
             return collectionYear === currentYear && collectionMonth === currentMonthNum;
           });
           
-          // Check if any collection items for this member contain EMI payments this month
+          // Check if any collection items for this member contain loan instalment payments this month
           for (const collection of thisMonthCollections) {
             if (collection.collection_items) {
-              const memberEMIPayments = collection.collection_items.filter(item => 
+              const memberLoanInstalmentPayments = collection.collection_items.filter(item => 
                 item.member_id === member.id && 
                 (item.payment_type === 'LOAN_PRINCIPAL' || item.payment_type === 'LOAN_INTEREST')
               );
-              if (memberEMIPayments.length > 0) {
+              if (memberLoanInstalmentPayments.length > 0) {
                 hasPaidThisMonth = true;
                 lastPaymentDate = collection.collection_date;
                 break;
@@ -199,12 +200,12 @@ function BillCollectorDashboard({ user, onLogout }) {
           }
         }
         
-        const emiDue = calculateEMIDue(member, memberLoan);
-        const emiBreakdown = calculateEMIBreakdown(member, memberLoan);
+        const loanInstalmentDue = calculateLoanInstalmentDue(member, memberLoan);
+        const loanInstalmentBreakdown = calculateLoanInstalmentBreakdown(member, memberLoan);
         
         return {
           ...member,
-          current_emi_due: emiDue,
+          current_loan_instalment_due: loanInstalmentDue,
           carry_forward_amount: member.carry_forward_amount || 0,
           remaining_loan_amount: calculateRemainingLoanAmount({...member, payments_made: paymentsMade}, memberLoan),
           payments_made: paymentsMade,
@@ -215,7 +216,7 @@ function BillCollectorDashboard({ user, onLogout }) {
         };
       }));
       
-      setGroupMembers(membersWithEMI);
+      setGroupMembers(membersWithLoanInstalment);
     } catch (err) {
       setError('Failed to load group members. Please try again.');
       setGroupMembers([]);
@@ -224,15 +225,15 @@ function BillCollectorDashboard({ user, onLogout }) {
     }
   };
 
-  // Calculate EMI due for a member using correct compound interest formula
-  const calculateEMIDue = (member, loanInfo) => {
+  // Calculate loan instalment due for a member using correct compound interest formula
+  const calculateLoanInstalmentDue = (member, loanInfo) => {
     try {
       // If no loan info, return 0
       if (!loanInfo) {
         return 0;
       }
       
-      // Only calculate EMI for loans that are approved, disbursed, or active
+      // Only calculate loan instalment for loans that are approved, disbursed, or active
       // Loans with status REQUEST or PENDING might not have all required fields
       if (loanInfo.status === 'REQUEST' || loanInfo.status === 'PENDING') {
         return 0;
@@ -253,7 +254,7 @@ function BillCollectorDashboard({ user, onLogout }) {
       
       // Validate inputs
       if (isNaN(loanAmount) || isNaN(termMonths) || isNaN(annualInterestRate)) {
-        console.error('Invalid loan data for EMI calculation:', loanInfo);
+        console.error('Invalid loan data for loan instalment calculation:', loanInfo);
         return 0;
       }
       
@@ -280,7 +281,7 @@ function BillCollectorDashboard({ user, onLogout }) {
       
       return isNaN(totalDue) ? 0 : totalDue;
     } catch (error) {
-      console.error('Error calculating EMI due:', error, { member, loanInfo });
+      console.error('Error calculating loan instalment due:', error, { member, loanInfo });
       return 0;
     }
   };
@@ -314,18 +315,18 @@ function BillCollectorDashboard({ user, onLogout }) {
 
   // Calculate carry-forward amount after partial payment
   const calculateCarryForward = (member, amountPaid) => {
-    const totalDue = calculateEMIDue(member, member.loan_info);
+    const totalDue = calculateLoanInstalmentDue(member, member.loan_info);
     const remaining = totalDue - amountPaid;
     return remaining > 0 ? remaining : 0;
   };
 
-  // Calculate EMI breakdown (principal and interest components)
-  const calculateEMIBreakdown = (member, loanInfo) => {
+  // Calculate loan instalment breakdown (principal and interest components)
+  const calculateLoanInstalmentBreakdown = (member, loanInfo) => {
     if (!loanInfo || !loanInfo.loan_amount || !loanInfo.term_months) {
       return { principal: 0, interest: 0 };
     }
     
-    // Only calculate EMI breakdown for loans that are approved, disbursed, or active
+    // Only calculate loan instalment breakdown for loans that are approved, disbursed, or active
     if (loanInfo.status === 'REQUEST' || loanInfo.status === 'PENDING') {
       return { principal: 0, interest: 0 };
     }
@@ -348,8 +349,8 @@ function BillCollectorDashboard({ user, onLogout }) {
         return { principal: 0, interest: 0 };
       }
       
-      // Calculate total EMI first
-      const totalEMI = calculateEMIDue(member, loanInfo);
+      // Calculate total loan instalment first
+      const totalLoanInstalment = calculateLoanInstalmentDue(member, loanInfo);
       
       // Calculate remaining principal (simplified approach)
       const paymentsMade = member.payments_made || 0;
@@ -359,7 +360,7 @@ function BillCollectorDashboard({ user, onLogout }) {
       const interestAmount = remainingPrincipal * interestRate;
       
       // Calculate principal component (EMI - interest)
-      const principalAmount = Math.max(0, totalEMI - interestAmount);
+      const principalAmount = Math.max(0, totalLoanInstalment - interestAmount);
       
       return {
         principal: Math.min(principalAmount, remainingPrincipal),
@@ -462,7 +463,7 @@ function BillCollectorDashboard({ user, onLogout }) {
           const hasActiveLoan = selectedMember.loan_info && (selectedMember.loan_info.status === 'ACTIVE' || selectedMember.loan_info.status === 'DISBURSED' || selectedMember.loan_info.status === 'APPROVED');
           
           if (hasActiveLoan) {
-            const currentEMI = selectedMember.current_emi_due || 0;
+            const currentLoanInstalment = selectedMember.current_loan_instalment_due || 0;
             const totalLoanPayment = principalAmount + interestAmount;
             const carryForwardAmount = selectedMember.carry_forward_amount || 0;
             const totalDue = currentEMI + carryForwardAmount;
@@ -478,7 +479,7 @@ function BillCollectorDashboard({ user, onLogout }) {
                 loan_id: selectedMember.loan_info?.id || null,
                 amount: principalAmount,
                 payment_type: 'LOAN_PRINCIPAL',
-                notes: `Principal payment${remainingAfterPayment > 0 ? ` (Carry forward: ${formatIndianCurrency(remainingAfterPayment)})` : ''}`
+                notes: `Loan Instalment payment${remainingAfterPayment > 0 ? ` (Carry forward: ${formatIndianCurrency(remainingAfterPayment)})` : ''}`
               });
             }
 
@@ -511,7 +512,7 @@ function BillCollectorDashboard({ user, onLogout }) {
                 loan_id: null,
                 amount: principalAmount,
                 payment_type: 'LOAN_PRINCIPAL',
-                notes: 'Principal payment (no active loan)'
+                notes: 'Loan Instalment payment (no active loan)'
               });
             }
 
@@ -533,8 +534,8 @@ function BillCollectorDashboard({ user, onLogout }) {
             member_id: item.member_id,
             loan_id: null,
             amount: depositAmount,
-            payment_type: 'DEPOSIT',
-            notes: 'Savings deposit'
+            payment_type: 'THRIFT',
+            notes: 'Thrift deposit'
           });
         }
 
@@ -555,8 +556,8 @@ function BillCollectorDashboard({ user, onLogout }) {
             member_id: item.member_id,
             loan_id: null,
             amount: insuranceAmount,
-            payment_type: 'INSURANCE_AMOUNT',
-            notes: 'Insurance amount'
+            payment_type: 'CHEYUTHA',
+            notes: 'Cheyutha payment'
           });
         }
 
@@ -594,27 +595,27 @@ function BillCollectorDashboard({ user, onLogout }) {
 
       // Calculate totals from transformed items
       const calculatedTotals = {
-        total_deposits: 0,
+        total_thrift: 0,
         total_loan_principal: 0,
         total_loan_interest: 0,
         total_joining_fees: 0,
-        total_insurance_amount: 0,
+        total_cheyutha: 0,
         total_carry_forward: 0,
         total_share_capital: 0,
         total_lrf: 0
       };
 
       transformedCollectionItems.forEach(item => {
-        if (item.payment_type === 'DEPOSIT') {
-          calculatedTotals.total_deposits += parseFloat(item.amount);
+        if (item.payment_type === 'THRIFT') {
+          calculatedTotals.total_thrift += parseFloat(item.amount);
         } else if (item.payment_type === 'LOAN_PRINCIPAL') {
           calculatedTotals.total_loan_principal += parseFloat(item.amount);
         } else if (item.payment_type === 'LOAN_INTEREST') {
           calculatedTotals.total_loan_interest += parseFloat(item.amount);
         } else if (item.payment_type === 'JOINING_FEE') {
           calculatedTotals.total_joining_fees += parseFloat(item.amount);
-        } else if (item.payment_type === 'INSURANCE_AMOUNT') {
-          calculatedTotals.total_insurance_amount += parseFloat(item.amount);
+        } else if (item.payment_type === 'CHEYUTHA') {
+          calculatedTotals.total_cheyutha += parseFloat(item.amount);
         } else if (item.payment_type === 'CARRY_FORWARD') {
           calculatedTotals.total_carry_forward += parseFloat(item.amount);
         } else if (item.payment_type === 'SHARE_CAPITAL') {
@@ -628,11 +629,11 @@ function BillCollectorDashboard({ user, onLogout }) {
       const collectionData = {
         group_id: parseInt(collectionForm.group_id),
         collection_date: collectionForm.collection_date,
-        total_deposits: calculatedTotals.total_deposits,
+        total_thrift: calculatedTotals.total_thrift,
         total_loan_principal: calculatedTotals.total_loan_principal,
         total_loan_interest: calculatedTotals.total_loan_interest,
         total_joining_fees: calculatedTotals.total_joining_fees,
-        total_insurance_amount: calculatedTotals.total_insurance_amount,
+        total_cheyutha: calculatedTotals.total_cheyutha,
         total_carry_forward: calculatedTotals.total_carry_forward,
         total_share_capital: calculatedTotals.total_share_capital,
         total_lrf: calculatedTotals.total_lrf,
@@ -702,7 +703,7 @@ function BillCollectorDashboard({ user, onLogout }) {
       const newItem = { 
         member_id: memberId || '', 
         amount: '', 
-        payment_type: 'DEPOSIT', 
+        payment_type: 'THRIFT', 
         loan_id: null,
         notes: ''
       };
@@ -711,11 +712,11 @@ function BillCollectorDashboard({ user, onLogout }) {
       
       // Calculate totals by payment type
       const totals = {
-        total_deposits: 0,
+        total_thrift: 0,
         total_loan_principal: 0,
         total_loan_interest: 0,
         total_joining_fees: 0,
-        total_insurance_amount: 0,
+        total_cheyutha: 0,
         total_carry_forward: 0,
         total_share_capital: 0,
         total_lrf: 0
@@ -725,18 +726,18 @@ function BillCollectorDashboard({ user, onLogout }) {
         // For items with separate amount fields (new structure)
         const principalAmount = parseFloat(item.principal_amount || 0);
         const interestAmount = parseFloat(item.interest_amount || 0);
-        const depositAmount = parseFloat(item.deposit_amount || 0);
+        const thriftAmount = parseFloat(item.deposit_amount || 0);
         const joiningFeeAmount = parseFloat(item.joining_fee || 0);
-        const insuranceAmount = parseFloat(item.insurance_amount || 0);
+        const cheyuthaAmount = parseFloat(item.insurance_amount || 0);
         const shareCapitalAmount = parseFloat(item.share_capital || 0);
         const lrfAmount = parseFloat(item.lrf || 0);
         
         // Add amounts from separate fields
-        totals.total_deposits += depositAmount;
+        totals.total_thrift += thriftAmount;
         totals.total_loan_principal += principalAmount;
         totals.total_loan_interest += interestAmount;
         totals.total_joining_fees += joiningFeeAmount;
-        totals.total_insurance_amount += insuranceAmount;
+        totals.total_cheyutha += cheyuthaAmount;
         totals.total_share_capital += shareCapitalAmount;
         totals.total_lrf += lrfAmount;
         
@@ -744,8 +745,8 @@ function BillCollectorDashboard({ user, onLogout }) {
         const amount = parseFloat(item.amount || 0);
         if (amount > 0 && item.payment_type) {
           switch (item.payment_type) {
-            case 'DEPOSIT':
-              totals.total_deposits += amount;
+            case 'THRIFT':
+              totals.total_thrift += amount;
               break;
             case 'LOAN_PRINCIPAL':
               totals.total_loan_principal += amount;
@@ -756,8 +757,8 @@ function BillCollectorDashboard({ user, onLogout }) {
             case 'JOINING_FEE':
               totals.total_joining_fees += amount;
               break;
-            case 'INSURANCE_AMOUNT':
-              totals.total_insurance_amount += amount;
+            case 'CHEYUTHA':
+              totals.total_cheyutha += amount;
               break;
             case 'CARRY_FORWARD':
               totals.total_carry_forward += amount;
@@ -794,11 +795,11 @@ function BillCollectorDashboard({ user, onLogout }) {
       
       // Calculate totals by payment type
       const totals = {
-        total_deposits: 0,
+        total_thrift: 0,
         total_loan_principal: 0,
         total_loan_interest: 0,
         total_joining_fees: 0,
-        total_insurance_amount: 0,
+        total_cheyutha: 0,
         total_carry_forward: 0,
         total_share_capital: 0,
         total_lrf: 0
@@ -808,18 +809,18 @@ function BillCollectorDashboard({ user, onLogout }) {
         // For items with separate amount fields (new structure)
         const principalAmount = parseFloat(item.principal_amount || 0);
         const interestAmount = parseFloat(item.interest_amount || 0);
-        const depositAmount = parseFloat(item.deposit_amount || 0);
+        const thriftAmount = parseFloat(item.deposit_amount || 0);
         const joiningFeeAmount = parseFloat(item.joining_fee || 0);
-        const insuranceAmount = parseFloat(item.insurance_amount || 0);
+        const cheyuthaAmount = parseFloat(item.insurance_amount || 0);
         const shareCapitalAmount = parseFloat(item.share_capital || 0);
         const lrfAmount = parseFloat(item.lrf || 0);
         
         // Add amounts from separate fields
-        totals.total_deposits += depositAmount;
+        totals.total_thrift += thriftAmount;
         totals.total_loan_principal += principalAmount;
         totals.total_loan_interest += interestAmount;
         totals.total_joining_fees += joiningFeeAmount;
-        totals.total_insurance_amount += insuranceAmount;
+        totals.total_cheyutha += cheyuthaAmount;
         totals.total_share_capital += shareCapitalAmount;
         totals.total_lrf += lrfAmount;
         
@@ -827,8 +828,8 @@ function BillCollectorDashboard({ user, onLogout }) {
         const amount = parseFloat(item.amount || 0);
         if (amount > 0 && item.payment_type) {
           switch (item.payment_type) {
-            case 'DEPOSIT':
-              totals.total_deposits += amount;
+            case 'THRIFT':
+              totals.total_thrift += amount;
               break;
             case 'LOAN_PRINCIPAL':
               totals.total_loan_principal += amount;
@@ -839,8 +840,8 @@ function BillCollectorDashboard({ user, onLogout }) {
             case 'JOINING_FEE':
               totals.total_joining_fees += amount;
               break;
-            case 'INSURANCE_AMOUNT':
-              totals.total_insurance_amount += amount;
+            case 'CHEYUTHA':
+              totals.total_cheyutha += amount;
               break;
             case 'CARRY_FORWARD':
               totals.total_carry_forward += amount;
@@ -945,8 +946,8 @@ function BillCollectorDashboard({ user, onLogout }) {
         const amount = parseFloat(item.amount || 0);
         if (amount > 0 && item.payment_type) {
           switch (item.payment_type) {
-            case 'DEPOSIT':
-              totals.total_deposits += amount;
+            case 'THRIFT':
+              totals.total_thrift += amount;
               break;
             case 'LOAN_PRINCIPAL':
               totals.total_loan_principal += amount;
@@ -1097,14 +1098,14 @@ function BillCollectorDashboard({ user, onLogout }) {
       const hasActiveLoan = member.loan_info && (member.loan_info.status === 'ACTIVE' || member.loan_info.status === 'DISBURSED' || member.loan_info.status === 'APPROVED');
       const remainingAmount = parseFloat(member.remaining_loan_amount || 0);
       const savingsAmount = parseFloat(member.savings_balance || 0);
-      const emiDue = parseFloat(member.current_emi_due || 0);
+      const loanInstalmentDue = parseFloat(member.current_loan_instalment_due || 0);
 
       let principalAmount = 0;
       let interestAmount = 0;
       try {
-        const emiBreakdown = calculateEMIBreakdown(member, member.loan_info);
-        principalAmount = emiBreakdown.principal || 0;
-        interestAmount = emiBreakdown.interest || 0;
+        const loanInstalmentBreakdown = calculateLoanInstalmentBreakdown(member, member.loan_info);
+        principalAmount = loanInstalmentBreakdown.principal || 0;
+        interestAmount = loanInstalmentBreakdown.interest || 0;
       } catch (error) {
       }
 
@@ -1115,10 +1116,10 @@ function BillCollectorDashboard({ user, onLogout }) {
         hasActiveLoan,
         remainingAmount: parseFloat(remainingAmount),
         savingsAmount: parseFloat(savingsAmount),
-        emiDue: parseFloat(emiDue),
+        loanInstalmentDue: parseFloat(loanInstalmentDue),
         principalAmount: parseFloat(principalAmount),
         interestAmount: parseFloat(interestAmount),
-        totalEMI: parseFloat(totalEMI)
+        totalLoanInstalment: parseFloat(totalLoanInstalment)
       };
     });
 
@@ -1140,10 +1141,10 @@ function BillCollectorDashboard({ user, onLogout }) {
             </span>
           </td>
           <td class="amount">₹${parseFloat(member.savingsAmount || 0).toFixed(2)}</td>
-          <td class="amount">₹${parseFloat(member.emiDue || 0).toFixed(2)}</td>
+          <td class="amount">₹${parseFloat(member.loanInstalmentDue || 0).toFixed(2)}</td>
           <td class="amount">₹${parseFloat(member.principalAmount || 0).toFixed(2)}</td>
           <td class="amount">₹${parseFloat(member.interestAmount || 0).toFixed(2)}</td>
-          <td class="amount">₹${parseFloat(member.totalEMI || 0).toFixed(2)}</td>
+          <td class="amount">₹${parseFloat(member.totalLoanInstalment || 0).toFixed(2)}</td>
           <td class="amount">₹${parseFloat(member.remainingAmount || 0).toFixed(2)}</td>
         </tr>
       `;
@@ -1275,10 +1276,10 @@ function BillCollectorDashboard({ user, onLogout }) {
               <th>Code</th>
               <th>Status</th>
               <th>Savings Balance</th>
-              <th>EMI Due</th>
-              <th>Principal</th>
+              <th>Loan Instalment Due</th>
+              <th>Loan Instalment Principal</th>
               <th>Interest</th>
-              <th>Total EMI</th>
+              <th>Total Loan Instalment</th>
               <th>Remaining Loan</th>
             </tr>
           </thead>
@@ -1799,12 +1800,12 @@ function BillCollectorDashboard({ user, onLogout }) {
                   
                   {collectionForm.collection_items.map((item, index) => {
                     const selectedMember = getMemberById(item.member_id);
-                    const dueAmount = selectedMember ? parseFloat(calculateEMIDue(selectedMember, selectedMember.loan_info)) : 0;
+                    const dueAmount = selectedMember ? parseFloat(calculateLoanInstalmentDue(selectedMember, selectedMember.loan_info)) : 0;
                     const amountPaid = parseFloat(item.amount || 0);
                     const remaining = dueAmount - amountPaid;
                     
-                    // Calculate EMI breakdown
-                    const emiBreakdown = selectedMember && selectedMember.loan_info ? calculateEMIBreakdown(selectedMember, selectedMember.loan_info) : null;
+                    // Calculate loan instalment breakdown
+                    const loanInstalmentBreakdown = selectedMember && selectedMember.loan_info ? calculateLoanInstalmentBreakdown(selectedMember, selectedMember.loan_info) : null;
                     
                     return (
                       <div key={index} className="bg-white border-2 border-gray-200 rounded-xl p-4 sm:p-6 mb-4 sm:mb-6 shadow-lg hover:shadow-xl transition-all duration-200">
@@ -1869,13 +1870,13 @@ function BillCollectorDashboard({ user, onLogout }) {
                                 <button
                                   type="button"
                                   onClick={() => {
-                                    const breakdown = calculateEMIBreakdown(selectedMember, selectedMember.loan_info);
+                                    const breakdown = calculateLoanInstalmentBreakdown(selectedMember, selectedMember.loan_info);
                                     updateCollectionItem(index, 'principal_amount', breakdown.principal.toFixed(2));
                                     updateCollectionItem(index, 'interest_amount', breakdown.interest.toFixed(2));
                                   }}
                                   className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium cursor-pointer"
                                 >
-                                  💰 Fill EMI Amounts
+                                  💰 Fill Loan Instalment Amounts
                                 </button>
                               )}
                               <button
@@ -1885,7 +1886,7 @@ function BillCollectorDashboard({ user, onLogout }) {
                                 }}
                                 className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium cursor-pointer"
                               >
-                                💳 Add ₹100 Deposit
+                                💳 Add ₹100 THRIFT
                               </button>
                               <button
                                 type="button"
@@ -1912,7 +1913,7 @@ function BillCollectorDashboard({ user, onLogout }) {
                                   </div>
                                   <div className="space-y-1 text-sm">
                                     <div className="flex justify-between">
-                                      <span className="text-gray-600">Principal:</span>
+                                      <span className="text-gray-600">Loan Amount:</span>
                                       <span className="font-medium">{formatIndianCurrency(selectedMember.loan_info.loan_amount || 0)}</span>
                                     </div>
                                     <div className="flex justify-between">
@@ -1924,8 +1925,8 @@ function BillCollectorDashboard({ user, onLogout }) {
                                       <span className="font-medium text-orange-600">{formatIndianCurrency(selectedMember.remaining_loan_amount || 0)}</span>
                                     </div>
                                     <div className="flex justify-between border-t pt-1">
-                                      <span className="text-gray-600">This Month EMI:</span>
-                                      <span className="font-bold text-blue-600">{formatIndianCurrency(selectedMember.current_emi_due || 0)}</span>
+                                      <span className="text-gray-600">This Month Loan Instalment:</span>
+                                      <span className="font-bold text-blue-600">{formatIndianCurrency(selectedMember.current_loan_instalment_due || 0)}</span>
                                     </div>
                                   </div>
                                 </div>
@@ -1954,9 +1955,9 @@ function BillCollectorDashboard({ user, onLogout }) {
                                         <div className="text-xs text-green-600">
                                           Interest Rate: {selectedMember.savings_interest_rate || 3.0}% p.a.
                                         </div>
-                                        {selectedMember.first_deposit_date && (
+                                        {selectedMember.first_thrift_date && (
                                           <div className="text-xs text-gray-500 mt-1">
-                                            First Deposit: {new Date(selectedMember.first_deposit_date).toLocaleDateString()}
+                                            First THRIFT: {new Date(selectedMember.first_thrift_date).toLocaleDateString()}
                                           </div>
                                         )}
                                         {selectedMember.total_interest_earned > 0 && (
@@ -1967,24 +1968,24 @@ function BillCollectorDashboard({ user, onLogout }) {
                                       </div>
                                     </div>
 
-                              {/* EMI Breakdown */}
-                              {emiBreakdown && (
+                              {/* Loan Instalment Breakdown */}
+                              {loanInstalmentBreakdown && (
                                 <div className="bg-white rounded-lg p-4 border border-green-200">
                                   <div className="flex items-center mb-2">
                                     <span className="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
-                                    <span className="font-semibold text-gray-800">EMI Breakdown</span>
+                                    <span className="font-semibold text-gray-800">Loan Instalment Breakdown</span>
                                   </div>
                                   <div className="space-y-1 text-sm">
                                     <div className="flex justify-between">
                                       <span className="text-gray-600">Principal:</span>
-                                      <span className="font-medium">{formatIndianCurrency(emiBreakdown.principal)}</span>
+                                      <span className="font-medium">{formatIndianCurrency(loanInstalmentBreakdown.principal)}</span>
                                     </div>
                                     <div className="flex justify-between">
                                       <span className="text-gray-600">Interest:</span>
-                                      <span className="font-medium">{formatIndianCurrency(emiBreakdown.interest)}</span>
+                                      <span className="font-medium">{formatIndianCurrency(loanInstalmentBreakdown.interest)}</span>
                                     </div>
                                     <div className="flex justify-between border-t pt-1">
-                                      <span className="text-gray-600">Total EMI:</span>
+                                      <span className="text-gray-600">Total Loan Instalment:</span>
                                       <span className="font-bold text-green-600">{formatIndianCurrency(dueAmount)}</span>
                                     </div>
                                   </div>
@@ -2005,23 +2006,23 @@ function BillCollectorDashboard({ user, onLogout }) {
                             {/* Partial Payment Warning */}
                             {selectedMember && selectedMember.loan_info && (() => {
                               const totalLoanPayment = parseFloat(item.principal_amount || 0) + parseFloat(item.interest_amount || 0);
-                              const totalDue = selectedMember.current_emi_due || 0;
+                              const totalDue = selectedMember.current_loan_instalment_due || 0;
                               const carryForward = selectedMember.carry_forward_amount || 0;
                               const totalDueWithCarryForward = totalDue + carryForward;
                               const remainingAfterPayment = totalDueWithCarryForward - totalLoanPayment;
                               
-                              // Check if loan is active for EMI calculation
-                              const isLoanActiveForEMI = selectedMember.loan_info.status === 'ACTIVE' || 
+                              // Check if loan is active for loan instalment calculation
+                              const isLoanActiveForLoanInstalment = selectedMember.loan_info.status === 'ACTIVE' || 
                                                          selectedMember.loan_info.status === 'DISBURSED' || 
                                                          selectedMember.loan_info.status === 'APPROVED';
                               
                               
                               // Only show partial payment warning if:
                               // 1. There's a loan payment being made
-                              // 2. The total due is greater than 0 (loan is active for EMI calculation)
+                              // 2. The total due is greater than 0 (loan is active for loan instalment calculation)
                               // 3. The remaining amount is greater than 0.01 (to avoid floating point precision issues)
-                              // 4. The loan is active for EMI calculation
-                              if (totalLoanPayment > 0 && totalDueWithCarryForward > 0 && remainingAfterPayment > 0.01 && isLoanActiveForEMI) {
+                              // 4. The loan is active for loan instalment calculation
+                              if (totalLoanPayment > 0 && totalDueWithCarryForward > 0 && remainingAfterPayment > 0.01 && isLoanActiveForLoanInstalment) {
                                 return (
                                   <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
                                     <div className="flex items-center text-yellow-700">
@@ -2037,8 +2038,8 @@ function BillCollectorDashboard({ user, onLogout }) {
                                 );
                               }
                               
-                              // Show info message for loans not active for EMI calculation
-                              if (totalLoanPayment > 0 && !isLoanActiveForEMI) {
+                              // Show info message for loans not active for loan instalment calculation
+                              if (totalLoanPayment > 0 && !isLoanActiveForLoanInstalment) {
                                 return (
                                   <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
                                     <div className="flex items-center text-blue-700">
@@ -2046,7 +2047,7 @@ function BillCollectorDashboard({ user, onLogout }) {
                                       <div>
                                         <div className="font-medium">Manual Payment</div>
                                         <div className="text-sm">
-                                          This is a manual payment for a {selectedMember.loan_info.status} loan. No EMI calculation applies.
+                                          This is a manual payment for a {selectedMember.loan_info.status} loan. No loan instalment calculation applies.
                                         </div>
                                       </div>
                                     </div>
@@ -2073,10 +2074,10 @@ function BillCollectorDashboard({ user, onLogout }) {
                                   </h4>
                                   
                                   <div className="space-y-4">
-                                    {/* Principal Amount */}
+                                    {/* Loan Instalment Amount */}
                                     <div>
                                       <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                        Principal Amount
+                                        Loan Instalment Amount
                                       </label>
                                       <div className="relative">
                                         <input
@@ -2089,7 +2090,7 @@ function BillCollectorDashboard({ user, onLogout }) {
                                           min="0"
                                         />
                                         <div className="absolute right-3 top-3 text-sm text-gray-500">
-                                          Due: {formatIndianCurrency(emiBreakdown?.principal || 0)}
+                                          Due: {formatIndianCurrency(loanInstalmentBreakdown?.principal || 0)}
                                         </div>
                                       </div>
                                     </div>
@@ -2110,7 +2111,7 @@ function BillCollectorDashboard({ user, onLogout }) {
                                           min="0"
                                         />
                                         <div className="absolute right-3 top-3 text-sm text-gray-500">
-                                          Due: {formatIndianCurrency(emiBreakdown?.interest || 0)}
+                                          Due: {formatIndianCurrency(loanInstalmentBreakdown?.interest || 0)}
                                         </div>
                                       </div>
                                     </div>
@@ -2314,7 +2315,7 @@ function BillCollectorDashboard({ user, onLogout }) {
                                   Code
                                 </th>
                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  EMI Breakdown
+                                  Loan Instalment Breakdown
                                 </th>
                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                   Paid
@@ -2339,11 +2340,11 @@ function BillCollectorDashboard({ user, onLogout }) {
                               const remainingAmount = member.remaining_loan_amount || 0;
                               const paidAmount = member.payments_made || 0;
                               const savingsAmount = member.savings_balance || 0;
-                              const emiDue = member.current_emi_due || 0;
-                              const emiBreakdown = calculateEMIBreakdown(member, member.loan_info);
-                              const principalAmount = emiBreakdown.principal || 0;
-                              const interestAmount = emiBreakdown.interest || 0;
-                              const totalEMI = emiDue || 0;
+                              const loanInstalmentDue = member.current_loan_instalment_due || 0;
+                              const loanInstalmentBreakdown = calculateLoanInstalmentBreakdown(member, member.loan_info);
+                              const principalAmount = loanInstalmentBreakdown.principal || 0;
+                              const interestAmount = loanInstalmentBreakdown.interest || 0;
+                              const totalLoanInstalment = loanInstalmentDue || 0;
                               
                               // Check if member has already paid this month (for display purposes only)
                               const hasPaidThisMonth = hasMemberPaidThisMonth(member);
@@ -2367,10 +2368,10 @@ function BillCollectorDashboard({ user, onLogout }) {
                                     {hasActiveLoan ? (
                                       <div className="text-xs">
                                         <div className="text-gray-600">
-                                          Total: {formatIndianCurrency(totalEMI)}
+                                          Total: {formatIndianCurrency(totalLoanInstalment)}
                                         </div>
                                         <div className="text-gray-500">
-                                          Principal: {formatIndianCurrency(principalAmount)}
+                                          Loan Instalment Principal: {formatIndianCurrency(principalAmount)}
                                         </div>
                                         <div className="text-gray-500">
                                           Interest: {formatIndianCurrency(interestAmount)}
@@ -2404,11 +2405,11 @@ function BillCollectorDashboard({ user, onLogout }) {
                                     {hasActiveLoan ? (
                                       hasPaidThisMonth ? (
                                         <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
-                                          EMI Paid
+                                          Loan Instalment Paid
                                         </span>
                                       ) : (
                                         <span className="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">
-                                          EMI Due
+                                          Loan Instalment Due
                                         </span>
                                       )
                                     ) : (
@@ -2452,10 +2453,11 @@ function BillCollectorDashboard({ user, onLogout }) {
                             const paidAmount = member.payments_made || 0;
                             const savingsAmount = member.savings_balance || 0;
                             const emiDue = member.current_emi_due || 0;
-                            const emiBreakdown = calculateEMIBreakdown(member, member.loan_info);
+                            const emiBreakdown = calculateLoanInstalmentBreakdown(member, member.loan_info);
                             const principalAmount = emiBreakdown.principal || 0;
                             const interestAmount = emiBreakdown.interest || 0;
                             const totalEMI = emiDue || 0;
+                            const totalLoanInstalment = totalEMI || (principalAmount + interestAmount);
                             
                             // Check if member has already paid this month (for display purposes only)
                             const hasPaidThisMonth = hasMemberPaidThisMonth(member);
@@ -2491,11 +2493,11 @@ function BillCollectorDashboard({ user, onLogout }) {
                                   {hasActiveLoan ? (
                                     <>
                                       <div>
-                                        <span className="text-gray-500">EMI Total:</span>
-                                        <p className="font-medium text-gray-900">{formatIndianCurrency(totalEMI)}</p>
+                                        <span className="text-gray-500">Loan Instalment Total:</span>
+                                        <p className="font-medium text-gray-900">{formatIndianCurrency(totalLoanInstalment)}</p>
                                       </div>
                                       <div>
-                                        <span className="text-gray-500">Principal:</span>
+                                        <span className="text-gray-500">Loan Instalment Principal:</span>
                                         <p className="font-medium text-gray-900">{formatIndianCurrency(principalAmount)}</p>
                                       </div>
                                       <div>
@@ -2902,7 +2904,7 @@ function BillCollectorDashboard({ user, onLogout }) {
               <div className="text-center">
                 <h3 className="text-lg font-medium text-gray-900 mb-2">Print Group Members Report</h3>
                 <p className="text-sm text-gray-500 mb-6">
-                  Do you want to print the current group members data? This will include all {groupMembers.length} member(s) with their EMI details and financial information.
+                  Do you want to print the current group members data? This will include all {groupMembers.length} member(s) with their loan instalment details and financial information.
                 </p>
                 <div className="flex justify-center space-x-3">
                   <button

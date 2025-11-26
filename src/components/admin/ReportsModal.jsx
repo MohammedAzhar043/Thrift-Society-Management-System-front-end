@@ -48,7 +48,7 @@ function ReportsModal({ isOpen, onClose, groups = [], user }) {
       },
       { 
         id: 'emi', 
-        name: 'EMI Schedule', 
+        name: 'Loan Instalment Schedule', 
         icon: 'FaTable', 
         description: 'Payment schedules', 
         color: 'teal',

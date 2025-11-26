@@ -2,8 +2,8 @@
  * API service for communicating with the backend
  */
   // const API_BASE_URL = 'http://kranthimahila.org/api/v1';
-// const API_BASE_URL = 'http://localhost:8000/api/v1';
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://kranthimahila.org/api/v1';
+const API_BASE_URL = 'http://localhost:8000/api/v1';
+// const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://kranthimahila.org/api/v1';
 
 class ApiService {
   constructor() {
@@ -172,6 +172,72 @@ class ApiService {
       method: 'POST',
       body: JSON.stringify(approvalData),
     });
+  }
+
+  async markLoanAsCredited(loanId) {
+    return await this.request(`/admin/loans/${loanId}/mark-credited`, {
+      method: 'POST',
+    });
+  }
+
+  async downloadLoanRequests(status = null, groupId = null) {
+    let params = [];
+    if (status) params.push(`status=${status}`);
+    if (groupId) params.push(`group_id=${groupId}`);
+    
+    const queryString = params.length > 0 ? `?${params.join('&')}` : '';
+    const url = `${this.baseURL}/admin/loan-requests/download${queryString}`;
+    
+    const headers = this.getHeaders();
+    // Remove Content-Type for file download
+    delete headers['Content-Type'];
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: headers,
+      credentials: 'include',
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+    }
+    
+    const blob = await response.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = `loan_requests_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(downloadUrl);
+  }
+
+  async uploadLoanRequests(file) {
+    const url = `${this.baseURL}/admin/loan-requests/upload`;
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const headers = {};
+    const currentToken = localStorage.getItem('token');
+    if (currentToken) {
+      headers['Authorization'] = `Bearer ${currentToken}`;
+    }
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: headers,
+      body: formData,
+      credentials: 'include',
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+    }
+    
+    return await response.json();
   }
 
   async getGroups() {

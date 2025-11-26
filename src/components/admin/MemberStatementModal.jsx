@@ -107,11 +107,12 @@ const MemberStatementModal = ({ isOpen, onClose, memberId, memberData, isClerkVi
 
   const getPaymentTypeDescription = (paymentType) => {
     const descriptions = {
-      'DEPOSIT': 'Savings Deposit',
-      'LOAN_PRINCIPAL': 'Loan Principal',
-      'LOAN_INTEREST': 'Loan Interest',
+      'THRIFT': 'THRIFT',
+      'THRIFT_WITHDRAWAL': 'Thrift Withdrawal',
+      'LOAN_PRINCIPAL': 'Loan Instalment Principal',
+      'LOAN_INTEREST': 'Loan Instalment Interest',
       'JOINING_FEE': 'Joining Fee',
-      'INSURANCE_AMOUNT': 'Insurance Amount',
+      'CHEYUTHA': 'Cheyutha',
       'CARRY_FORWARD': 'Carry Forward',
       'SHARE_CAPITAL': 'Share Capital',
       'LRF': 'LRF'
@@ -169,7 +170,7 @@ const MemberStatementModal = ({ isOpen, onClose, memberId, memberData, isClerkVi
         totalPaid += transaction.amount || 0;
         
         switch (transaction.paymentType) {
-          case 'DEPOSIT':
+          case 'THRIFT':
             totalSavings += transaction.amount || 0;
             break;
           case 'LOAN_PRINCIPAL':
@@ -181,7 +182,7 @@ const MemberStatementModal = ({ isOpen, onClose, memberId, memberData, isClerkVi
           case 'JOINING_FEE':
             totalJoiningFees += transaction.amount || 0;
             break;
-          case 'INSURANCE_AMOUNT':
+          case 'CHEYUTHA':
             totalInsuranceAmount += transaction.amount || 0;
             break;
           case 'CARRY_FORWARD':
@@ -215,12 +216,12 @@ const MemberStatementModal = ({ isOpen, onClose, memberId, memberData, isClerkVi
       const annualInterestRate = loanInfo.interest_rate || 12.0;
       const monthlyRate = annualInterestRate / 100 / 12;
       
-      // Calculate EMI
-      const emi = loanAmount * monthlyRate * Math.pow(1 + monthlyRate, termMonths) / 
+      // Calculate loan instalment
+      const loanInstalment = loanAmount * monthlyRate * Math.pow(1 + monthlyRate, termMonths) / 
                   (Math.pow(1 + monthlyRate, termMonths) - 1);
       
       // Calculate total amount to be paid
-      const totalAmount = emi * termMonths;
+      const totalAmount = loanInstalment * termMonths;
       
       // Get payments made (principal + interest payments)
       const paymentsMade = totalLoanPrincipal + totalLoanInterest;
@@ -228,12 +229,12 @@ const MemberStatementModal = ({ isOpen, onClose, memberId, memberData, isClerkVi
       // Calculate remaining amount
       currentLoanBalance = Math.max(0, totalAmount - paymentsMade);
       
-      console.log('EMI calculation details:', {
+      console.log('Loan instalment calculation details:', {
         loanAmount,
         termMonths,
         annualInterestRate,
         monthlyRate,
-        emi,
+        loanInstalment,
         totalAmount,
         paymentsMade,
         currentLoanBalance
@@ -494,7 +495,7 @@ const MemberStatementModal = ({ isOpen, onClose, memberId, memberData, isClerkVi
                   <p className="text-lg font-bold text-purple-600">{formatCurrency(summary.totalJoiningFees)}</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-sm text-gray-600">Insurance Amount</p>
+                  <p className="text-sm text-gray-600">Cheyutha</p>
                   <p className="text-lg font-bold text-teal-600">{formatCurrency(summary.totalInsuranceAmount || 0)}</p>
                 </div>
                 <div className="text-center">

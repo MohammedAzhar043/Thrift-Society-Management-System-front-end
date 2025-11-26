@@ -6,11 +6,11 @@ import { toast } from 'react-hot-toast';
 
 // Transaction types available
 const TRANSACTION_TYPES = [
-  { value: 'EMI', label: 'EMI' },
-  { value: 'DEPOSIT', label: 'Deposit' },
+  { value: 'EMI', label: 'Loan Instalment' },
+  { value: 'THRIFT', label: 'THRIFT' },
   { value: 'INTEREST', label: 'Interest' },
   { value: 'JOINING_FEE', label: 'Joining Fee' },
-  { value: 'INSURANCE_AMOUNT', label: 'Insurance Amount' },
+  { value: 'CHEYUTHA', label: 'Cheyutha' },
   { value: 'SHARE_CAPITAL', label: 'Share Capital' },
   { value: 'LRF', label: 'LRF' }
 ];
@@ -35,7 +35,7 @@ function CollectionEntryTab({
   const [selectedVillage, setSelectedVillage] = useState('');
   const [villages, setVillages] = useState([]);
   const normalizeVillage = (name) => (name || '').trim().toLowerCase();
-  const [memberLoanMap, setMemberLoanMap] = useState({}); // memberId -> loanId for EMI/INTEREST linkage
+  const [memberLoanMap, setMemberLoanMap] = useState({}); // memberId -> loanId for Loan Instalment/INTEREST linkage
 
   // Extract unique villages from groups (dedupe by trimmed, lowercased value)
   useEffect(() => {
@@ -122,7 +122,7 @@ function CollectionEntryTab({
         member_id: '',
         receipt_number: '', // Receipt number for this member
         transaction_types: [], // Array of selected transaction types
-        amounts: {} // Object to store amounts: { EMI_PRINCIPAL: 0, EMI_INTEREST: 0, DEPOSIT: 0, etc. }
+        amounts: {} // Object to store amounts: { EMI: 0 (Loan Instalment), INTEREST: 0, THRIFT: 0, etc. }
       }]
     }));
   };
@@ -181,9 +181,9 @@ function CollectionEntryTab({
       const currentTransactionTypes = member.transaction_types || [];
       const newTransactionTypes = [...currentTransactionTypes, transactionType];
       
-      // Initialize amounts - EMI is now just Principal, Interest is separate
+      // Initialize amounts - Loan Instalment is now just Principal, Interest is separate
       let newAmounts = { ...member.amounts };
-      // Initialize amount for all transaction types (EMI is now just one amount field)
+      // Initialize amount for all transaction types (Loan Instalment is now just one amount field)
       newAmounts = {
         ...newAmounts,
         [transactionType]: 0
@@ -383,7 +383,7 @@ function CollectionEntryTab({
         
         const amounts = memberEntry.amounts || {};
         
-        // Add EMI Principal if EMI is selected (EMI is now just Principal)
+        // Add Loan Instalment Principal if Loan Instalment is selected
         if (memberEntry.transaction_types.includes('EMI')) {
           const principalAmount = parseFloat(amounts['EMI'] || 0);
           
@@ -394,22 +394,22 @@ function CollectionEntryTab({
               amount: principalAmount,
               payment_type: 'LOAN_PRINCIPAL',
               receipt_number: memberEntry.receipt_number || null,
-              notes: 'EMI Principal payment'
+              notes: 'Loan Instalment Principal payment'
             });
           }
         }
         
-        // Add Deposit
-        if (memberEntry.transaction_types.includes('DEPOSIT')) {
-          const depositAmount = parseFloat(amounts['DEPOSIT'] || 0);
-          if (depositAmount > 0) {
+        // Add THRIFT
+        if (memberEntry.transaction_types.includes('THRIFT')) {
+          const thriftAmount = parseFloat(amounts['THRIFT'] || 0);
+          if (thriftAmount > 0) {
             collectionItems.push({
               member_id: parseInt(memberEntry.member_id),
               loan_id: null,
-              amount: depositAmount,
-              payment_type: 'DEPOSIT',
+              amount: thriftAmount,
+              payment_type: 'THRIFT',
               receipt_number: memberEntry.receipt_number || null,
-              notes: 'Savings deposit'
+              notes: 'Thrift deposit'
             });
           }
         }
@@ -444,17 +444,17 @@ function CollectionEntryTab({
           }
         }
         
-        // Add Insurance Amount
-        if (memberEntry.transaction_types.includes('INSURANCE_AMOUNT')) {
-          const insuranceAmount = parseFloat(amounts['INSURANCE_AMOUNT'] || 0);
-          if (insuranceAmount > 0) {
+        // Add Cheyutha
+        if (memberEntry.transaction_types.includes('CHEYUTHA')) {
+          const cheyuthaAmount = parseFloat(amounts['CHEYUTHA'] || 0);
+          if (cheyuthaAmount > 0) {
             collectionItems.push({
               member_id: parseInt(memberEntry.member_id),
               loan_id: null,
-              amount: insuranceAmount,
-              payment_type: 'INSURANCE_AMOUNT',
+              amount: cheyuthaAmount,
+              payment_type: 'CHEYUTHA',
               receipt_number: memberEntry.receipt_number || null,
-              notes: 'Insurance amount'
+              notes: 'Cheyutha payment'
             });
           }
         }
@@ -492,7 +492,8 @@ function CollectionEntryTab({
       
       // Calculate totals
       const totals = collectionItems.reduce((acc, item) => {
-        if (item.payment_type === 'DEPOSIT') acc.total_deposits += item.amount;
+        if (item.payment_type === 'THRIFT') acc.total_thrift += item.amount;
+        if (item.payment_type === 'THRIFT_WITHDRAWAL') acc.total_thrift_withdrawal += item.amount;
         if (item.payment_type === 'LOAN_PRINCIPAL') acc.total_loan_principal += item.amount;
         if (item.payment_type === 'LOAN_INTEREST') acc.total_loan_interest += item.amount;
         if (item.payment_type === 'JOINING_FEE') acc.total_joining_fees += item.amount;
@@ -502,6 +503,7 @@ function CollectionEntryTab({
         return acc;
       }, {
         total_deposits: 0,
+        total_thrift_withdrawal: 0,
         total_loan_principal: 0,
         total_loan_interest: 0,
         total_joining_fees: 0,
@@ -511,6 +513,7 @@ function CollectionEntryTab({
         total_lrf: 0
       });
       
+      // Grand total includes all payments but excludes withdrawals (they reduce the total)
       const grandTotal = totals.total_deposits + totals.total_loan_principal + 
                         totals.total_loan_interest + totals.total_joining_fees + 
                         totals.total_insurance_amount + totals.total_share_capital + totals.total_lrf;
@@ -523,6 +526,7 @@ function CollectionEntryTab({
         collection_date: collectionEntryForm.collection_date,
         receipt_file_path: receiptFilePath,
         total_deposits: totals.total_deposits,
+        total_thrift_withdrawal: totals.total_thrift_withdrawal,
         total_loan_principal: totals.total_loan_principal,
         total_loan_interest: totals.total_loan_interest,
         total_joining_fees: totals.total_joining_fees,
@@ -808,18 +812,18 @@ function CollectionEntryTab({
                           if (loanInfoLoaded) {
                             // Loan info has been loaded - check if member has a loan
                             const hasLoan = memberLoanMap[memberId] !== null && memberLoanMap[memberId] !== undefined;
-                            // If member doesn't have a loan, only show DEPOSIT and JOINING_FEE
+                            // If member doesn't have a loan, only show THRIFT and JOINING_FEE
                             if (!hasLoan) {
-                              if (type.value !== 'DEPOSIT' && type.value !== 'JOINING_FEE') {
-                                return null; // Hide EMI and INTEREST for members without loans
+                              if (type.value !== 'THRIFT' && type.value !== 'JOINING_FEE') {
+                                return null; // Hide Loan Instalment and INTEREST for members without loans
                               }
                             }
                             // If member has a loan, show all transaction types
                           } else {
-                            // Loan info hasn't loaded yet - be conservative and only show DEPOSIT and JOINING_FEE
+                            // Loan info hasn't loaded yet - be conservative and only show THRIFT and JOINING_FEE
                             // This prevents users from selecting loan-related transactions before loan info is confirmed
-                            if (type.value !== 'DEPOSIT' && type.value !== 'JOINING_FEE') {
-                              return null; // Hide EMI and INTEREST until loan info loads
+                            if (type.value !== 'THRIFT' && type.value !== 'JOINING_FEE') {
+                              return null; // Hide Loan Instalment and INTEREST until loan info loads
                             }
                           }
                           
@@ -835,13 +839,13 @@ function CollectionEntryTab({
                       <div className="space-y-3">
                         {memberEntry.transaction_types.map(transactionType => {
                           // All transaction types now have single amount field
-                          // EMI = Principal only, Interest = separate transaction
+                          // Loan Instalment = Principal only, Interest = separate transaction
                           const transactionLabel = TRANSACTION_TYPES.find(t => t.value === transactionType)?.label || transactionType;
                           return (
                             <div key={transactionType} className="border border-gray-200 rounded-lg p-2 sm:p-3 bg-gray-50">
                               <div className="flex justify-between items-center mb-2 sm:mb-3">
                                 <span className="font-medium text-xs sm:text-sm text-gray-900 break-words pr-2">
-                                  {transactionType === 'EMI' ? 'EMI (Principal)' : transactionLabel}
+                                  {transactionType === 'EMI' ? 'Loan Instalment' : transactionLabel}
                                 </span>
                                 <button
                                   type="button"
@@ -854,7 +858,7 @@ function CollectionEntryTab({
                               </div>
                               <div>
                                 <label className="block text-xs font-medium text-gray-700 mb-1">
-                                  {transactionType === 'EMI' ? 'Principal Amount' : 'Amount'}
+                                  {transactionType === 'EMI' ? 'Loan Instalment Amount' : 'Amount'}
                                 </label>
                                 <input
                                   type="number"
