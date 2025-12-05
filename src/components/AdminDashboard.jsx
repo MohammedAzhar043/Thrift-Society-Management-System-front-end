@@ -841,7 +841,7 @@ function AdminDashboard({ user, onLogout }) {
       };
       
       // Add filters if set
-      if (filters.group_id) filterParams.group_id = parseInt(filters.group_id);
+      if (filters.group_id) filterParams.group_id = filters.group_id;
       if (filters.start_date) filterParams.start_date = filters.start_date;
       if (filters.end_date) filterParams.end_date = filters.end_date;
       
@@ -1101,7 +1101,7 @@ function AdminDashboard({ user, onLogout }) {
     });
 
     // Get selected group name if filtered
-    const selectedGroup = groups.find((g) => g.id === parseInt(groupFilter));
+    const selectedGroup = groups.find((g) => g.id === groupFilter);
     const groupName = selectedGroup ? selectedGroup.name : "All Groups";
 
     // Create the print content

@@ -234,7 +234,7 @@ function IndividualMemberDashboard({ user, onLogout }) {
       
       const loanData = {
         member_id: memberProfile.id,
-        group_id: memberProfile.group_id || 1, // Default to group 1 if not specified
+        group_id: memberProfile.group_id || '', // Use member's group_id if available
         loan_amount: amount,
         purpose: loanApplication.purpose?.trim() || null,
         term_months: parseInt(loanApplication.term_months) || 12

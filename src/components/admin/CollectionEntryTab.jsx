@@ -81,7 +81,7 @@ function CollectionEntryTab({
   useEffect(() => {
     if (collectionEntryForm.group_id) {
       loadGroupMembers(collectionEntryForm.group_id);
-      const selectedGroup = filteredGroups.find(g => g.id === parseInt(collectionEntryForm.group_id));
+      const selectedGroup = filteredGroups.find(g => g.id === collectionEntryForm.group_id);
       if (selectedGroup) {
         setSelectedGroupData(selectedGroup);
       }
@@ -522,7 +522,7 @@ function CollectionEntryTab({
       
       // Create collection record
       const collectionData = {
-        group_id: parseInt(collectionEntryForm.group_id),
+        group_id: collectionEntryForm.group_id,
         collection_date: collectionEntryForm.collection_date,
         receipt_file_path: receiptFilePath,
         total_deposits: totals.total_deposits,
@@ -592,7 +592,7 @@ function CollectionEntryTab({
     }
   };
 
-  const selectedGroup = selectedGroupData || filteredGroups.find(g => g.id === parseInt(collectionEntryForm.group_id));
+  const selectedGroup = selectedGroupData || filteredGroups.find(g => g.id === collectionEntryForm.group_id);
 
   // Get available members for dropdown (exclude already selected members)
   const getAvailableMembers = (currentIndex) => {

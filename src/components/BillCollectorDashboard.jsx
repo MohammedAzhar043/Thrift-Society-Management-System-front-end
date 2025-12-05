@@ -466,7 +466,7 @@ function BillCollectorDashboard({ user, onLogout }) {
             const currentLoanInstalment = selectedMember.current_loan_instalment_due || 0;
             const totalLoanPayment = principalAmount + interestAmount;
             const carryForwardAmount = selectedMember.carry_forward_amount || 0;
-            const totalDue = currentEMI + carryForwardAmount;
+            const totalDue = currentLoanInstalment + carryForwardAmount;
             
             // Calculate how much is being paid towards the total due
             const paymentTowardsDue = Math.min(totalLoanPayment, totalDue);
@@ -627,7 +627,7 @@ function BillCollectorDashboard({ user, onLogout }) {
 
       // Create the collection record with transformed items and calculated totals
       const collectionData = {
-        group_id: parseInt(collectionForm.group_id),
+        group_id: collectionForm.group_id,
         collection_date: collectionForm.collection_date,
         total_thrift: calculatedTotals.total_thrift,
         total_loan_principal: calculatedTotals.total_loan_principal,
@@ -1005,7 +1005,7 @@ function BillCollectorDashboard({ user, onLogout }) {
     await submitLoanForm(async () => {
       const loanRequestData = {
         member_id: parseInt(collectionForm.member_id),
-        group_id: parseInt(collectionForm.group_id),
+        group_id: collectionForm.group_id,
         loan_amount: parseFloat(collectionForm.requested_amount),
         purpose: collectionForm.purpose?.trim() || null,
         term_months: parseInt(collectionForm.term_months)
@@ -2770,7 +2770,7 @@ function BillCollectorDashboard({ user, onLogout }) {
                         const groupId = e.target.value;
                         setCollectionForm(prev => ({ ...prev, group_id: groupId, member_id: '' }));
                         if (groupId) {
-                          loadGroupMembers(parseInt(groupId), true); // true for loan requests
+                          loadGroupMembers(groupId, true); // true for loan requests
                         } else {
                           setGroupMembers([]);
                         }

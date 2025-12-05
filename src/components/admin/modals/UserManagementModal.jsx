@@ -420,7 +420,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
         nominee_relation: userForm.relation?.trim() || null,
         bank_passbook_path: editingUser ? userForm.bank_passbook_path : (userForm.bank_passbook_path?.trim() || null), // Keep existing path for edit
         // Group assignment for members
-        group_id: userForm.group_id ? parseInt(userForm.group_id) : null,
+        group_id: userForm.group_id || null,
         // Enhanced member fields - include in userData so they get passed to member creation
         age: userForm.age ? parseInt(userForm.age) : null,
         profession: userForm.profession?.trim() || null,
@@ -438,7 +438,7 @@ function UserManagementModal({ isOpen, onClose, onDataChanged }) {
         caste: userForm.caste?.trim() || null,
         photo_url: editingUser ? userForm.photo_url : (userForm.photo_url?.trim() || null),
         // Group assignment
-        group_id: userForm.group_id ? parseInt(userForm.group_id) : null
+        group_id: userForm.group_id || null
       };
 
 
