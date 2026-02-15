@@ -13,6 +13,10 @@ RUN npm ci
 # Copy source code
 COPY . .
 
+# Pass API URL at build time so all requests use HTTPS (avoids "Not secure" from mixed content)
+ARG VITE_API_URL=https://kranthimahila.org/api/v1
+ENV VITE_API_URL=$VITE_API_URL
+
 # Build the application
 RUN npm run build
 
